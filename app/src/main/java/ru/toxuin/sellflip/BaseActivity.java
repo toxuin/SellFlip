@@ -69,6 +69,14 @@ public class BaseActivity extends ActionBarActivity {
                 .commit();
     }
 
+    /**
+     * Exposes the currently active fragment.
+     * @return Fragment that is currently occupying content view
+     */
+    public static Fragment getActiveFragment() {
+        return self.activeFragment;
+    }
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
