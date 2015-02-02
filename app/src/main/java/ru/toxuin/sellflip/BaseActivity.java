@@ -1,23 +1,29 @@
 package ru.toxuin.sellflip;
 
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.KeyEvent;
-import android.view.Menu;
 import android.view.MenuItem;
 
 import com.jeremyfeinstein.slidingmenu.lib.*;
 
-public class BaseActivty extends ActionBarActivity {
+public class BaseActivity extends ActionBarActivity {
 
+    private static final float MENU_FADE_DEGREE = 0.35f;
     private SlidingMenu leftMenu;
     private SlidingMenu rightMenu;
-    private static final float MENU_FADE_DEGREE = 0.35f;
+
+    static BaseActivity self;
+
+    private FragmentManager fragmentManager;
+    private Fragment activeFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        self = this;
         setContentView(R.layout.activity_base);
 
         leftMenu = new SlidingMenu(this);
@@ -46,6 +52,21 @@ public class BaseActivty extends ActionBarActivity {
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeAsUpIndicator(R.drawable.ic_drawer);
+
+        // CONTENT MANAGEMENT STUFF
+        fragmentManager = getSupportFragmentManager();
+        activeFragment = new SearchResultFragment();
+        fragmentManager.beginTransaction().replace(R.id.content, activeFragment).commit();
+    }
+
+    /**
+     * Call this to set contents.
+     * @param fragment Fragment to set as content.
+     */
+    public static void setContent(Fragment fragment) {
+        self.fragmentManager.beginTransaction().replace(R.id.content, fragment)
+                .addToBackStack(null)
+                .commit();
     }
 
     @Override
@@ -70,7 +91,10 @@ public class BaseActivty extends ActionBarActivity {
     public boolean onKeyDown(int keyCode, KeyEvent event) {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
             if (leftMenu.isMenuShowing()){
-                leftMenu.toggle(true);
+                leftMenu.toggle();
+                return false;
+            } else if (rightMenu.isMenuShowing()) {
+                rightMenu.toggle();
                 return false;
             }
         }
