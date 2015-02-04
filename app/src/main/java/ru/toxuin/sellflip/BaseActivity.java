@@ -7,6 +7,8 @@ import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 
+import android.view.View;
+import android.widget.Button;
 import com.jeremyfeinstein.slidingmenu.lib.*;
 
 public class BaseActivity extends ActionBarActivity {
@@ -57,6 +59,15 @@ public class BaseActivity extends ActionBarActivity {
         fragmentManager = getSupportFragmentManager();
         activeFragment = new SearchResultFragment();
         fragmentManager.beginTransaction().replace(R.id.content, activeFragment).commit();
+
+        // TEMPORARY BUTTON TO ACCESS SINGLE AD VIEW
+        Button testButton = (Button) leftMenu.getMenu().findViewById(R.id.testButton);
+        testButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                BaseActivity.setContent(new SingleAdFragment().setId("SOME_TEMP_ID_CHANGE_ME_DAMMIT"));
+            }
+        });
     }
 
     /**

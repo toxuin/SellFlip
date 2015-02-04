@@ -4,9 +4,14 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+import ru.toxuin.sellflip.entities.SingleAd;
+import ru.toxuin.sellflip.library.LoadingCallback;
+import ru.toxuin.sellflip.restapi.ApiConnector;
+
+import java.util.List;
 
 public class SearchResultFragment extends Fragment {
     private View rootView;
@@ -19,11 +24,17 @@ public class SearchResultFragment extends Fragment {
         getActivity().setTitle(title);
 
         // DO STUFF
-        Button testButton = (Button) rootView.findViewById(R.id.testButton);
-        testButton.setOnClickListener(new OnClickListener() {
+
+        ApiConnector api = ApiConnector.getInstance();
+        api.requestTopAds(new LoadingCallback<List<SingleAd>>(getActivity()) {
             @Override
-            public void onClick(View view) {
-                BaseActivity.setContent(new SingleAdFragment());
+            protected void onSuccess(List<SingleAd> singleAds, Response response) {
+
+            }
+
+            @Override
+            protected void onFailure(RetrofitError error) {
+
             }
         });
 

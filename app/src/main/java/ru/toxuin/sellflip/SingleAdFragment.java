@@ -10,30 +10,35 @@ import android.view.ViewGroup;
 import android.widget.MediaController;
 import android.widget.VideoView;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-
-import java.util.List;
-
-import retrofit.Callback;
-import retrofit.RestAdapter;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
-import retrofit.converter.GsonConverter;
 import ru.toxuin.sellflip.entities.SingleAd;
-import ru.toxuin.sellflip.restapi.AdsService;
+import ru.toxuin.sellflip.library.LoadingCallback;
+import ru.toxuin.sellflip.restapi.ApiConnector;
 
 public class SingleAdFragment extends Fragment {
     public static final String TAG = "SingleAdFragment";
 
-    // TODO: move it probably to separate class
-    public static final String API_ENDPOINT_URL = "http://appfrontend-mavd.rhcloud.com/api";
-    AdsService adsService;
-    RestAdapter restAdapter;
+    private final static String TEMP_AD_ID = "54cff251922f682877681eda";
 
     private View rootView;
+    private String adId;
+    private SingleAd thisAd;
 
     public SingleAdFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
+
+    /**
+     * This is a constructor extension for chain-setting the id parameter
+     * Use like this: new SingleAdFragment().setId("lalal")
+     * @param id is that should be retrieved
+     * @return same instance that would be returned with constructor
+     */
+    public SingleAdFragment setId(String id) {
+        //TODO:
+        //adId = id;
+        adId = TEMP_AD_ID;
+        return this;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -41,41 +46,34 @@ public class SingleAdFragment extends Fragment {
         String title = getString(R.string.search_results);
         getActivity().setTitle(title);
 
-        // Testing video
-        VideoView videoView = (VideoView) rootView.findViewById(R.id.videoView);
-        String path = "android.resource://" + getActivity().getPackageName() + "/" + R.raw.small;
-        videoView.setVideoURI(Uri.parse(path));
-        videoView.requestFocus();
-        videoView.setMediaController(new MediaController(getActivity()));
-        // videoView.start();
+        ApiConnector api = ApiConnector.getInstance();
 
-        /*
-        * REST example
-        * */
-        initRest();
-        adsService.listAds(new Callback<List<SingleAd>>() {
-            @Override public void success(List<SingleAd> singleAds, Response response) {
-                Log.i(TAG, singleAds.get(0).toString());
+        if (adId == null) {
+            throw new IllegalStateException("SingleAdFragment instantiated without id! Use .setId(\"lalal\")!");
+        }
+
+        api.requestSingleAdForId(adId, new LoadingCallback<SingleAd>(getActivity()) {
+            @Override
+            public void onSuccess(SingleAd ad, Response response) {
+                thisAd = ad;
+                Log.d(TAG, "GOT AD! " + ad.getTitle());
+
+                // DO STUFF
+
+                // Testing video
+                VideoView videoView = (VideoView) rootView.findViewById(R.id.videoView);
+                String path = "android.resource://" + getActivity().getPackageName() + "/" + R.raw.small;
+                videoView.setVideoURI(Uri.parse(path));
+                videoView.requestFocus();
+                videoView.setMediaController(new MediaController(getActivity()));
+                // videoView.start();
             }
 
-            @Override public void failure(RetrofitError error) {
-                Log.i(TAG, "Failure " + error);
+            @Override
+            public void onFailure(RetrofitError error) {
             }
         });
 
         return rootView;
-    }
-
-    private void initRest() {
-        Gson gson = new GsonBuilder()
-                .setDateFormat("yyyy-MM-dd") // Will complain about default JS format without it
-                .create();
-
-        restAdapter = new RestAdapter.Builder()
-                .setEndpoint(API_ENDPOINT_URL)
-                .setConverter(new GsonConverter(gson))
-                .build();
-
-        adsService = restAdapter.create(AdsService.class);
     }
 }
