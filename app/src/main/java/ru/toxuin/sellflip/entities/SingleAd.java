@@ -43,6 +43,7 @@ public class SingleAd {
     public String getTitle() {
         return title;
     }
+
     public void setTitle(String title) {
         this.title = title;
     }
@@ -50,6 +51,7 @@ public class SingleAd {
     public float getPrice() {
         return price;
     }
+
     public void setPrice(float price) {
         this.price = price;
     }
@@ -57,6 +59,7 @@ public class SingleAd {
     public String getEmail() {
         return email;
     }
+
     public void setEmail(String email) {
         this.email = email;
     }
@@ -64,6 +67,7 @@ public class SingleAd {
     public String getPhone() {
         return phone;
     }
+
     public void setPhone(String phone) {
         this.phone = phone;
     }
@@ -71,6 +75,7 @@ public class SingleAd {
     public String getCategory() {
         return category;
     }
+
     public void setCategory(String category) {
         this.category = category;
     }
@@ -78,6 +83,7 @@ public class SingleAd {
     public String getDescription() {
         return description;
     }
+
     public void setDescription(String description) {
         this.description = description;
     }
@@ -85,6 +91,7 @@ public class SingleAd {
     public Coordinates getCoords() {
         return coords;
     }
+
     public void setCoords(Coordinates coords) {
         this.coords = coords;
     }
@@ -92,7 +99,14 @@ public class SingleAd {
     public Date getDate() {
         return date;
     }
+
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    // TODO: proper toString
+    // 'title' is stored as 'name' in the back end
+    @Override public String toString() {
+        return "Title:" + getTitle() + ", Price:" + getPrice() + ", Date:" + getDate().toString();
     }
 }
