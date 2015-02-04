@@ -8,8 +8,6 @@ import android.os.AsyncTask;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
@@ -58,17 +56,13 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         viewHolder.price.setText(formatter.format(itemsList.get(position).getPrice()));
 
-        // THIS DOES NOT DOWNLOAD, JUST DRAWS
+        viewHolder.thumbnail.setImageResource(R.drawable.loading);
+        LayerDrawable progressAnimation = (LayerDrawable) viewHolder.thumbnail.getDrawable();
+        ((Animatable) progressAnimation.getDrawable(0)).start();
+        ((Animatable) progressAnimation.getDrawable(1)).start();
+
         new AsyncTask<SearchResultViewHolder, Void, Bitmap>() {
             private SearchResultViewHolder viewHolder;
-
-            @Override
-            protected void onPreExecute() {
-                viewHolder.thumbnail.setImageResource(R.drawable.loading);
-                LayerDrawable progressAnimation = (LayerDrawable) viewHolder.thumbnail.getDrawable();
-                ((Animatable) progressAnimation.getDrawable(0)).start();
-                ((Animatable) progressAnimation.getDrawable(1)).start();
-            }
 
             @Override
             protected Bitmap doInBackground(SearchResultViewHolder... params) {
