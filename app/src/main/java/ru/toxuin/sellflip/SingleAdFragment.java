@@ -8,6 +8,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.MediaController;
+import android.widget.TextView;
 import android.widget.VideoView;
 
 import retrofit.RetrofitError;
@@ -15,6 +16,8 @@ import retrofit.client.Response;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.LoadingCallback;
 import ru.toxuin.sellflip.restapi.ApiConnector;
+
+import java.text.NumberFormat;
 
 public class SingleAdFragment extends Fragment {
     public static final String TAG = "SingleAdFragment";
@@ -52,6 +55,10 @@ public class SingleAdFragment extends Fragment {
             throw new IllegalStateException("SingleAdFragment instantiated without id! Use .setId(\"lalal\")!");
         }
 
+        final TextView adTitle = (TextView) rootView.findViewById(R.id.adTitle);
+        final TextView adDescription = (TextView) rootView.findViewById(R.id.adDescription);
+        final TextView adPrice = (TextView) rootView.findViewById(R.id.adPrice);
+
         api.requestSingleAdForId(adId, new LoadingCallback<SingleAd>(getActivity()) {
             @Override
             public void onSuccess(SingleAd ad, Response response) {
@@ -59,6 +66,12 @@ public class SingleAdFragment extends Fragment {
                 Log.d(TAG, "GOT AD! " + ad.getTitle());
 
                 // DO STUFF
+
+                adTitle.setText(ad.getTitle());
+                adDescription.setText(ad.getDescription());
+
+                NumberFormat formatter = NumberFormat.getCurrencyInstance();
+                adPrice.setText(formatter.format(ad.getPrice()));
 
                 // Testing video
                 VideoView videoView = (VideoView) rootView.findViewById(R.id.videoView);

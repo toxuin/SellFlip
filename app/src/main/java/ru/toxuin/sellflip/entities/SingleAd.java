@@ -1,8 +1,11 @@
 package ru.toxuin.sellflip.entities;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.Date;
 
 public class SingleAd {
+    @SerializedName("name")
     private String title;
     private float price; // -1 = Please contact, 0 = free
     private String email;
