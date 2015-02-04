@@ -5,6 +5,8 @@ import com.google.gson.annotations.SerializedName;
 import java.util.Date;
 
 public class SingleAd {
+    @SerializedName("_id")
+    private final String id;
     @SerializedName("name")
     private String title;
     private float price; // -1 = Please contact, 0 = free
@@ -15,7 +17,8 @@ public class SingleAd {
     private Coordinates coords;
     private Date date;
 
-    public SingleAd(String title, float price, String email, String phone, String category, String description, Coordinates coord, Date date) {
+    public SingleAd(String id, String title, float price, String email, String phone, String category, String description, Coordinates coord, Date date) {
+        this.id = id;
         this.title = title;
         this.price = price;
         this.email = email;
@@ -33,7 +36,8 @@ public class SingleAd {
         if (!(other instanceof SingleAd)) return false;
         SingleAd that = (SingleAd) other;
 
-        return this.getTitle().equals(that.getTitle()) &&
+        return this.getId().equals(that.getId()) &&
+                this.getTitle().equals(that.getTitle()) &&
                 this.getPrice() == that.getPrice() &&
                 this.getEmail().equals(that.getEmail()) &&
                 this.getPhone().equals(that.getPhone()) &&
@@ -105,6 +109,10 @@ public class SingleAd {
 
     public void setDate(Date date) {
         this.date = date;
+    }
+
+    public String getId() {
+        return id;
     }
 
     // TODO: proper toString

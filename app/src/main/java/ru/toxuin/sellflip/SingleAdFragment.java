@@ -20,9 +20,7 @@ import ru.toxuin.sellflip.restapi.ApiConnector;
 import java.text.NumberFormat;
 
 public class SingleAdFragment extends Fragment {
-    public static final String TAG = "SingleAdFragment";
-
-    private final static String TEMP_AD_ID = "54cff251922f682877681eda";
+    public static final String TAG = "SINGLE_AD_UI";
 
     private View rootView;
     private String adId;
@@ -37,9 +35,7 @@ public class SingleAdFragment extends Fragment {
      * @return same instance that would be returned with constructor
      */
     public SingleAdFragment setId(String id) {
-        //TODO:
-        //adId = id;
-        adId = TEMP_AD_ID;
+        adId = id;
         return this;
     }
 
