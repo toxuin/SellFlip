@@ -1,18 +1,25 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              android:orientation="vertical"
               android:layout_width="match_parent"
-              android:layout_height="match_parent">
+              android:layout_height="match_parent"
+              android:orientation="vertical">
 
     <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="YOU SUCK"
-            android:id="@+id/textView" android:layout_gravity="center_horizontal"/>
+        android:id="@+id/textView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:text="YOU SUCK"/>
 
-    <Button android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="SINGLE ITEM VIEW"
-            android:id="@+id/testButton"/>
+    <Button
+        android:id="@+id/testButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="SINGLE ITEM VIEW"/>
 
+    <ListView
+        android:id="@+id/left_menu_list"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"/>
 </LinearLayout>

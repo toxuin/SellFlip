@@ -1,26 +1,46 @@
 package ru.toxuin.sellflip;
 
+import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v7.app.ActionBarActivity;
-import android.os.Bundle;
 import android.view.KeyEvent;
 import android.view.MenuItem;
-
 import android.view.View;
 import android.widget.Button;
+import android.widget.ListView;
+
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
+
+import ru.toxuin.sellflip.entities.LeftMenuItem;
+import ru.toxuin.sellflip.library.LeftMenuAdapter;
 
 public class BaseActivity extends ActionBarActivity {
 
     private static final float MENU_FADE_DEGREE = 0.35f;
+    static BaseActivity self;
     private SlidingMenu leftMenu;
     private SlidingMenu rightMenu;
-
-    static BaseActivity self;
-
     private FragmentManager fragmentManager;
     private Fragment activeFragment;
+
+    /**
+     * Call this to set contents.
+     * @param fragment Fragment to set as content.
+     */
+    public static void setContent(Fragment fragment) {
+        self.fragmentManager.beginTransaction().replace(R.id.content, fragment)
+                .addToBackStack(null)
+                .commit();
+    }
+
+    /**
+     * Exposes the currently active fragment.
+     * @return Fragment that is currently occupying content view
+     */
+    public static Fragment getActiveFragment() {
+        return self.activeFragment;
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,24 +88,15 @@ public class BaseActivity extends ActionBarActivity {
                 BaseActivity.setContent(new SingleAdFragment().setId("SOME_TEMP_ID_CHANGE_ME_DAMMIT"));
             }
         });
-    }
 
-    /**
-     * Call this to set contents.
-     * @param fragment Fragment to set as content.
-     */
-    public static void setContent(Fragment fragment) {
-        self.fragmentManager.beginTransaction().replace(R.id.content, fragment)
-                .addToBackStack(null)
-                .commit();
-    }
+        // Add dummy buttons to the left list
+        ListView left_menu_list = (ListView) leftMenu.getMenu().findViewById(R.id.left_menu_list);
+        LeftMenuAdapter leftMenuAdapter = new LeftMenuAdapter(this);
+        for (int i = 0; i < 20; i++) {
+            leftMenuAdapter.add(new LeftMenuItem("Item#" + i, "fa-github"));
+        }
 
-    /**
-     * Exposes the currently active fragment.
-     * @return Fragment that is currently occupying content view
-     */
-    public static Fragment getActiveFragment() {
-        return self.activeFragment;
+        left_menu_list.setAdapter(leftMenuAdapter);
     }
 
     @Override
