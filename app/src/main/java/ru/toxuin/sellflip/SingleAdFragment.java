@@ -6,21 +6,26 @@ import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
+
+import com.beardedhen.androidbootstrap.FontAwesomeText;
+
+import java.text.NumberFormat;
 
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.LoadingCallback;
 import ru.toxuin.sellflip.restapi.ApiConnector;
-
-import java.text.NumberFormat;
 
 public class SingleAdFragment extends Fragment {
     public static final String TAG = "SINGLE_AD_UI";
@@ -58,6 +63,24 @@ public class SingleAdFragment extends Fragment {
         final TextView adDescription = (TextView) rootView.findViewById(R.id.adDescription);
         final TextView adPrice = (TextView) rootView.findViewById(R.id.adPrice);
         final Button openMapBtn = (Button) rootView.findViewById(R.id.mapButton);
+        final FontAwesomeText play_icon = (FontAwesomeText) rootView.findViewById(R.id.play_icon);
+
+        //FLASHING BUTTON
+        final Animation animAlpha = AnimationUtils.loadAnimation(getActivity(), R.anim.button_alpha_anim);
+        play_icon.setOnTouchListener(new View.OnTouchListener() {
+            @Override public boolean onTouch(View v, MotionEvent event) {
+                if (event.getAction() == MotionEvent.ACTION_DOWN) {
+    /*Code*/
+                    play_icon.startAnimation(animAlpha);
+                    play_icon.setTextColor(getResources().getColor(R.color.bbutton_default_pressed));
+                }
+                if (event.getAction() == MotionEvent.ACTION_UP) {
+    /*Code*/       // play_icon.setAlpha(1f);
+                    play_icon.setTextColor(getResources().getColor(R.color.bbutton_inverse));
+                }
+                return true;
+            }
+        });
 
         api.requestSingleAdForId(adId, new LoadingCallback<SingleAd>(getActivity()) {
             @Override
@@ -80,6 +103,7 @@ public class SingleAdFragment extends Fragment {
                 videoView.requestFocus();
                 videoView.setMediaController(new MediaController(getActivity()));
                 // videoView.start();
+
 
                 if (ad.getCoords() != null) {
                     openMapBtn.setVisibility(View.VISIBLE);

@@ -5,4 +5,5 @@
     <dimen name="menu_behind_offset">300dp</dimen>
     <dimen name="menu_shadow_offset">15dp</dimen>
     <dimen name="menu_swipe_threshold">60dp</dimen>
+    <dimen name="font_awesome_icon_video_size">26sp</dimen>
 </resources>
