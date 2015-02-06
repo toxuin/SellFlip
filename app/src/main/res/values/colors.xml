@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="odd_card">#ff99e000</color>
+    <color name="even_card">#ff73a800</color>
+</resources>

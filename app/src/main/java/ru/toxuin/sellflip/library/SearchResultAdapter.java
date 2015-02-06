@@ -17,6 +17,7 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.ArrayAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import org.apache.http.HttpEntity;
@@ -36,7 +37,10 @@ import ru.toxuin.sellflip.restapi.ApiConnector;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
     private final Context context;
@@ -60,16 +64,33 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
             viewHolder = new SearchResultViewHolder();
             viewHolder.position = position;
             viewHolder.title = (TextView) rowView.findViewById(R.id.item_title);
-            viewHolder.description = (TextView) rowView.findViewById(R.id.item_description);
+            viewHolder.date = (TextView) rowView.findViewById(R.id.item_date);
             viewHolder.price = (TextView) rowView.findViewById(R.id.item_price);
             viewHolder.thumbnail = (ImageView) rowView.findViewById(R.id.item_thumbnail);
+            viewHolder.cardContainer = (LinearLayout) rowView.findViewById(R.id.item_card);
             rowView.setTag(viewHolder);
         } else {
             viewHolder = (SearchResultViewHolder) rowView.getTag();
         }
+        if (position % 2 == 0) viewHolder.cardContainer.setBackgroundColor(context.getResources().getColor(R.color.even_card));
 
         viewHolder.title.setText(itemsList.get(position).getTitle());
-        viewHolder.description.setText(itemsList.get(position).getDescription());
+        // DETERMINE THE DATE
+        Date past = itemsList.get(position).getDate();
+        Date now = new Date();
+        long secondsAgo = TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
+        long minutesAgo = TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
+        long hoursAgo = TimeUnit.MILLISECONDS.toHours(now.getTime() - past.getTime());
+
+        String dateAgo;
+        if (secondsAgo < 60) dateAgo = secondsAgo + " seconds ago";
+        else if (minutesAgo < 60) dateAgo = minutesAgo + " minutes ago";
+        else if (hoursAgo < 24) dateAgo = hoursAgo + " hours ago";
+        else {
+            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
+            dateAgo = format.format(past);
+        }
+        viewHolder.date.setText(dateAgo);
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         viewHolder.price.setText(formatter.format(itemsList.get(position).getPrice()));
 
@@ -85,7 +106,7 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
             protected Bitmap doInBackground(SearchResultViewHolder... params) {
                 viewHolder = params[0];
                 BitmapCache cache = BitmapCache.getInstance();
-                String url = "http://lorempixel.com/100/100/technics/" + itemsList.get(position).getId() + "/";
+                String url = "http://lorempixel.com/600/200/technics/" + itemsList.get(position).getId() + "/";
                 if (cache.getBitmapFromMemCache(url) == null) {
                     final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
                     final HttpGet getRequest = new HttpGet(url);
@@ -184,8 +205,12 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
             @Override
             public void success(List<SingleAd> allAds, Response response) {
                 for (Header header : response.getHeaders()) {
-                    if (header.getName().equals("X-Total-Items")) {
-                        totalServerItems = Integer.parseInt(header.getValue());
+                    try {
+                        if (header.getName().equals("X-Total-Items")) {
+                            totalServerItems = Integer.parseInt(header.getValue());
+                        }
+                    } catch (NullPointerException e) {
+                        // NO ACTION
                     }
                 }
 
@@ -207,9 +232,10 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
 
     static class SearchResultViewHolder {
         int position;
+        LinearLayout cardContainer;
         TextView title;
         TextView price;
-        TextView description;
+        TextView date;
         ImageView thumbnail;
     }
 }
