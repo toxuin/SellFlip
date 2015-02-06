@@ -14,12 +14,6 @@ import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import ru.toxuin.sellflip.entities.SideMenuItem;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class BaseActivity extends ActionBarActivity {
 
     private static final float MENU_FADE_DEGREE = 0.35f;
@@ -37,7 +31,6 @@ public class BaseActivity extends ActionBarActivity {
         if (self == null) return;
         if (self.leftMenu.isMenuShowing()) self.leftMenu.toggle();
         if (self.rightMenu.isMenuShowing()) self.rightMenu.toggle();
-        if (getActiveFragment().getClass().equals(fragment.getClass())) return; // QUESTIONABLE
         self.fragmentManager.beginTransaction().replace(R.id.content, fragment)
                 .addToBackStack(null)
                 .commit();
@@ -87,8 +80,7 @@ public class BaseActivity extends ActionBarActivity {
 
         // CONTENT MANAGEMENT STUFF
         fragmentManager = getSupportFragmentManager();
-        activeFragment = new SearchResultFragment();
-        fragmentManager.beginTransaction().replace(R.id.content, activeFragment).commit();
+        setContent(new SearchResultFragment());
 
         // ADD ITEMS TO LEFT MENU
         ListView leftMenuList= (ListView) leftMenu.getMenu().findViewById(R.id.left_menu_list);
@@ -137,5 +129,9 @@ public class BaseActivity extends ActionBarActivity {
             }
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    public static void setContentTitle(String title) {
+        self.setTitle(title);
     }
 }

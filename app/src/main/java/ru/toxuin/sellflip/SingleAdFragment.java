@@ -1,22 +1,25 @@
 package ru.toxuin.sellflip;
 
 import android.content.Intent;
+import android.graphics.SurfaceTexture;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
+import android.view.Surface;
+import android.view.TextureView;
+import android.view.TextureView.SurfaceTextureListener;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.Button;
-import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.widget.VideoView;
 
 import com.beardedhen.androidbootstrap.FontAwesomeText;
 
@@ -28,12 +31,14 @@ import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.LoadingCallback;
 import ru.toxuin.sellflip.restapi.ApiConnector;
 
-public class SingleAdFragment extends Fragment {
+public class SingleAdFragment extends Fragment implements SurfaceTextureListener {
     public static final String TAG = "SINGLE_AD_UI";
+    public static final String VIDEO_URL = "http://nighthunters.ca/minecraft/TEST_VIDEO_PLEASE_IGNORE.mp4";
 
     private View rootView;
     private String adId;
     private SingleAd thisAd;
+    private MediaPlayer mediaPlayer;
 
     public SingleAdFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -66,6 +71,9 @@ public class SingleAdFragment extends Fragment {
         final Button openMapBtn = (Button) rootView.findViewById(R.id.mapButton);
         final FontAwesomeText play_icon = (FontAwesomeText) rootView.findViewById(R.id.play_icon);
 
+        final TextureView textureView = (TextureView) rootView.findViewById(R.id.textureView);
+        textureView.setSurfaceTextureListener(this);
+
         //FLASHING BUTTON
         final Animation animAlpha = AnimationUtils.loadAnimation(getActivity(), R.anim.button_alpha_anim);
         play_icon.setOnTouchListener(new View.OnTouchListener() {
@@ -87,7 +95,8 @@ public class SingleAdFragment extends Fragment {
             @Override
             public void onSuccess(SingleAd ad, Response response) {
                 thisAd = ad;
-                Log.d(TAG, "GOT AD! " + ad.getTitle());
+                Log.d(TAG, "GOT AD! " + ad.getId());
+                BaseActivity.setContentTitle(ad.getTitle());
 
                 // DO STUFF
 
@@ -96,15 +105,6 @@ public class SingleAdFragment extends Fragment {
 
                 NumberFormat formatter = NumberFormat.getCurrencyInstance();
                 adPrice.setText(formatter.format(ad.getPrice()));
-
-                // Testing video
-                VideoView videoView = (VideoView) rootView.findViewById(R.id.videoView);
-                String path = "android.resource://" + getActivity().getPackageName() + "/" + R.raw.small;
-                videoView.setVideoURI(Uri.parse(path));
-                videoView.requestFocus();
-                videoView.setMediaController(new MediaController(getActivity()));
-                // videoView.start();
-
 
                 if (ad.getCoords() != null) {
                     openMapBtn.setVisibility(View.VISIBLE);
@@ -127,5 +127,54 @@ public class SingleAdFragment extends Fragment {
         });
 
         return rootView;
+    }
+
+
+    @Override
+    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i2) {
+        Surface surface = new Surface(surfaceTexture);
+
+        try {
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setDataSource(rootView.getContext().getApplicationContext(), Uri.parse(VIDEO_URL));
+            mediaPlayer.setSurface(surface);
+            mediaPlayer.setLooping(false);
+            mediaPlayer.prepareAsync();
+
+            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
+                @Override
+                public void onPrepared(MediaPlayer mediaPlayer) {
+                    mediaPlayer.start();
+                }
+            });
+
+        } catch (Exception e) {
+            Log.e(TAG, e.getMessage());
+        }
+    }
+
+    @Override
+    public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {
+    }
+
+    @Override
+    public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
+        return true;
+    }
+
+    @Override
+    public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
+    }
+
+
+
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) {
+            mediaPlayer.stop();
+            mediaPlayer.release();
+            mediaPlayer = null;
+        }
     }
 }
