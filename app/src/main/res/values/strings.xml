@@ -9,5 +9,8 @@
     <string name="map_satellite">Satellite</string>
     <string name="map_terrain">Terrain</string>
     <string name="map_normal">Normal</string>
+    <string name="seconds_ago">seconds ago</string>
+    <string name="minutes_ago">minutes ago</string>
+    <string name="hours_ago">hours ago</string>
 
 </resources>

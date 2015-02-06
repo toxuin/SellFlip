@@ -7,6 +7,7 @@ import android.graphics.drawable.Animatable;
 import android.graphics.drawable.LayerDrawable;
 import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
+import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -37,7 +38,6 @@ import ru.toxuin.sellflip.restapi.ApiConnector;
 import java.io.IOException;
 import java.io.InputStream;
 import java.text.NumberFormat;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -83,13 +83,10 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
         long hoursAgo = TimeUnit.MILLISECONDS.toHours(now.getTime() - past.getTime());
 
         String dateAgo;
-        if (secondsAgo < 60) dateAgo = secondsAgo + " seconds ago";
-        else if (minutesAgo < 60) dateAgo = minutesAgo + " minutes ago";
-        else if (hoursAgo < 24) dateAgo = hoursAgo + " hours ago";
-        else {
-            SimpleDateFormat format = new SimpleDateFormat("dd/MM/yyyy");
-            dateAgo = format.format(past);
-        }
+        if (secondsAgo < 60) dateAgo = secondsAgo + context.getString(R.string.seconds_ago);
+        else if (minutesAgo < 60) dateAgo = minutesAgo + context.getString(R.string.minutes_ago);
+        else if (hoursAgo < 24) dateAgo = hoursAgo + context.getString(R.string.hours_ago);
+        else dateAgo = DateFormat.getDateFormat(context.getApplicationContext()).format(past);
         viewHolder.date.setText(dateAgo);
         NumberFormat formatter = NumberFormat.getCurrencyInstance();
         viewHolder.price.setText(formatter.format(itemsList.get(position).getPrice()));
