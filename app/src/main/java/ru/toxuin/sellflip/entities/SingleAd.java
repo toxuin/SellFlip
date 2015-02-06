@@ -14,6 +14,7 @@ public class SingleAd {
     private String phone;
     private String category;
     private String description;
+    @SerializedName("coordinates")
     private Coordinates coords;
     private Date date;
 

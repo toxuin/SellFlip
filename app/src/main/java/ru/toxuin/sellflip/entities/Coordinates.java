@@ -1,6 +1,9 @@
 package ru.toxuin.sellflip.entities;
 
-public class Coordinates {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Coordinates implements Parcelable {
     private float lat;
     private float lng;
     private float radius;
@@ -41,4 +44,26 @@ public class Coordinates {
                 this.getLat() == that.getLat() &&
                 this.getLng() == that.getLng();
     }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel out, int flags) {
+        out.writeFloat(lat);
+        out.writeFloat(lng);
+        out.writeFloat(radius);
+    }
+
+    public static final Parcelable.Creator<Coordinates> CREATOR = new Parcelable.Creator<Coordinates>() {
+        public Coordinates createFromParcel(Parcel in) {
+            return new Coordinates(in.readFloat(), in.readFloat(), in.readFloat());
+        }
+
+        public Coordinates[] newArray(int size) {
+            return new Coordinates[size];
+        }
+    };
 }

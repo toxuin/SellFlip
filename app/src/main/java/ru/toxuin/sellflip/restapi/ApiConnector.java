@@ -12,7 +12,7 @@ import java.util.List;
 
 public class ApiConnector {
     public static final String TAG = "API_CONNECTOR";
-    public static final String API_ENDPOINT_URL = "http://appfrontend-mavd.rhcloud.com/api";
+    public static final String API_ENDPOINT_URL = "http://appfrontend-mavd.rhcloud.com/api/v1";
 
     ApiService apiService;
     RestAdapter restAdapter;

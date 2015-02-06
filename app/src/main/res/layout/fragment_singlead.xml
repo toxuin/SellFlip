@@ -47,7 +47,9 @@
             android:layout_height="wrap_content"
             android:layout_margin="4dp"
             android:padding="8dp"
-            android:text="Button"/>
+            android:id="@+id/mapButton"
+            android:visibility="gone"
+            android:text="Open map"/>
 
     </LinearLayout>
 

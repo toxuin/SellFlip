@@ -1,12 +1,15 @@
 package ru.toxuin.sellflip;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.MediaController;
 import android.widget.TextView;
 import android.widget.VideoView;
@@ -54,6 +57,7 @@ public class SingleAdFragment extends Fragment {
         final TextView adTitle = (TextView) rootView.findViewById(R.id.adTitle);
         final TextView adDescription = (TextView) rootView.findViewById(R.id.adDescription);
         final TextView adPrice = (TextView) rootView.findViewById(R.id.adPrice);
+        final Button openMapBtn = (Button) rootView.findViewById(R.id.mapButton);
 
         api.requestSingleAdForId(adId, new LoadingCallback<SingleAd>(getActivity()) {
             @Override
@@ -76,6 +80,18 @@ public class SingleAdFragment extends Fragment {
                 videoView.requestFocus();
                 videoView.setMediaController(new MediaController(getActivity()));
                 // videoView.start();
+
+                if (ad.getCoords() != null) {
+                    openMapBtn.setVisibility(View.VISIBLE);
+                    openMapBtn.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            Intent intent = new Intent(getActivity(), MapPopupActivity.class);
+                            intent.putExtra("coords", thisAd.getCoords());
+                            startActivity(intent);
+                        }
+                    });
+                }
             }
 
             @Override
