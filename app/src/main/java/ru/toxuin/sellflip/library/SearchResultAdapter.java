@@ -2,8 +2,10 @@ package ru.toxuin.sellflip.library;
 
 import android.content.Context;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.LayerDrawable;
+import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -17,6 +19,10 @@ import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.HttpGet;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -26,6 +32,8 @@ import ru.toxuin.sellflip.SingleAdFragment;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.restapi.ApiConnector;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.NumberFormat;
 import java.util.List;
 
@@ -74,8 +82,43 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
             @Override
             protected Bitmap doInBackground(SearchResultViewHolder... params) {
                 viewHolder = params[0];
-                //TODO:
-                //return BitmapDownloader.getThumbnailForAd(_____id_____);
+                BitmapCache cache = BitmapCache.getInstance();
+                String url = "http://lorempixel.com/100/100/technics/" + itemsList.get(position).getId() + "/";
+                if (cache.getBitmapFromMemCache(url) == null) {
+                    final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
+                    final HttpGet getRequest = new HttpGet(url);
+                    try {
+                        HttpResponse response = client.execute(getRequest);
+                        final int statusCode = response.getStatusLine().getStatusCode();
+                        if (statusCode != HttpStatus.SC_OK) {
+                            Log.e("BITMAP_LOADER", "Error " + statusCode
+                                    + " while retrieving bitmap from " + url);
+                            return null;
+                        }
+                        final HttpEntity entity = response.getEntity();
+                        if (entity != null) {
+                            InputStream inputStream = null;
+                            try {
+                                inputStream = entity.getContent();
+                                Bitmap bmp = BitmapFactory.decodeStream(inputStream);
+                                cache.addBitmapToMemoryCache(url, bmp);
+                                return bmp;
+                            } finally {
+                                if (inputStream != null) {
+                                    inputStream.close();
+                                }
+                                entity.consumeContent();
+                            }
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    } finally {
+                        client.close();
+                    }
+                } else {
+                    return cache.getBitmapFromMemCache(url);
+                }
+
                 return null;
             }
 
