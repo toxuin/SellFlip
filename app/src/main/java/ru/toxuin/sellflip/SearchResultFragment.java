@@ -7,6 +7,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
+import android.widget.Toast;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import ru.toxuin.sellflip.entities.SingleAd;
@@ -46,7 +47,7 @@ public class SearchResultFragment extends Fragment {
 
             @Override
             protected void onFailure(RetrofitError error) {
-
+                Toast.makeText(getActivity(), "ERROR: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 

@@ -15,6 +15,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.VideoView;
 
 import com.beardedhen.androidbootstrap.FontAwesomeText;
@@ -121,6 +122,7 @@ public class SingleAdFragment extends Fragment {
 
             @Override
             public void onFailure(RetrofitError error) {
+                Toast.makeText(getActivity(), "ERROR: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
