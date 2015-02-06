@@ -30,7 +30,7 @@ public class SearchResultFragment extends Fragment {
 
         SearchResultAdapter adapter = new SearchResultAdapter(getActivity(), new LinkedList<SingleAd>());
         listView.setAdapter(adapter);
-        listView.setOnItemClickListener(adapter.searchReslutsItemClickListener);
+        listView.setOnItemClickListener(adapter.searchResultsItemClickListener);
         listView.setOnScrollListener(adapter.searchResultsEndlessScrollListener);
         adapter.requestData(0);
 

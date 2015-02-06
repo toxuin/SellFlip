@@ -140,7 +140,7 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
         return rowView;
     }
 
-    public OnItemClickListener searchReslutsItemClickListener = new OnItemClickListener() {
+    public OnItemClickListener searchResultsItemClickListener = new OnItemClickListener() {
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             SingleAdFragment adFragment = new SingleAdFragment();

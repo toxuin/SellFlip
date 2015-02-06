@@ -1,12 +1,16 @@
 package ru.toxuin.sellflip.entities;
 
-public class LeftMenuItem {
+import android.view.View;
+
+public class SideMenuItem {
     private String name;
     private String iconName;
+    private View.OnClickListener onClickListener;
 
-    public LeftMenuItem(String name, String iconName) {
+    public SideMenuItem(String name, String iconName, View.OnClickListener onClickListener) {
         this.name = name;
         this.iconName = iconName; // prefix with fa for example 'fa-github'
+        this.onClickListener = onClickListener;
     }
 
     public String getName() {
@@ -23,5 +27,13 @@ public class LeftMenuItem {
 
     public void setIconName(String iconName) {
         this.iconName = iconName;
+    }
+
+    public View.OnClickListener getOnClickListener() {
+        return onClickListener;
+    }
+
+    public void setOnClickListener(View.OnClickListener onClickListener) {
+        this.onClickListener = onClickListener;
     }
 }
