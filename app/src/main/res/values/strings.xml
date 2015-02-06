@@ -4,5 +4,9 @@
     <string name="app_name">SellFlip</string>
     <string name="action_settings">Settings</string>
     <string name="search_results">Search results</string>
+    <string name="map_hybrid">Hybrid</string>
+    <string name="map_satellite">Satellite</string>
+    <string name="map_terrain">Terrain</string>
+    <string name="map_normal">Normal</string>
 
 </resources>

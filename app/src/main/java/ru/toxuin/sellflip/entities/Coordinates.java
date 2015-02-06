@@ -2,6 +2,7 @@ package ru.toxuin.sellflip.entities;
 
 import android.os.Parcel;
 import android.os.Parcelable;
+import com.google.android.gms.maps.model.LatLng;
 
 public class Coordinates implements Parcelable {
     private float lat;
@@ -66,4 +67,8 @@ public class Coordinates implements Parcelable {
             return new Coordinates[size];
         }
     };
+
+    public LatLng getLatLng() {
+        return new LatLng(lat, lng);
+    }
 }

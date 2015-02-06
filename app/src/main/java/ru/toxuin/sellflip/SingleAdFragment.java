@@ -88,6 +88,7 @@ public class SingleAdFragment extends Fragment {
                         public void onClick(View view) {
                             Intent intent = new Intent(getActivity(), MapPopupActivity.class);
                             intent.putExtra("coords", thisAd.getCoords());
+                            intent.putExtra("title", thisAd.getTitle());
                             startActivity(intent);
                         }
                     });

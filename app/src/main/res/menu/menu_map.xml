@@ -1,0 +1,26 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+      xmlns:app="http://schemas.android.com/apk/res-auto"
+      xmlns:tools="http://schemas.android.com/tools"
+      tools:context="ru.toxuin.sellflip.MapPopupActivity">
+
+    <item android:id="@+id/action_map_normal"
+          android:title="@string/map_normal"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+
+    <item android:id="@+id/action_map_sattelite"
+          android:title="@string/map_hybrid"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+
+    <item android:id="@+id/action_map_terrain"
+          android:title="@string/map_terrain"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+
+    <item android:id="@+id/action_map_hybrid"
+          android:title="@string/map_satellite"
+          android:orderInCategory="100"
+          app:showAsAction="never"/>
+
+</menu>
