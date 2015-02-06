@@ -7,12 +7,14 @@ import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
 import ru.toxuin.sellflip.entities.SingleAd;
+import ru.toxuin.sellflip.library.SearchResultAdapter;
 
 import java.util.List;
 
 public class ApiConnector {
     public static final String TAG = "API_CONNECTOR";
     public static final String API_ENDPOINT_URL = "http://appfrontend-mavd.rhcloud.com/api/v1";
+    private static int itemsOnPage = 7;
 
     ApiService apiService;
     RestAdapter restAdapter;
@@ -43,9 +45,23 @@ public class ApiConnector {
         apiService.getSingleAd(adId, callback);
     }
 
-    public void requestTopAds(Callback<List<SingleAd>> callback) {
-        apiService.listAds(callback);
-        Log.d(TAG, "REQUESTING TOP ADS");
+    public void requestTopAdsPaged(int page, Callback<List<SingleAd>> callback) {
+        int skip = getItemsOnPage() * page;
+        int limit = getItemsOnPage();
+        apiService.listTopAds(skip, limit, callback);
+        Log.d(TAG, "REQUESTING TOP ADS FROM " + skip + " TO " + (skip+limit) + "(" + limit + " ITEMS)");
+    }
+
+
+
+    // GETTERS AND SETTERS
+
+    public static int getItemsOnPage() {
+        return itemsOnPage;
+    }
+
+    public static void setItemsOnPage(int itemsOnPage) {
+        ApiConnector.itemsOnPage = itemsOnPage;
     }
 }
 
