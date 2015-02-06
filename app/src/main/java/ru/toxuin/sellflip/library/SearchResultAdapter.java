@@ -25,6 +25,7 @@ import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import retrofit.Callback;
 import retrofit.RetrofitError;
+import retrofit.client.Header;
 import retrofit.client.Response;
 import ru.toxuin.sellflip.BaseActivity;
 import ru.toxuin.sellflip.R;
@@ -40,6 +41,7 @@ import java.util.List;
 public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
     private final Context context;
     private final List<SingleAd> itemsList;
+    private int totalServerItems = 0;
 
     public SearchResultAdapter(Context context, List<SingleAd> listReference) {
         super(context, R.layout.search_result_item, listReference);
@@ -164,8 +166,10 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
                 }
             }
             if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + ApiConnector.getItemsOnPage())) {
-                requestData(currentPage + 1);
-                loading = true;
+                if (currentPage*ApiConnector.getItemsOnPage() < totalServerItems) {
+                    requestData(currentPage + 1);
+                    loading = true;
+                }
             }
         }
 
@@ -179,11 +183,17 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
         api.requestTopAdsPaged(page, new Callback<List<SingleAd>>() {
             @Override
             public void success(List<SingleAd> allAds, Response response) {
-                //TODO: THIS SHOULD NOT BE LIKE THIS
+                for (Header header : response.getHeaders()) {
+                    if (header.getName().equals("X-Total-Items")) {
+                        totalServerItems = Integer.parseInt(header.getValue());
+                    }
+                }
+
+                /*//TODO: THIS SHOULD NOT BE LIKE THIS
                 for (SingleAd ad : allAds) {
                     if (!itemsList.contains(ad)) itemsList.add(ad);
-                }
-                //itemsList.addAll(allAds);
+                } */
+                itemsList.addAll(allAds);
                 notifyDataSetChanged();
                 Log.d("LIST_ADAPTER", "GOT " + allAds.size() + " ITEMS!");
             }
