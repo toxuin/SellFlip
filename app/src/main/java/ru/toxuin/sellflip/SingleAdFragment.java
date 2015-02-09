@@ -17,12 +17,13 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.beardedhen.androidbootstrap.BootstrapButton;
 import com.beardedhen.androidbootstrap.FontAwesomeText;
 
+import java.text.DateFormat;
 import java.text.NumberFormat;
 
 import retrofit.RetrofitError;
@@ -68,9 +69,10 @@ public class SingleAdFragment extends Fragment implements SurfaceTextureListener
         final TextView adTitle = (TextView) rootView.findViewById(R.id.adTitle);
         final TextView adDescription = (TextView) rootView.findViewById(R.id.adDescription);
         final TextView adPrice = (TextView) rootView.findViewById(R.id.adPrice);
-        final Button openMapBtn = (Button) rootView.findViewById(R.id.mapButton);
-        final FontAwesomeText play_icon = (FontAwesomeText) rootView.findViewById(R.id.play_icon);
+        final TextView adDate = (TextView) rootView.findViewById(R.id.adDate);
 
+        final FontAwesomeText play_icon = (FontAwesomeText) rootView.findViewById(R.id.play_icon);
+        final BootstrapButton openMapBtn = (BootstrapButton) rootView.findViewById(R.id.mapButton);
         final TextureView textureView = (TextureView) rootView.findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
 
@@ -79,18 +81,16 @@ public class SingleAdFragment extends Fragment implements SurfaceTextureListener
         play_icon.setOnTouchListener(new View.OnTouchListener() {
             @Override public boolean onTouch(View v, MotionEvent event) {
                 if (event.getAction() == MotionEvent.ACTION_DOWN) {
-    /*Code*/
                     play_icon.startAnimation(animAlpha);
                     play_icon.setTextColor(getResources().getColor(R.color.bbutton_default_pressed));
                 }
                 if (event.getAction() == MotionEvent.ACTION_UP) {
-    /*Code*/       // play_icon.setAlpha(1f);
+                    // play_icon.setAlpha(1f);
                     play_icon.setTextColor(getResources().getColor(R.color.bbutton_inverse));
                 }
                 return true;
             }
         });
-
         api.requestSingleAdForId(adId, new LoadingCallback<SingleAd>(getActivity()) {
             @Override
             public void onSuccess(SingleAd ad, Response response) {
@@ -98,13 +98,20 @@ public class SingleAdFragment extends Fragment implements SurfaceTextureListener
                 Log.d(TAG, "GOT AD! " + ad.getId());
                 BaseActivity.setContentTitle(ad.getTitle());
 
-                // DO STUFF
+                // Set the fields
 
                 adTitle.setText(ad.getTitle());
                 adDescription.setText(ad.getDescription());
 
-                NumberFormat formatter = NumberFormat.getCurrencyInstance();
-                adPrice.setText(formatter.format(ad.getPrice()));
+                DateFormat dateFormat = DateFormat.getDateInstance();
+                adDate.setText(dateFormat.format(ad.getDate()));
+
+                if (ad.getPrice() == 0) {
+                    adPrice.setText("Free");
+                } else {
+                    NumberFormat formatter = NumberFormat.getCurrencyInstance();
+                    adPrice.setText(formatter.format(ad.getPrice()));
+                }
 
                 if (ad.getCoords() != null) {
                     openMapBtn.setVisibility(View.VISIBLE);
@@ -144,7 +151,7 @@ public class SingleAdFragment extends Fragment implements SurfaceTextureListener
             mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override
                 public void onPrepared(MediaPlayer mediaPlayer) {
-                    mediaPlayer.start();
+//                    mediaPlayer.start();
                 }
             });
 

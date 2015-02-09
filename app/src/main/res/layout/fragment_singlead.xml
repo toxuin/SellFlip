@@ -9,7 +9,7 @@
 
     <LinearLayout android:layout_width="fill_parent"
                   android:layout_height="fill_parent"
-                  android:background="@android:color/holo_green_dark"
+                  android:background="@color/single_ad_backgroud"
                   android:orientation="vertical">
 
         <TextureView android:id="@+id/textureView"
@@ -18,89 +18,102 @@
 
         <LinearLayout
             android:layout_width="fill_parent"
-            android:layout_height="60dp"
-            android:background="#22000000"
-            android:orientation="horizontal">
-
-            <com.beardedhen.androidbootstrap.FontAwesomeText
-                android:id="@+id/play_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:clickable="true"
-                android:gravity="center_vertical"
-                android:padding="10dp"
-                android:textColor="@color/bbutton_inverse"
-                android:textSize="@dimen/font_awesome_icon_video_size"
-                bootstrap:fa_icon="fa-play"
-                />
-
-            <com.beardedhen.androidbootstrap.FontAwesomeText
-                android:id="@+id/stop_icon"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:gravity="center_vertical"
-                android:padding="10dp"
-                android:textSize="@dimen/font_awesome_icon_video_size"
-                bootstrap:fa_icon="fa-stop"
-                />
-
-            <com.beardedhen.androidbootstrap.FontAwesomeText
-                android:id="@+id/full_screen_icon"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_gravity="right"
-                android:layout_weight="1"
-                android:padding="10dp"
-                android:textSize="@dimen/font_awesome_icon_video_size"
-                bootstrap:fa_icon="fa-arrows-alt"
-                />
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="100dp"
-            android:layout_margin="@dimen/activity_horizontal_margin"
-            android:orientation="vertical">
-
-            <TextView
-                android:id="@+id/adTitle"
-                android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:text="Price"/>
-
-            <TextView
-                android:id="@+id/adDescription"
-                android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:text="Description"/>
-
-            <TextView
-                android:id="@+id/adPrice"
-                android:layout_width="wrap_content"
-                      android:layout_height="wrap_content"
-                      android:text="Price"/>
-
-        </LinearLayout>
-
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="200dp"
-            android:layout_margin="20dp"
-            android:background="@android:color/holo_blue_dark"
-            android:orientation="vertical">
-
-
-        </LinearLayout>
-
-        <Button
-            android:id="@+id/mapButton"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="4dp"
-            android:padding="8dp"
-            android:text="Open map"
-            android:visibility="gone"/>
+            android:background="@android:drawable/dialog_holo_light_frame">
+
+            <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="60dp"
+                android:background="@color/single_ad_secondary"
+                android:orientation="horizontal">
+
+                <com.beardedhen.androidbootstrap.FontAwesomeText
+                    android:id="@+id/play_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:clickable="true"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:textColor="@color/bbutton_inverse"
+                    android:textSize="@dimen/font_awesome_icon_video_size"
+                    bootstrap:fa_icon="fa-play"
+                    />
+
+                <com.beardedhen.androidbootstrap.FontAwesomeText
+                    android:id="@+id/stop_icon"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:gravity="center_vertical"
+                    android:padding="10dp"
+                    android:textSize="@dimen/font_awesome_icon_video_size"
+                    bootstrap:fa_icon="fa-stop"
+                    />
+
+                <com.beardedhen.androidbootstrap.FontAwesomeText
+                    android:id="@+id/full_screen_icon"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:layout_weight="1"
+                    android:padding="10dp"
+                    android:textSize="@dimen/font_awesome_icon_video_size"
+                    bootstrap:fa_icon="fa-arrows-alt"
+                    />
+
+            </LinearLayout>
+        </LinearLayout>
+
+
+        <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="10dp"
+
+            android:background="@android:drawable/dialog_holo_light_frame">
+
+            <include layout="@layout/single_ad_details_partial"/>
+
+        </LinearLayout>
+
+        <TableRow
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_margin="10dp"
+            android:gravity="bottom">
+
+            <com.beardedhen.androidbootstrap.BootstrapButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="Contact Seller"
+                android:textSize="16sp"
+                bootstrap:bb_icon_left="fa-envelope"
+                bootstrap:bb_type="success"
+                />
+
+            <com.beardedhen.androidbootstrap.BootstrapButton
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="Back"
+                android:textSize="16sp"
+                bootstrap:bb_icon_left="fa-mail-forward"
+                bootstrap:bb_type="danger"
+                />
+
+            <com.beardedhen.androidbootstrap.BootstrapButton
+                android:id="@+id/mapButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_margin="8dp"
+                android:text="Open map"
+                android:textSize="16sp"
+                android:visibility="gone"
+                bootstrap:bb_icon_left="fa-map-marker"
+                bootstrap:bb_type="primary"
+                />
+
+        </TableRow>
 
     </LinearLayout>
 

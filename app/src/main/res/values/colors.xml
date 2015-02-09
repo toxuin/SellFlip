@@ -2,4 +2,7 @@
 <resources>
     <color name="odd_card">#ff99e000</color>
     <color name="even_card">#ff73a800</color>
+    <color name="single_ad_backgroud">#71C3DE</color>
+    <color name="single_ad_secondary">#B8D9E3</color>
+    <color name="single_ad_dark">#30535E</color>
 </resources>

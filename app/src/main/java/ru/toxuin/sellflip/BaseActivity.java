@@ -45,6 +45,10 @@ public class BaseActivity extends ActionBarActivity {
         return self.activeFragment;
     }
 
+    public static void setContentTitle(String title) {
+        self.setTitle(title);
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -83,9 +87,10 @@ public class BaseActivity extends ActionBarActivity {
         setContent(new SearchResultFragment());
 
         // ADD ITEMS TO LEFT MENU
-        ListView leftMenuList= (ListView) leftMenu.getMenu().findViewById(R.id.left_menu_list);
+        ListView leftMenuList = (ListView) leftMenu.getMenu().findViewById(R.id.left_menu_list);
 
         LeftMenuAdapter leftMenuAdapter = new LeftMenuAdapter(this);
+        leftMenuAdapter.add(new SideMenuItem("Login", "fa-sign-in", null));
         leftMenuAdapter.add(new SideMenuItem("Top ads", "fa-line-chart", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -114,8 +119,9 @@ public class BaseActivity extends ActionBarActivity {
      * This should fix stupid behaviour of back button & menus.
      * Once you press Back with leftMenu open – app will quit.
      * With this – leftMenu will close.
+     *
      * @param keyCode what's pressed
-     * @param event the event object
+     * @param event   the event object
      * @return whatever.
      */
     public boolean onKeyDown(int keyCode, KeyEvent event) {
@@ -129,9 +135,5 @@ public class BaseActivity extends ActionBarActivity {
             }
         }
         return super.onKeyDown(keyCode, event);
-    }
-
-    public static void setContentTitle(String title) {
-        self.setTitle(title);
     }
 }
