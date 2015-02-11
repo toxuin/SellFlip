@@ -2,19 +2,18 @@ package ru.toxuin.sellflip;
 
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v7.widget.DefaultItemAnimator;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ListView;
-import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.SearchResultAdapter;
-
-import java.util.LinkedList;
 
 public class SearchResultFragment extends Fragment {
     private static final String TAG = "SEARCH_RESULT_UI";
     private View rootView;
-    ListView listView;
+    RecyclerView recyclerView;
 
     public SearchResultFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -24,14 +23,19 @@ public class SearchResultFragment extends Fragment {
         String title = getString(R.string.search_results);
         getActivity().setTitle(title);
 
-        listView = (ListView) rootView.findViewById(R.id.itemsList);
+        recyclerView = (RecyclerView) rootView.findViewById(R.id.itemsList);
 
         // DO STUFF
 
-        SearchResultAdapter adapter = new SearchResultAdapter(getActivity(), new LinkedList<SingleAd>());
-        listView.setAdapter(adapter);
-        listView.setOnItemClickListener(adapter.searchResultsItemClickListener);
-        listView.setOnScrollListener(adapter.searchResultsEndlessScrollListener);
+        SearchResultAdapter adapter = new SearchResultAdapter(getActivity());
+        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
+        RecyclerView.ItemAnimator animator = new DefaultItemAnimator();
+
+        recyclerView.setItemAnimator(animator);
+        recyclerView.setAdapter(adapter);
+        recyclerView.setLayoutManager(manager);
+        adapter.setLayoutManager(manager);
+        recyclerView.setOnScrollListener(adapter.searchResultsEndlessScrollListener);
         adapter.requestData(0);
 
         return rootView;

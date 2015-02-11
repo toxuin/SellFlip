@@ -82,6 +82,7 @@
             android:gravity="bottom">
 
             <com.beardedhen.androidbootstrap.BootstrapButton
+                android:id="@+id/contact_mail_btn"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_margin="8dp"
@@ -92,14 +93,16 @@
                 />
 
             <com.beardedhen.androidbootstrap.BootstrapButton
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="Back"
-                android:textSize="16sp"
-                bootstrap:bb_icon_left="fa-mail-forward"
-                bootstrap:bb_type="danger"
-                />
+                    android:id="@+id/contact_phone_btn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="8dp"
+                    android:text="Contact Seller"
+                    android:textSize="16sp"
+                    bootstrap:bb_icon_left="fa-phone"
+                    bootstrap:bb_type="success"
+                    android:visibility="gone"
+                    />
 
             <com.beardedhen.androidbootstrap.BootstrapButton
                 android:id="@+id/mapButton"

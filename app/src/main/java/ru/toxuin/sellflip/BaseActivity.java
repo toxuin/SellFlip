@@ -90,13 +90,13 @@ public class BaseActivity extends ActionBarActivity {
         ListView leftMenuList = (ListView) leftMenu.getMenu().findViewById(R.id.left_menu_list);
 
         LeftMenuAdapter leftMenuAdapter = new LeftMenuAdapter(this);
-        leftMenuAdapter.add(new SideMenuItem("Login", "fa-sign-in", null));
         leftMenuAdapter.add(new SideMenuItem("Top ads", "fa-line-chart", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 BaseActivity.setContent(new SearchResultFragment());
             }
         }));
+        leftMenuAdapter.add(new SideMenuItem("Login", "fa-sign-in", null));
         leftMenuAdapter.add(new SideMenuItem("Post", "fa-camera-retro", null));
         leftMenuAdapter.add(new SideMenuItem("My Favourites", "fa-heart", null));
         leftMenuAdapter.add(new SideMenuItem("Settings", "fa-cogs", null));

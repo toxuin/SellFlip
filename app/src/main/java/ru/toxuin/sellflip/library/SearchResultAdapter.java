@@ -1,30 +1,24 @@
 package ru.toxuin.sellflip.library;
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.LayerDrawable;
-import android.net.http.AndroidHttpClient;
 import android.os.AsyncTask;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.RecyclerView.Adapter;
+import android.support.v7.widget.RecyclerView.OnScrollListener;
+import android.support.v7.widget.RecyclerView.ViewHolder;
 import android.text.format.DateFormat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
-import android.widget.AbsListView.OnScrollListener;
-import android.widget.AdapterView;
-import android.widget.AdapterView.OnItemClickListener;
-import android.widget.ArrayAdapter;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.HttpGet;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Header;
@@ -34,140 +28,26 @@ import ru.toxuin.sellflip.R;
 import ru.toxuin.sellflip.SingleAdFragment;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.restapi.ApiConnector;
+import ru.toxuin.sellflip.library.SearchResultAdapter.SearchResultViewHolder;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.NumberFormat;
 import java.util.Date;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
-    private final Context context;
+public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
+    private static final String TAG = "SEARCH_RESULT_ADAPTER";
+    private static Context context;
     private final List<SingleAd> itemsList;
     private int totalServerItems = 0;
+    private LinearLayoutManager layoutManager;
 
-    public SearchResultAdapter(Context context, List<SingleAd> listReference) {
-        super(context, R.layout.search_result_item, listReference);
-        this.context = context;
-        this.itemsList = listReference;
+    public SearchResultAdapter(Context context) {
+        super();
+        SearchResultAdapter.context = context;
+        this.itemsList = new LinkedList<>();
     }
-
-    @Override
-    public View getView(final int position, View convertView, ViewGroup parent) {
-        SearchResultViewHolder viewHolder;
-        View rowView = convertView;
-
-        if (rowView == null) {
-            LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            rowView = inflater.inflate(R.layout.search_result_item, parent, false);
-            viewHolder = new SearchResultViewHolder();
-            viewHolder.position = position;
-            viewHolder.title = (TextView) rowView.findViewById(R.id.item_title);
-            viewHolder.date = (TextView) rowView.findViewById(R.id.item_date);
-            viewHolder.price = (TextView) rowView.findViewById(R.id.item_price);
-            viewHolder.thumbnail = (ImageView) rowView.findViewById(R.id.item_thumbnail);
-            viewHolder.cardContainer = (LinearLayout) rowView.findViewById(R.id.item_card);
-            rowView.setTag(viewHolder);
-        } else {
-            viewHolder = (SearchResultViewHolder) rowView.getTag();
-        }
-        if (position % 2 == 0) viewHolder.cardContainer.setBackgroundColor(context.getResources().getColor(R.color.even_card));
-
-        viewHolder.title.setText(itemsList.get(position).getTitle());
-        // DETERMINE THE DATE
-        Date past = itemsList.get(position).getDate();
-        Date now = new Date();
-        long secondsAgo = TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
-        long minutesAgo = TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
-        long hoursAgo = TimeUnit.MILLISECONDS.toHours(now.getTime() - past.getTime());
-
-        String dateAgo;
-        if (secondsAgo < 60) dateAgo = secondsAgo + context.getString(R.string.seconds_ago);
-        else if (minutesAgo < 60) dateAgo = minutesAgo + context.getString(R.string.minutes_ago);
-        else if (hoursAgo < 24) dateAgo = hoursAgo + context.getString(R.string.hours_ago);
-        else dateAgo = DateFormat.getDateFormat(context.getApplicationContext()).format(past);
-        viewHolder.date.setText(dateAgo);
-        NumberFormat formatter = NumberFormat.getCurrencyInstance();
-        viewHolder.price.setText(formatter.format(itemsList.get(position).getPrice()));
-
-        viewHolder.thumbnail.setImageResource(R.drawable.loading);
-        LayerDrawable progressAnimation = (LayerDrawable) viewHolder.thumbnail.getDrawable();
-        ((Animatable) progressAnimation.getDrawable(0)).start();
-        ((Animatable) progressAnimation.getDrawable(1)).start();
-
-        new AsyncTask<SearchResultViewHolder, Void, Bitmap>() {
-            private SearchResultViewHolder viewHolder;
-
-            @Override
-            protected Bitmap doInBackground(SearchResultViewHolder... params) {
-                viewHolder = params[0];
-                BitmapCache cache = BitmapCache.getInstance();
-                String url = "http://lorempixel.com/600/200/technics/" + itemsList.get(position).getId() + "/";
-                if (cache.getBitmapFromMemCache(url) == null) {
-                    final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
-                    final HttpGet getRequest = new HttpGet(url);
-                    try {
-                        HttpResponse response = client.execute(getRequest);
-                        final int statusCode = response.getStatusLine().getStatusCode();
-                        if (statusCode != HttpStatus.SC_OK) {
-                            Log.e("BITMAP_LOADER", "Error " + statusCode
-                                    + " while retrieving bitmap from " + url);
-                            return null;
-                        }
-                        final HttpEntity entity = response.getEntity();
-                        if (entity != null) {
-                            InputStream inputStream = null;
-                            try {
-                                inputStream = entity.getContent();
-                                Bitmap bmp = BitmapFactory.decodeStream(inputStream);
-                                cache.addBitmapToMemoryCache(url, bmp);
-                                return bmp;
-                            } finally {
-                                if (inputStream != null) {
-                                    inputStream.close();
-                                }
-                                entity.consumeContent();
-                            }
-                        }
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    } finally {
-                        client.close();
-                    }
-                } else {
-                    return cache.getBitmapFromMemCache(url);
-                }
-
-                return null;
-            }
-
-            @Override
-            protected void onPostExecute(Bitmap result) {
-                super.onPostExecute(result);
-                //if (viewHolder.position == position) {
-                    if (result == null) {
-                        viewHolder.thumbnail.setImageDrawable(viewHolder.thumbnail.getContext().getResources()
-                                .getDrawable(R.drawable.no_image));
-                    } else {
-                        viewHolder.thumbnail.setImageBitmap(result);
-                    }
-                //} else Log.e("IMAGE_DRAW", "WRONG POSITION: " + viewHolder.position + " :: " + position);
-            }
-        }.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, viewHolder);  // ANDROID 3.0+ ONLY
-
-
-        return rowView;
-    }
-
-    public OnItemClickListener searchResultsItemClickListener = new OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            SingleAdFragment adFragment = new SingleAdFragment();
-            adFragment.setId(itemsList.get(position).getId());
-            BaseActivity.setContent(adFragment);
-        }
-    };
 
     public OnScrollListener searchResultsEndlessScrollListener = new OnScrollListener() {
         private int currentPage = 0;
@@ -175,7 +55,13 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
         private boolean loading = true;
 
         @Override
-        public void onScroll(AbsListView view, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+        public void onScrolled(RecyclerView recyclerView, int dx, int dy) {
+            super.onScrolled(recyclerView, dx, dy);
+
+            int visibleItemCount = layoutManager.getChildCount();
+            int totalItemCount = layoutManager.getItemCount();
+            int firstVisibleItem = layoutManager.findFirstVisibleItemPosition();
+
             if (loading) {
                 if (totalItemCount > previousTotal) {
                     loading = false;
@@ -190,10 +76,6 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
                 }
             }
         }
-
-        @Override
-        public void onScrollStateChanged(AbsListView view, int scrollState) {
-        }
     };
 
     public void requestData(int page) {
@@ -205,16 +87,12 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
                     try {
                         if (header.getName().equals("X-Total-Items")) {
                             totalServerItems = Integer.parseInt(header.getValue());
+                            Log.d(TAG, "GOT TOTAL ITEMS: " + totalServerItems);
                         }
                     } catch (NullPointerException e) {
                         // NO ACTION
                     }
                 }
-
-                /*//TODO: THIS SHOULD NOT BE LIKE THIS
-                for (SingleAd ad : allAds) {
-                    if (!itemsList.contains(ad)) itemsList.add(ad);
-                } */
                 itemsList.addAll(allAds);
                 notifyDataSetChanged();
                 Log.d("LIST_ADAPTER", "GOT " + allAds.size() + " ITEMS!");
@@ -227,12 +105,92 @@ public class SearchResultAdapter extends ArrayAdapter<SingleAd> {
         });
     }
 
-    static class SearchResultViewHolder {
-        int position;
+
+    @Override
+    public SearchResultViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
+        LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        return new SearchResultViewHolder(
+                inflater.inflate(R.layout.search_result_item, viewGroup, false)
+        );
+    }
+
+    @Override
+    public void onBindViewHolder(SearchResultViewHolder viewHolder, int position) {
+        viewHolder.bind(itemsList.get(position));
+    }
+
+    @Override
+    public int getItemCount() {
+        return itemsList.size();
+    }
+
+    public void setLayoutManager(LinearLayoutManager layoutManager) {
+        this.layoutManager = layoutManager;
+    }
+
+    public static class SearchResultViewHolder extends ViewHolder implements OnClickListener {
         LinearLayout cardContainer;
         TextView title;
         TextView price;
         TextView date;
         ImageView thumbnail;
+        String id;
+
+        public SearchResultViewHolder(View itemView) {
+            super(itemView);
+            this.cardContainer = (LinearLayout) itemView.findViewById(R.id.item_card);
+            this.title = (TextView) itemView.findViewById(R.id.item_title);
+            this.price = (TextView) itemView.findViewById(R.id.item_price);
+            this.date = (TextView) itemView.findViewById(R.id.item_date);
+            this.thumbnail = (ImageView) itemView.findViewById(R.id.item_thumbnail);
+            cardContainer.setOnClickListener(this);
+        }
+
+        public void bind(SingleAd ad) {
+            // BACKGROUND
+            //if (position % 2 == 0) viewHolder.cardContainer.setBackgroundColor(context.getResources().getColor(R.color.even_card));
+
+            // ID
+            id = ad.getId();
+
+            // TITLE
+            title.setText(ad.getTitle());
+
+            // DATE
+            String dateAgo;
+            Date past = ad.getDate();
+            Date now = new Date();
+            long secondsAgo = TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
+            long minutesAgo = TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
+            long hoursAgo = TimeUnit.MILLISECONDS.toHours(now.getTime() - past.getTime());
+            if (secondsAgo < 60) dateAgo = secondsAgo + context.getString(R.string.seconds_ago);
+            else if (minutesAgo < 60) dateAgo = minutesAgo + context.getString(R.string.minutes_ago);
+            else if (hoursAgo < 24) dateAgo = hoursAgo + context.getString(R.string.hours_ago);
+            else dateAgo = DateFormat.getDateFormat(context.getApplicationContext()).format(past);
+            date.setText(dateAgo);
+
+            // PRICE
+            NumberFormat formatter = NumberFormat.getCurrencyInstance();
+            price.setText(formatter.format(ad.getPrice()));
+
+            // THUMBNAIL
+                // LOADING:
+            thumbnail.setImageResource(R.drawable.loading);
+            LayerDrawable progressAnimation = (LayerDrawable) thumbnail.getDrawable();
+            ((Animatable) progressAnimation.getDrawable(0)).start();
+            ((Animatable) progressAnimation.getDrawable(1)).start();
+
+                // GET ACTUAL THUMBNAIL:
+            new BitmapDownloader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, this);  // ANDROID 3.0+ ONLY
+        }
+
+        @Override
+        public void onClick(View view) {
+            Log.d(TAG, "CLICKED " + view.getClass().getSimpleName());
+            if (id == null) return;
+            SingleAdFragment adFragment = new SingleAdFragment();
+            adFragment.setId(id);
+            BaseActivity.setContent(adFragment);
+        }
     }
 }

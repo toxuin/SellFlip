@@ -72,6 +72,8 @@ public class SingleAdFragment extends Fragment implements SurfaceTextureListener
         final TextView adDate = (TextView) rootView.findViewById(R.id.adDate);
 
         final FontAwesomeText play_icon = (FontAwesomeText) rootView.findViewById(R.id.play_icon);
+        final BootstrapButton contactEmailBtn = (BootstrapButton) rootView.findViewById(R.id.contact_mail_btn);
+        final BootstrapButton contactPhoneBtn = (BootstrapButton) rootView.findViewById(R.id.contact_phone_btn);
         final BootstrapButton openMapBtn = (BootstrapButton) rootView.findViewById(R.id.mapButton);
         final TextureView textureView = (TextureView) rootView.findViewById(R.id.textureView);
         textureView.setSurfaceTextureListener(this);
@@ -93,7 +95,7 @@ public class SingleAdFragment extends Fragment implements SurfaceTextureListener
         });
         api.requestSingleAdForId(adId, new LoadingCallback<SingleAd>(getActivity()) {
             @Override
-            public void onSuccess(SingleAd ad, Response response) {
+            public void onSuccess(final SingleAd ad, Response response) {
                 thisAd = ad;
                 Log.d(TAG, "GOT AD! " + ad.getId());
                 BaseActivity.setContentTitle(ad.getTitle());
@@ -108,6 +110,8 @@ public class SingleAdFragment extends Fragment implements SurfaceTextureListener
 
                 if (ad.getPrice() == 0) {
                     adPrice.setText("Free");
+                } else if (ad.getPrice() == -1) {
+                    adPrice.setText("Please contact");
                 } else {
                     NumberFormat formatter = NumberFormat.getCurrencyInstance();
                     adPrice.setText(formatter.format(ad.getPrice()));
@@ -125,6 +129,28 @@ public class SingleAdFragment extends Fragment implements SurfaceTextureListener
                         }
                     });
                 }
+
+                if (ad.getPhone() != null && !ad.getPhone().equals("")) {
+                    contactPhoneBtn.setVisibility(View.VISIBLE);
+                    contactPhoneBtn.setOnClickListener(new OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            String uri = "tel:" + ad.getPhone().trim() ;
+                            Intent intent = new Intent(Intent.ACTION_DIAL);
+                            intent.setData(Uri.parse(uri));
+                            startActivity(intent);
+                        }
+                    });
+                }
+                contactEmailBtn.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View view) {
+                        Intent emailIntent = new Intent(Intent.ACTION_SENDTO, Uri.fromParts("mailto", ad.getEmail(), null));
+                        emailIntent.putExtra(Intent.EXTRA_SUBJECT, "About your ad on SellFlip: " + ad.getTitle());
+                        //emailIntent.putExtra(Intent.EXTRA_TEXT, "Sent from SellFlip, item \"" + ad.getTitle() + "\" (" + ad.getId() + ")");
+                        startActivity(Intent.createChooser(emailIntent, "Send email"));
+                    }
+                });
             }
 
             @Override
