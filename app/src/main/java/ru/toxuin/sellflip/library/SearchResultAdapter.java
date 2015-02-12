@@ -19,6 +19,13 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
+import java.text.NumberFormat;
+import java.util.Date;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
+
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Header;
@@ -27,28 +34,14 @@ import ru.toxuin.sellflip.BaseActivity;
 import ru.toxuin.sellflip.R;
 import ru.toxuin.sellflip.SingleAdFragment;
 import ru.toxuin.sellflip.entities.SingleAd;
-import ru.toxuin.sellflip.restapi.ApiConnector;
 import ru.toxuin.sellflip.library.SearchResultAdapter.SearchResultViewHolder;
-
-import java.text.NumberFormat;
-import java.util.Date;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.concurrent.TimeUnit;
+import ru.toxuin.sellflip.restapi.ApiConnector;
 
 public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
     private static final String TAG = "SEARCH_RESULT_ADAPTER";
     private static Context context;
     private final List<SingleAd> itemsList;
     private int totalServerItems = 0;
-    private LinearLayoutManager layoutManager;
-
-    public SearchResultAdapter(Context context) {
-        super();
-        SearchResultAdapter.context = context;
-        this.itemsList = new LinkedList<>();
-    }
-
     public OnScrollListener searchResultsEndlessScrollListener = new OnScrollListener() {
         private int currentPage = 0;
         private int previousTotal = 0;
@@ -70,13 +63,20 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
                 }
             }
             if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + ApiConnector.getItemsOnPage())) {
-                if (currentPage*ApiConnector.getItemsOnPage() < totalServerItems) {
+                if (currentPage * ApiConnector.getItemsOnPage() < totalServerItems) {
                     requestData(currentPage + 1);
                     loading = true;
                 }
             }
         }
     };
+    private LinearLayoutManager layoutManager;
+
+    public SearchResultAdapter(Context context) {
+        super();
+        SearchResultAdapter.context = context;
+        this.itemsList = new LinkedList<>();
+    }
 
     public void requestData(int page) {
         ApiConnector api = ApiConnector.getInstance();
@@ -164,23 +164,28 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
             long minutesAgo = TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
             long hoursAgo = TimeUnit.MILLISECONDS.toHours(now.getTime() - past.getTime());
             if (secondsAgo < 60) dateAgo = secondsAgo + context.getString(R.string.seconds_ago);
-            else if (minutesAgo < 60) dateAgo = minutesAgo + context.getString(R.string.minutes_ago);
+            else if (minutesAgo < 60)
+                dateAgo = minutesAgo + context.getString(R.string.minutes_ago);
             else if (hoursAgo < 24) dateAgo = hoursAgo + context.getString(R.string.hours_ago);
             else dateAgo = DateFormat.getDateFormat(context.getApplicationContext()).format(past);
             date.setText(dateAgo);
 
             // PRICE
-            NumberFormat formatter = NumberFormat.getCurrencyInstance();
-            price.setText(formatter.format(ad.getPrice()));
+
+            if (ad.getPrice() == 0) price.setText("Free");
+            else {
+                NumberFormat formatter = NumberFormat.getCurrencyInstance();
+                price.setText(formatter.format(ad.getPrice()));
+            }
 
             // THUMBNAIL
-                // LOADING:
+            // LOADING:
             thumbnail.setImageResource(R.drawable.loading);
             LayerDrawable progressAnimation = (LayerDrawable) thumbnail.getDrawable();
             ((Animatable) progressAnimation.getDrawable(0)).start();
             ((Animatable) progressAnimation.getDrawable(1)).start();
 
-                // GET ACTUAL THUMBNAIL:
+            // GET ACTUAL THUMBNAIL:
             new BitmapDownloader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, this);  // ANDROID 3.0+ ONLY
         }
 

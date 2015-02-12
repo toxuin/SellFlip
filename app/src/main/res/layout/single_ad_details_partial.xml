@@ -62,13 +62,24 @@
         android:id="@+id/adAddress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/adPrice"
+        android:layout_above="@+id/adPhone"
         android:layout_alignParentLeft="true"
-
         android:layout_alignParentStart="true"
         android:text="Address: Canada, BC, Near that garbage can"
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textSize="12sp"/>
+
+    <TextView
+        android:id="@+id/adPhone"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/adPrice"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentStart="true"
+        android:text="Phone: 123-444-1323"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textSize="12sp"
+        android:visibility="gone"/>
 
     <TextView
         android:id="@+id/adPrice"

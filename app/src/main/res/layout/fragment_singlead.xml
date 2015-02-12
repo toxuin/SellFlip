@@ -1,25 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    android:id="@+id/pointCardView"
+<ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:bootstrap="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:elevation="10dp">
+    android:fillViewport="true"
+    android:overScrollMode="never">
 
     <LinearLayout android:layout_width="fill_parent"
-                  android:layout_height="fill_parent"
+                  android:layout_height="wrap_content"
                   android:background="@color/single_ad_backgroud"
                   android:orientation="vertical">
 
-        <TextureView android:id="@+id/textureView"
-                     android:layout_width="fill_parent"
-                     android:layout_height="200dp"/>
+        <FrameLayout
+            android:id="@+id/videoSurfaceContainer"
+            android:layout_width="match_parent"
+            android:layout_height="300dp">
+
+            <SurfaceView
+                android:id="@+id/videoSurface"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </FrameLayout>
+
 
         <LinearLayout
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
-            android:background="@android:drawable/dialog_holo_light_frame">
+            android:background="@android:drawable/dialog_holo_light_frame"
+            android:visibility="gone">
 
             <LinearLayout
                 android:layout_width="fill_parent"
@@ -99,9 +109,9 @@
                     android:layout_margin="8dp"
                     android:text="Contact Seller"
                     android:textSize="16sp"
+                    android:visibility="gone"
                     bootstrap:bb_icon_left="fa-phone"
                     bootstrap:bb_type="success"
-                    android:visibility="gone"
                     />
 
             <com.beardedhen.androidbootstrap.BootstrapButton
@@ -120,5 +130,5 @@
 
     </LinearLayout>
 
-</LinearLayout>
+</ScrollView>
 

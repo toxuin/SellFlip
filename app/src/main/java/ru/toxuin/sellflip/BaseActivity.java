@@ -25,6 +25,7 @@ public class BaseActivity extends ActionBarActivity {
 
     /**
      * Call this to set contents.
+     *
      * @param fragment Fragment to set as content.
      */
     public static void setContent(Fragment fragment) {
@@ -39,6 +40,7 @@ public class BaseActivity extends ActionBarActivity {
 
     /**
      * Exposes the currently active fragment.
+     *
      * @return Fragment that is currently occupying content view
      */
     public static Fragment getActiveFragment() {

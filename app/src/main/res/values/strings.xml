@@ -12,4 +12,8 @@
     <string name="seconds_ago">seconds ago</string>
     <string name="minutes_ago">minutes ago</string>
     <string name="hours_ago">hours ago</string>
+    <string name="title_activity_full_screen_video">FullScreenVideoActivity</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="description">Media Controls</string>
+
 </resources>

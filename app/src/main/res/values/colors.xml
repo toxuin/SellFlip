@@ -1,8 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="odd_card">#ff99e000</color>
-    <color name="even_card">#ff73a800</color>
+    <color name="odd_card">#71C3DE</color>
+    <color name="even_card">#5796AB</color>
+
     <color name="single_ad_backgroud">#71C3DE</color>
     <color name="single_ad_secondary">#B8D9E3</color>
     <color name="single_ad_dark">#30535E</color>
+    <color name="single_ad_darker">#4C5A5E</color>
+    <color name="single_ad_brighter">#5796AB</color>
 </resources>

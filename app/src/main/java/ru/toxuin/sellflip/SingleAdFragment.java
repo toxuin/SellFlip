@@ -1,7 +1,7 @@
 package ru.toxuin.sellflip;
 
 import android.content.Intent;
-import android.graphics.SurfaceTexture;
+import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
@@ -9,19 +9,16 @@ import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
-import android.view.Surface;
-import android.view.TextureView;
-import android.view.TextureView.SurfaceTextureListener;
+import android.view.SurfaceHolder;
+import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.beardedhen.androidbootstrap.BootstrapButton;
-import com.beardedhen.androidbootstrap.FontAwesomeText;
 
 import java.text.DateFormat;
 import java.text.NumberFormat;
@@ -30,16 +27,22 @@ import retrofit.RetrofitError;
 import retrofit.client.Response;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.LoadingCallback;
+import ru.toxuin.sellflip.library.VideoControllerView;
 import ru.toxuin.sellflip.restapi.ApiConnector;
 
-public class SingleAdFragment extends Fragment implements SurfaceTextureListener {
+public class SingleAdFragment extends Fragment implements
+        SurfaceHolder.Callback, MediaPlayer.OnPreparedListener,
+        VideoControllerView.MediaPlayerControl {
     public static final String TAG = "SINGLE_AD_UI";
     public static final String VIDEO_URL = "http://nighthunters.ca/minecraft/TEST_VIDEO_PLEASE_IGNORE.mp4";
 
     private View rootView;
     private String adId;
     private SingleAd thisAd;
-    private MediaPlayer mediaPlayer;
+
+    // Video with controls
+    private MediaPlayer player;
+    private VideoControllerView controller;
 
     public SingleAdFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -71,28 +74,33 @@ public class SingleAdFragment extends Fragment implements SurfaceTextureListener
         final TextView adPrice = (TextView) rootView.findViewById(R.id.adPrice);
         final TextView adDate = (TextView) rootView.findViewById(R.id.adDate);
 
-        final FontAwesomeText play_icon = (FontAwesomeText) rootView.findViewById(R.id.play_icon);
         final BootstrapButton contactEmailBtn = (BootstrapButton) rootView.findViewById(R.id.contact_mail_btn);
         final BootstrapButton contactPhoneBtn = (BootstrapButton) rootView.findViewById(R.id.contact_phone_btn);
         final BootstrapButton openMapBtn = (BootstrapButton) rootView.findViewById(R.id.mapButton);
-        final TextureView textureView = (TextureView) rootView.findViewById(R.id.textureView);
-        textureView.setSurfaceTextureListener(this);
 
-        //FLASHING BUTTON
-        final Animation animAlpha = AnimationUtils.loadAnimation(getActivity(), R.anim.button_alpha_anim);
-        play_icon.setOnTouchListener(new View.OnTouchListener() {
+        final SurfaceView videoSurface = (SurfaceView) rootView.findViewById(R.id.videoSurface);
+
+        // SET UP VIDEO
+        videoSurface.setOnTouchListener(new View.OnTouchListener() {
             @Override public boolean onTouch(View v, MotionEvent event) {
-                if (event.getAction() == MotionEvent.ACTION_DOWN) {
-                    play_icon.startAnimation(animAlpha);
-                    play_icon.setTextColor(getResources().getColor(R.color.bbutton_default_pressed));
-                }
-                if (event.getAction() == MotionEvent.ACTION_UP) {
-                    // play_icon.setAlpha(1f);
-                    play_icon.setTextColor(getResources().getColor(R.color.bbutton_inverse));
-                }
-                return true;
+                controller.show();
+                return false;
             }
         });
+        SurfaceHolder videoHolder = videoSurface.getHolder();
+        videoHolder.addCallback(this);
+
+        player = new MediaPlayer();
+        controller = new VideoControllerView(getActivity());
+
+        try {
+            player.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            player.setDataSource(getActivity(), Uri.parse(VIDEO_URL));
+            player.setOnPreparedListener(this);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
         api.requestSingleAdForId(adId, new LoadingCallback<SingleAd>(getActivity()) {
             @Override
             public void onSuccess(final SingleAd ad, Response response) {
@@ -101,7 +109,6 @@ public class SingleAdFragment extends Fragment implements SurfaceTextureListener
                 BaseActivity.setContentTitle(ad.getTitle());
 
                 // Set the fields
-
                 adTitle.setText(ad.getTitle());
                 adDescription.setText(ad.getDescription());
 
@@ -162,52 +169,81 @@ public class SingleAdFragment extends Fragment implements SurfaceTextureListener
         return rootView;
     }
 
-
-    @Override
-    public void onSurfaceTextureAvailable(SurfaceTexture surfaceTexture, int i, int i2) {
-        Surface surface = new Surface(surfaceTexture);
-
-        try {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setDataSource(rootView.getContext().getApplicationContext(), Uri.parse(VIDEO_URL));
-            mediaPlayer.setSurface(surface);
-            mediaPlayer.setLooping(false);
-            mediaPlayer.prepareAsync();
-
-            mediaPlayer.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                @Override
-                public void onPrepared(MediaPlayer mediaPlayer) {
-//                    mediaPlayer.start();
-                }
-            });
-
-        } catch (Exception e) {
-            Log.e(TAG, e.getMessage());
-        }
+    @Override public void surfaceCreated(SurfaceHolder holder) {
+        player.setDisplay(holder);
+        player.prepareAsync();
     }
 
-    @Override
-    public void onSurfaceTextureSizeChanged(SurfaceTexture surfaceTexture, int i, int i1) {
+    @Override public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
+
     }
 
-    @Override
-    public boolean onSurfaceTextureDestroyed(SurfaceTexture surfaceTexture) {
+    @Override public void surfaceDestroyed(SurfaceHolder holder) {
+
+    }
+
+    @Override public void start() {
+        player.start();
+    }
+
+    @Override public void pause() {
+        player.pause();
+    }
+
+    @Override public int getDuration() {
+        return player.getDuration();
+    }
+
+    @Override public int getCurrentPosition() {
+        return player.getCurrentPosition();
+    }
+
+    @Override public void seekTo(int pos) {
+        player.seekTo(pos);
+    }
+
+    @Override public boolean isPlaying() {
+        return player.isPlaying();
+    }
+
+    @Override public int getBufferPercentage() {
+        return 0;
+    }
+
+    @Override public boolean canPause() {
         return true;
     }
 
-    @Override
-    public void onSurfaceTextureUpdated(SurfaceTexture surfaceTexture) {
+    @Override public boolean canSeekBackward() {
+        return true;
     }
 
+    @Override public boolean canSeekForward() {
+        return true;
+    }
 
+    @Override public boolean isFullScreen() {
+        return false;
+    }
+
+    @Override public void toggleFullScreen() {
+        Intent intent = new Intent(getActivity(), FullScreenVideoActivity.class);
+        intent.putExtra("position", player.getCurrentPosition());
+        startActivity(intent);
+    }
+
+    @Override public void onPrepared(MediaPlayer mp) {
+        controller.setMediaPlayer(this);
+        controller.setAnchorView((FrameLayout) rootView.findViewById(R.id.videoSurfaceContainer));
+        player.start();
+    }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (mediaPlayer != null) {
-            mediaPlayer.stop();
-            mediaPlayer.release();
-            mediaPlayer = null;
+        if (player != null) {
+            player.stop();
+            player.release();
         }
     }
 }
