@@ -44,15 +44,17 @@ public class SingleAdFragment extends Fragment implements
     private MediaPlayer player;
     private VideoControllerView controller;
 
+    private boolean playerReady = false;
+
     public SingleAdFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
     /**
      * This is a constructor extension for chain-setting the id parameter
-     * Use like this: new SingleAdFragment().setId("lalal")
+     * Use like this: new SingleAdFragment().setAdId("lalal")
      * @param id is that should be retrieved
      * @return same instance that would be returned with constructor
      */
-    public SingleAdFragment setId(String id) {
+    public SingleAdFragment setAdId(String id) {
         adId = id;
         return this;
     }
@@ -66,7 +68,7 @@ public class SingleAdFragment extends Fragment implements
         ApiConnector api = ApiConnector.getInstance();
 
         if (adId == null) {
-            throw new IllegalStateException("SingleAdFragment instantiated without id! Use .setId(\"lalal\")!");
+            throw new IllegalStateException("SingleAdFragment instantiated without id! Use .setAdId(\"lalal\")!");
         }
 
         final TextView adTitle = (TextView) rootView.findViewById(R.id.adTitle);
@@ -169,9 +171,26 @@ public class SingleAdFragment extends Fragment implements
         return rootView;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        Log.d(TAG, "SAVING STATE! ID: " + adId);
+        outState.putString("adId", adId);
+    }
+
+    @Override
+    public void onActivityCreated(Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Log.d(TAG, "TRYING TO RESTORE STATE!");
+        if (savedInstanceState != null) {
+            adId = savedInstanceState.getString("adId", null);
+            Log.d(TAG, "GOT ID: " + adId);
+        }
+    }
+
     @Override public void surfaceCreated(SurfaceHolder holder) {
         player.setDisplay(holder);
-        player.prepareAsync();
+        if (!playerReady) player.prepareAsync();
     }
 
     @Override public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
@@ -233,6 +252,7 @@ public class SingleAdFragment extends Fragment implements
     }
 
     @Override public void onPrepared(MediaPlayer mp) {
+        playerReady = true;
         controller.setMediaPlayer(this);
         controller.setAnchorView((FrameLayout) rootView.findViewById(R.id.videoSurfaceContainer));
         player.start();
@@ -241,9 +261,10 @@ public class SingleAdFragment extends Fragment implements
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (player != null) {
+        if (player != null && playerReady) {
             player.stop();
             player.release();
+            playerReady = false;
         }
     }
 }

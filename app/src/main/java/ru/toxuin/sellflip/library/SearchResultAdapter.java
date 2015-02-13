@@ -194,7 +194,7 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
             Log.d(TAG, "CLICKED " + view.getClass().getSimpleName());
             if (id == null) return;
             SingleAdFragment adFragment = new SingleAdFragment();
-            adFragment.setId(id);
+            adFragment.setAdId(id);
             BaseActivity.setContent(adFragment);
         }
     }
