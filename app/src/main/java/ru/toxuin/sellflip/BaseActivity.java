@@ -1,5 +1,6 @@
 package ru.toxuin.sellflip;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -99,7 +100,11 @@ public class BaseActivity extends ActionBarActivity {
             }
         }));
         leftMenuAdapter.add(new SideMenuItem("Login", "fa-sign-in", null));
-        leftMenuAdapter.add(new SideMenuItem("Post", "fa-camera-retro", null));
+        leftMenuAdapter.add(new SideMenuItem("Video", "fa-camera-retro", new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                startActivity(new Intent(getApplication(), CaptureVideoActivity.class));
+            }
+        }));
         leftMenuAdapter.add(new SideMenuItem("My Favourites", "fa-heart", null));
         leftMenuAdapter.add(new SideMenuItem("Settings", "fa-cogs", null));
 

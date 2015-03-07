@@ -15,5 +15,6 @@
     <string name="title_activity_full_screen_video">FullScreenVideoActivity</string>
     <string name="hello_world">Hello world!</string>
     <string name="description">Media Controls</string>
+    <string name="title_activity_capture_video">CaptureVideoActivity</string>
 
 </resources>
