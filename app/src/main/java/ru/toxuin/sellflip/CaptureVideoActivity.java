@@ -14,6 +14,9 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
+import com.github.johnpersano.supertoasts.SuperToast;
+import com.github.johnpersano.supertoasts.util.Style;
+
 import java.io.IOException;
 
 import ru.toxuin.sellflip.library.Utils;
@@ -60,7 +63,7 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
                     capture.setText("Capture");
                     isRecording = false;
                     progressHandler.removeCallbacks(this);
-                    Utils.mergeVideos();
+                    Utils.mergeVideos(getBaseContext());
                     // go to the next activity
                 }
                 progressHandler.postDelayed(this, 500);
@@ -95,10 +98,15 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
         done_btn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 if (progressBar.getProgress() > VIDEO_MINIMUM_LENGTH) { // user has minimum length
-                    Utils.mergeVideos();
+                    Utils.mergeVideos(getBaseContext());
                 } else {
                     // INFORM that the user needs to record more
-                    // TODO: TOAST message
+
+                    SuperToast superToast = new SuperToast(getBaseContext(), Style.getStyle(Style.RED, SuperToast.Animations.POPUP));
+                    superToast.setDuration(SuperToast.Duration.VERY_SHORT);
+                    superToast.setText("Video has to be " + VIDEO_MINIMUM_LENGTH + " seconds short");
+                    superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
+                    superToast.show();
                 }
 
             }

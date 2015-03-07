@@ -7,6 +7,8 @@ import android.os.Environment;
 import android.util.Log;
 
 import com.coremedia.iso.boxes.Container;
+import com.github.johnpersano.supertoasts.SuperToast;
+import com.github.johnpersano.supertoasts.util.Style;
 import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
@@ -28,13 +30,7 @@ public class Utils {
     public static List<String> fileNames = new ArrayList<>();
 
     public static boolean checkCameraHardware(Context context) {
-        if (context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA)) {
-            // this device has a camera
-            return true;
-        } else {
-            // no camera on this device
-            return false;
-        }
+        return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
     }
 
     public static void removeTempFiles() {
@@ -75,11 +71,9 @@ public class Utils {
 
             // Create a media file name
             String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
-            File mediaFile = new File(mediaStorageDir.getPath() + File.separator +
+            return new File(mediaStorageDir.getPath() + File.separator +
                     "VID_" + timeStamp + ".mp4");
 
-            fileNames.add(mediaFile.toString());
-            return mediaFile;
         }
         return null;
 
@@ -117,8 +111,8 @@ public class Utils {
      * @return String containing the filename of a merged Video
      * Saves the final video in the public directory for videos on the device
      */
-    public static String mergeVideos() {
-
+    public static String mergeVideos(Context context) {
+        // TODO: make it async
         Movie video;
         List<Track> videoTracks = new LinkedList<>();
         List<Track> audioTracks = new LinkedList<>();
@@ -160,7 +154,13 @@ public class Utils {
             FileOutputStream fos = new FileOutputStream(outFile);
             out.writeContainer(fos.getChannel());
             fos.close();
-            // TODO: write TOAST to the user
+
+            SuperToast superToast = new SuperToast(context, Style.getStyle(Style.BLUE, SuperToast.Animations.POPUP));
+            superToast.setDuration(SuperToast.Duration.LONG);
+            superToast.setText("Video saved in: " + outFile.getPath());
+            superToast.setIcon(SuperToast.Icon.Dark.SAVE, SuperToast.IconPosition.LEFT);
+            superToast.show();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
