@@ -133,8 +133,7 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
 //        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 //        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
 //        mMediaRecorder.setVideoEncodingBitRate(512 * 1000);
-        mMediaRecorder.setVideoFrameRate(25);
-        mMediaRecorder.setVideoSize(480, 480);
+//        mMediaRecorder.setVideoFrameRate(25);
 
         // Step 4: Set output file
         mMediaRecorder.setOutputFile(Utils.createTempFile("video", ".mp4").toString());
