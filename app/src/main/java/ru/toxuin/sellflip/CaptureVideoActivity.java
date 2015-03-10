@@ -63,7 +63,7 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
                     capture.setText("Capture");
                     isRecording = false;
                     progressHandler.removeCallbacks(this);
-                    Utils.mergeVideos(getBaseContext());
+                    Utils.mergeAsync(getBaseContext());
                     // go to the next activity
                 }
                 progressHandler.postDelayed(this, 500);
@@ -98,7 +98,9 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
         done_btn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 if (progressBar.getProgress() > VIDEO_MINIMUM_LENGTH) { // user has minimum length
-                    Utils.mergeVideos(getBaseContext());
+                    Utils.mergeAsync(getBaseContext());
+                    finish();
+
                 } else {
                     // INFORM that the user needs to record more
 

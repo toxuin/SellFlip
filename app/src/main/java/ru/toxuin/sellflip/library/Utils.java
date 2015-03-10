@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.os.Environment;
+import android.os.Handler;
 import android.util.Log;
 
 import com.coremedia.iso.boxes.Container;
@@ -28,6 +29,7 @@ import java.util.List;
 public class Utils {
     public static final String TAG = "Utils";
     public static List<String> fileNames = new ArrayList<>();
+    public static Handler saveFileHandler;
 
     public static boolean checkCameraHardware(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
@@ -112,7 +114,7 @@ public class Utils {
      * Saves the final video in the public directory for videos on the device
      */
     public static String mergeVideos(Context context) {
-        // TODO: make it async
+
         Movie video;
         List<Track> videoTracks = new LinkedList<>();
         List<Track> audioTracks = new LinkedList<>();
@@ -155,17 +157,29 @@ public class Utils {
             out.writeContainer(fos.getChannel());
             fos.close();
 
-            SuperToast superToast = new SuperToast(context, Style.getStyle(Style.BLUE, SuperToast.Animations.POPUP));
-            superToast.setDuration(SuperToast.Duration.LONG);
-            superToast.setText("Video saved in: " + outFile.getPath());
-            superToast.setIcon(SuperToast.Icon.Dark.SAVE, SuperToast.IconPosition.LEFT);
-            superToast.show();
-
         } catch (Exception e) {
             e.printStackTrace();
         }
 
         return outFile.toString();
+    }
+
+    public static void mergeAsync(final Context context) {
+        if (saveFileHandler == null) saveFileHandler = new Handler();
+        new Thread(new Runnable() {
+            @Override public void run() {
+                final String filePath = Utils.mergeVideos(context);
+                saveFileHandler.post(new Runnable() {
+                    @Override public void run() {
+                        SuperToast superToast = new SuperToast(context, Style.getStyle(Style.BLUE, SuperToast.Animations.POPUP));
+                        superToast.setDuration(SuperToast.Duration.LONG);
+                        superToast.setText("Video saved in: " + filePath);
+                        superToast.setIcon(SuperToast.Icon.Dark.SAVE, SuperToast.IconPosition.LEFT);
+                        superToast.show();
+                    }
+                });
+            }
+        }).start();
     }
 
     private static boolean checkStorageWritable() {

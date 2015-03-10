@@ -79,7 +79,6 @@ public class BaseActivity extends ActionBarActivity {
         rightMenu.setTouchmodeMarginThreshold((int) getResources().getDimension(R.dimen.menu_swipe_threshold));
         rightMenu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
         rightMenu.setMenu(R.layout.right_main_menu);
-
         // MAKE HOME BUTTON IN ACTIONBAR SEXY
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
