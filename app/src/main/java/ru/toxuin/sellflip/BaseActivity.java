@@ -99,6 +99,12 @@ public class BaseActivity extends ActionBarActivity {
             }
         }));
         leftMenuAdapter.add(new SideMenuItem("Login", "fa-sign-in", null));
+
+        leftMenuAdapter.add(new SideMenuItem("Add ad", "fa-plus", new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                BaseActivity.setContent(new CreateAdFragment());
+            }
+        }));
         leftMenuAdapter.add(new SideMenuItem("Video", "fa-camera-retro", new View.OnClickListener() {
             @Override public void onClick(View v) {
                 startActivity(new Intent(getApplication(), CaptureVideoActivity.class));
