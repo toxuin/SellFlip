@@ -16,9 +16,13 @@ import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 import com.googlecode.mp4parser.authoring.tracks.AppendTrack;
 
+import java.io.BufferedInputStream;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -109,6 +113,31 @@ public class Utils {
 
     }
 
+    public static byte[] createSha1(String file) throws Exception {
+        MessageDigest digest = MessageDigest.getInstance("SHA-1");
+        InputStream fis = new BufferedInputStream(new FileInputStream(file));
+        int n = 0;
+        byte[] buffer = new byte[8192];
+        while (n != -1) {
+            n = fis.read(buffer);
+            if (n > 0) {
+                digest.update(buffer, 0, n);
+            }
+        }
+        fis.close();
+        return digest.digest();
+    }
+
+    public static String getSha1(String filename) throws Exception {
+        byte[] b = createSha1(filename);
+        String result = "";
+
+        for (byte aB : b) {
+            result += Integer.toString((aB & 0xff) + 0x100, 16).substring(1);
+        }
+        return result;
+    }
+
     /**
      * @return String containing the filename of a merged Video
      * Saves the final video in the public directory for videos on the device
@@ -185,4 +214,6 @@ public class Utils {
     private static boolean checkStorageWritable() {
         return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
     }
+
+
 }
