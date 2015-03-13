@@ -9,7 +9,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.EditText;
+import android.widget.ImageButton;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import ru.toxuin.sellflip.library.Utils;
 
 
 public class CreateAdFragment extends Fragment {
@@ -24,6 +28,8 @@ public class CreateAdFragment extends Fragment {
 
         final TextView adTitle = (TextView) rootView.findViewById(R.id.adTitle);
         final EditText titleEdit = (EditText) rootView.findViewById(R.id.titleEdit);
+        final ImageView adPic = (ImageView) rootView.findViewById(R.id.adPic);
+        final ImageButton takeVideoBtn = (ImageButton) rootView.findViewById(R.id.takeVideoBtn);
 
         titleEdit.addTextChangedListener(new TextWatcher() {
             Boolean valid = false;
@@ -41,6 +47,13 @@ public class CreateAdFragment extends Fragment {
                     adTitle.setText(s.toString());
                 }
 
+            }
+        });
+
+        //TODO: remove
+        takeVideoBtn.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                adPic.setImageBitmap(Utils.getVideoFrame(Utils.videoName, 1000)); // Being chicky TODO: remove
             }
         });
 

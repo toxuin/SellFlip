@@ -2,7 +2,9 @@ package ru.toxuin.sellflip.library;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
+import android.media.MediaMetadataRetriever;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
@@ -34,6 +36,7 @@ public class Utils {
     public static final String TAG = "Utils";
     public static List<String> fileNames = new ArrayList<>();
     public static Handler saveFileHandler;
+    public static String videoName; // TODO: remove it
 
     public static boolean checkCameraHardware(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
@@ -42,6 +45,7 @@ public class Utils {
     public static void removeTempFiles() {
         for (String file : fileNames) {
             new File(file).delete();
+            Log.d(TAG, "removed " + file);
         }
     }
 
@@ -205,6 +209,7 @@ public class Utils {
                         superToast.setText("Video saved in: " + filePath);
                         superToast.setIcon(SuperToast.Icon.Dark.SAVE, SuperToast.IconPosition.LEFT);
                         superToast.show();
+                        videoName = filePath; // TODO: remove it
                     }
                 });
             }
@@ -215,5 +220,16 @@ public class Utils {
         return Environment.getExternalStorageState().equals(Environment.MEDIA_MOUNTED);
     }
 
-
+    public static Bitmap getVideoFrame(String videoName, long time) {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        try {
+            retriever.setDataSource(videoName);
+            return retriever.getFrameAtTime(time);
+        } catch (IllegalArgumentException ex) {
+            ex.printStackTrace();
+        } finally {
+            retriever.release();
+        }
+        return null;
+    }
 }

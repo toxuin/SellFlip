@@ -32,16 +32,18 @@
             android:background="@color/single_ad_brighter">
 
             <ImageView
-                android:id="@+id/imagePic"
+                android:id="@+id/adPic"
                 android:layout_width="fill_parent"
                 android:layout_height="150dp"
+                android:adjustViewBounds="true"
+                android:scaleType="centerCrop"
                 />
 
             <TextView
                 android:id="@+id/adTitle"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@id/imagePic"
+                android:layout_alignBottom="@id/adPic"
                 android:background="#22000000"
                 android:gravity="center"
                 android:text="Ad Title"
@@ -50,11 +52,11 @@
 
 
             <ImageButton
-                android:id="@+id/takePhoto"
+                android:id="@+id/takeVideoBtn"
                 style="@style/AppTheme"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_alignBottom="@+id/imagePic"
+                android:layout_alignBottom="@+id/adPic"
                 android:layout_alignParentRight="true"
                 android:layout_margin="6dp"
                 android:background="@drawable/circle_button"
@@ -217,6 +219,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="Phone"
+
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     />
 

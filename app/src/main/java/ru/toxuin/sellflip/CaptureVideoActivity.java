@@ -14,6 +14,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
+import com.beardedhen.androidbootstrap.FontAwesomeText;
 import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.Style;
 
@@ -39,7 +40,8 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
         setContentView(R.layout.activity_capture_video);
 
         final Button capture = (Button) findViewById(R.id.button_capture);
-        final Button done_btn = (Button) findViewById(R.id.button_done);
+        final FontAwesomeText nextArrowBtn = (FontAwesomeText) findViewById(R.id.nextArrowBtn);
+        final FontAwesomeText closeXBtn = (FontAwesomeText) findViewById(R.id.closeXBtn);
 
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
         mPreview = (SurfaceView) findViewById(R.id.surface_preview);
@@ -78,7 +80,7 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
                             mMediaRecorder.stop();  // stop the recording
                             releaseMediaRecorder(); // release the MediaRecorder object
                             mCamera.lock();         // take camera access back from MediaRecorder
-
+                            closeXBtn.setEnabled(true);
                             // inform the user that recording has stopped
                             capture.setText("Capture");
                             isRecording = false;
@@ -89,13 +91,14 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
                             // inform the user that recording has started
                             capture.setText("Stop");
                             isRecording = true;
+                            closeXBtn.setEnabled(false);
                             progressHandler.postDelayed(progressRunnable, 0);
                         }
                     }
                 }
         );
 
-        done_btn.setOnClickListener(new View.OnClickListener() {
+        nextArrowBtn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 if (progressBar.getProgress() > VIDEO_MINIMUM_LENGTH) { // user has minimum length
                     Utils.mergeAsync(getBaseContext());
@@ -111,6 +114,13 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
                     superToast.show();
                 }
 
+            }
+        });
+
+        closeXBtn.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                //TODO: show conformation dialog
+                finish();
             }
         });
 
