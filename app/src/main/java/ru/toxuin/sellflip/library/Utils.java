@@ -1,5 +1,6 @@
 package ru.toxuin.sellflip.library;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
@@ -8,6 +9,7 @@ import android.media.MediaMetadataRetriever;
 import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
+import android.view.WindowManager;
 
 import com.coremedia.iso.boxes.Container;
 import com.github.johnpersano.supertoasts.SuperToast;
@@ -34,6 +36,7 @@ import java.util.List;
 
 public class Utils {
     public static final String TAG = "Utils";
+    public static boolean isFullScreen = false;
     public static List<String> fileNames = new ArrayList<>();
     public static Handler saveFileHandler;
     public static String videoName; // TODO: remove it
@@ -231,5 +234,17 @@ public class Utils {
             retriever.release();
         }
         return null;
+    }
+
+    public static void toggleFullScreen(Activity activity) {
+        if (!isFullScreen) {
+            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+            isFullScreen = true;
+        } else {
+            activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+            activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+            isFullScreen = false;
+        }
     }
 }

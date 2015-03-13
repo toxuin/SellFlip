@@ -6,11 +6,14 @@ import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.ActionBarActivity;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Log;
+import android.view.LayoutInflater;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
@@ -22,8 +25,8 @@ import java.io.IOException;
 
 import ru.toxuin.sellflip.library.Utils;
 
-public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHolder.Callback {
-    public static final String TAG = "CaptureVideoActivity";
+public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Callback {
+    public static final String TAG = "CaptureVideoFrag";
     public static int VIDEO_MINIMUM_LENGTH = 10;
     public static int VIDEO_MAXIMUM_LENGTH = 15;
 
@@ -34,17 +37,21 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
     private SurfaceHolder mHolder;
     private ProgressBar progressBar;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    private View rootView;
+
+    public CaptureVideoFragment() {
+    }
+
+    @Override public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_capture_video);
+        rootView = inflater.inflate(R.layout.fragment_capture_video, container, false);
 
-        final Button capture = (Button) findViewById(R.id.button_capture);
-        final FontAwesomeText nextArrowBtn = (FontAwesomeText) findViewById(R.id.nextArrowBtn);
-        final FontAwesomeText closeXBtn = (FontAwesomeText) findViewById(R.id.closeXBtn);
+        final Button capture = (Button) rootView.findViewById(R.id.button_capture);
+        final FontAwesomeText nextArrowBtn = (FontAwesomeText) rootView.findViewById(R.id.nextArrowBtn);
+        final FontAwesomeText closeXBtn = (FontAwesomeText) rootView.findViewById(R.id.closeXBtn);
 
-        progressBar = (ProgressBar) findViewById(R.id.progressBar);
-        mPreview = (SurfaceView) findViewById(R.id.surface_preview);
+        progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
+        mPreview = (SurfaceView) rootView.findViewById(R.id.surface_preview);
         mHolder = mPreview.getHolder();
         mHolder.addCallback(this);
 //        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
@@ -65,7 +72,7 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
                     capture.setText("Capture");
                     isRecording = false;
                     progressHandler.removeCallbacks(this);
-                    Utils.mergeAsync(getBaseContext());
+                    Utils.mergeAsync(getActivity());
                     // go to the next activity
                 }
                 progressHandler.postDelayed(this, 500);
@@ -101,13 +108,13 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
         nextArrowBtn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 if (progressBar.getProgress() > VIDEO_MINIMUM_LENGTH) { // user has minimum length
-                    Utils.mergeAsync(getBaseContext());
-                    finish();
+                    Utils.mergeAsync(getActivity());
+                    BaseActivity.setContent(new CreateAdFragment());
 
                 } else {
                     // INFORM that the user needs to record more
 
-                    SuperToast superToast = new SuperToast(getBaseContext(), Style.getStyle(Style.RED, SuperToast.Animations.POPUP));
+                    SuperToast superToast = new SuperToast(getActivity(), Style.getStyle(Style.RED, SuperToast.Animations.POPUP));
                     superToast.setDuration(SuperToast.Duration.VERY_SHORT);
                     superToast.setText("Video has to be " + VIDEO_MINIMUM_LENGTH + " seconds short");
                     superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
@@ -120,11 +127,11 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
         closeXBtn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 //TODO: show conformation dialog
-                finish();
+                getActivity().getSupportFragmentManager().popBackStack();
             }
         });
 
-
+        return rootView;
     }
 
     private boolean prepareVideoRecorder() {
@@ -170,10 +177,15 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
         return true;
     }
 
-    @Override protected void onPause() {
+    @Override public void onPause() {
         super.onPause();
         releaseMediaRecorder();
         releaseCamera();
+    }
+
+    @Override public void onResume() {
+        super.onResume();
+        Utils.toggleFullScreen(getActivity());
     }
 
     private void releaseMediaRecorder() {
@@ -232,8 +244,9 @@ public class CaptureVideoActivity extends ActionBarActivity implements SurfaceHo
 
     }
 
-    @Override protected void onDestroy() {
+    @Override public void onDestroy() {
         super.onDestroy();
         Utils.removeTempFiles();
+        Utils.toggleFullScreen(getActivity());
     }
 }

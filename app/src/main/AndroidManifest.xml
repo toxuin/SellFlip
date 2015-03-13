@@ -44,11 +44,7 @@
             android:theme="@style/FullScreenTheme">
             >
         </activity>
-        <activity
-            android:name=".CaptureVideoActivity"
-            android:label="@string/title_activity_capture_video"
-            android:theme="@style/FullScreenTheme">
-        </activity>
+
     </application>
 
 </manifest>
