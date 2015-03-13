@@ -1,6 +1,8 @@
 package ru.toxuin.sellflip;
 
+import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.text.Editable;
@@ -11,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 
 import ru.toxuin.sellflip.library.Utils;
@@ -18,8 +21,9 @@ import ru.toxuin.sellflip.library.Utils;
 
 public class CreateAdFragment extends Fragment {
     private static final String TAG = "CREATE_AD_FRAG";
+    Thread frameGrabberThread;
     private View rootView;
-
+    private Handler saveFileHandler;
     public CreateAdFragment() {
     }
 
@@ -30,6 +34,45 @@ public class CreateAdFragment extends Fragment {
         final EditText titleEdit = (EditText) rootView.findViewById(R.id.titleEdit);
         final ImageView adPic = (ImageView) rootView.findViewById(R.id.adPic);
         final ImageButton takeVideoBtn = (ImageButton) rootView.findViewById(R.id.takeVideoBtn);
+        final SeekBar frameSeekBar = (SeekBar) rootView.findViewById(R.id.frameSeekBar);
+
+        Bundle args = getArguments();
+        final String filename = args.getString("filename");
+
+
+        frameSeekBar.setMax((int) Utils.getVideoDuration(filename) * 1000);
+
+        frameSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
+                saveFileHandler = new Handler();
+                frameGrabberThread = new Thread(new Runnable() {
+                    @Override public void run() {
+                        final Bitmap bmp = Utils.getVideoFrame(filename, progress);
+                        saveFileHandler.post(new Runnable() {
+                            @Override public void run() {
+                                adPic.setImageBitmap(bmp);
+                            }
+                        });
+                    }
+                });
+
+
+            }
+
+            @Override public void onStartTrackingTouch(SeekBar seekBar) {
+                if (frameGrabberThread != null) {
+                    saveFileHandler.removeCallbacks(frameGrabberThread);
+                    frameGrabberThread = null;
+                }
+            }
+
+            @Override public void onStopTrackingTouch(SeekBar seekBar) {
+                if (frameGrabberThread != null) {
+
+                    frameGrabberThread.start();
+                }
+            }
+        });
 
         titleEdit.addTextChangedListener(new TextWatcher() {
             Boolean valid = false;
@@ -53,7 +96,6 @@ public class CreateAdFragment extends Fragment {
         //TODO: remove
         takeVideoBtn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                adPic.setImageBitmap(Utils.getVideoFrame(Utils.videoName, 1000)); // Being chicky TODO: remove
             }
         });
 

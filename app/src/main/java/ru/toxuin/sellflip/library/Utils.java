@@ -212,7 +212,6 @@ public class Utils {
                         superToast.setText("Video saved in: " + filePath);
                         superToast.setIcon(SuperToast.Icon.Dark.SAVE, SuperToast.IconPosition.LEFT);
                         superToast.show();
-                        videoName = filePath; // TODO: remove it
                     }
                 });
             }
@@ -225,9 +224,10 @@ public class Utils {
 
     public static Bitmap getVideoFrame(String videoName, long time) {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        Log.d(TAG, "Getting frame from: " + time);
         try {
             retriever.setDataSource(videoName);
-            return retriever.getFrameAtTime(time);
+            return retriever.getFrameAtTime(time * 1000);
         } catch (IllegalArgumentException ex) {
             ex.printStackTrace();
         } finally {
@@ -246,5 +246,13 @@ public class Utils {
             activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             isFullScreen = false;
         }
+    }
+
+    public static long getVideoDuration(String filename) {
+        MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+        retriever.setDataSource(filename);
+        String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
+        Log.d(TAG, "Video duration is:" + time);
+        return Long.parseLong(time) / 1000;
     }
 }

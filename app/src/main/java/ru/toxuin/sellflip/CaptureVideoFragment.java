@@ -108,9 +108,12 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
         nextArrowBtn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 if (progressBar.getProgress() > VIDEO_MINIMUM_LENGTH) { // user has minimum length
-                    Utils.mergeAsync(getActivity());
-                    BaseActivity.setContent(new CreateAdFragment());
-
+                    String filename = Utils.mergeVideos(getActivity());
+                    CreateAdFragment createAdFragment = new CreateAdFragment();
+                    Bundle args = new Bundle();
+                    args.putString("filename", filename);
+                    createAdFragment.setArguments(args);
+                    BaseActivity.setContent(createAdFragment);
                 } else {
                     // INFORM that the user needs to record more
 
