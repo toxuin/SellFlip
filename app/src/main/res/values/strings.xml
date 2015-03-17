@@ -17,5 +17,9 @@
     <string name="hello_world">Hello world!</string>
     <string name="description">Media Controls</string>
     <string name="title_activity_capture_video">CaptureVideoActivity</string>
+    <string name="next">Next</string>
+    <string name="determining_location">Determining your location, please wait...</string>
+    <string name="map_move_marker">You can move your marker around in 5km radius</string>
+    <string name="map_specify_radius">You can click the marker to add a blue circle to hide your exact location. Adjust blue circle with pinch-to-zoom.</string>
 
 </resources>

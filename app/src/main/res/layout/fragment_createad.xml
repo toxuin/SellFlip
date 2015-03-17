@@ -195,7 +195,7 @@
                     android:layout_gravity="center"
                     android:layout_margin="4dp"
                     android:text="Select location"
-                    />
+                    android:id="@+id/location_select_btn"/>
 
             </TableRow>
 

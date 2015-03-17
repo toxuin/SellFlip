@@ -23,4 +23,10 @@
           android:orderInCategory="100"
           app:showAsAction="never"/>
 
+    <item android:id="@+id/action_map_ready"
+          android:title="@string/next"
+          android:visible="false"
+          android:orderInCategory="100"
+          app:showAsAction="always"/>
+
 </menu>
