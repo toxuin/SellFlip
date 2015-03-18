@@ -14,7 +14,6 @@
     <string name="minutes_ago">minutes ago</string>
     <string name="hours_ago">hours ago</string>
     <string name="title_activity_full_screen_video">FullScreenVideoActivity</string>
-    <string name="hello_world">Hello world!</string>
     <string name="description">Media Controls</string>
     <string name="title_activity_capture_video">CaptureVideoActivity</string>
     <string name="next">Next</string>
@@ -22,4 +21,8 @@
     <string name="map_move_marker">You can move your marker around in 5km radius</string>
     <string name="map_specify_radius">You can click the marker to add a blue circle to hide your exact location. Adjust blue circle with pinch-to-zoom.</string>
 
+    <string name="quit_str">Discard Video</string>
+    <string name="yes_str">Yes</string>
+    <string name="no_str">No</string>
+    <string name="video_cancel">Are you sure you want to discard the video?</string>
 </resources>

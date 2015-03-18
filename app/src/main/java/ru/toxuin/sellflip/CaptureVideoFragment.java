@@ -1,6 +1,8 @@
 package ru.toxuin.sellflip;
 
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
@@ -55,6 +57,7 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
         mHolder = mPreview.getHolder();
         mHolder.addCallback(this);
 //        mHolder.setType(SurfaceHolder.SURFACE_TYPE_PUSH_BUFFERS);
+        progressBar.setProgress(0);
 
         final Handler progressHandler = new Handler();
         final Runnable progressRunnable = new Runnable() {
@@ -129,8 +132,26 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
 
         closeXBtn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
-                //TODO: show conformation dialog
-                getActivity().getSupportFragmentManager().popBackStack();
+                if (progressBar.getProgress() > 0) {
+                    new AlertDialog.Builder(getActivity())
+                            .setIcon(android.R.drawable.ic_dialog_alert)
+                            .setTitle(R.string.quit_str)
+                            .setMessage(R.string.video_cancel)
+                            .setPositiveButton(R.string.yes_str, new DialogInterface.OnClickListener() {
+
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    getActivity().getSupportFragmentManager().popBackStack();
+                                }
+
+                            })
+                            .setNegativeButton(R.string.no_str, null)
+                            .show();
+
+                } else {
+                    getActivity().getSupportFragmentManager().popBackStack();
+                }
+
             }
         });
 

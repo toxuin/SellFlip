@@ -39,7 +39,6 @@ public class Utils {
     public static boolean isFullScreen = false;
     public static List<String> fileNames = new ArrayList<>();
     public static Handler saveFileHandler;
-    public static String videoName; // TODO: remove it
 
     public static boolean checkCameraHardware(Context context) {
         return context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_CAMERA);
@@ -252,7 +251,6 @@ public class Utils {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         retriever.setDataSource(filename);
         String time = retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_DURATION);
-        Log.d(TAG, "Video duration is:" + time);
         return Long.parseLong(time) / 1000;
     }
 }

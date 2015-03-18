@@ -20,6 +20,11 @@ import android.widget.ImageView;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.github.johnpersano.supertoasts.SuperToast;
+import com.github.johnpersano.supertoasts.util.Style;
+
+import java.io.File;
+
 import ru.toxuin.sellflip.entities.Coordinates;
 import ru.toxuin.sellflip.library.Utils;
 
@@ -27,9 +32,11 @@ import ru.toxuin.sellflip.library.Utils;
 public class CreateAdFragment extends Fragment {
     private static final String TAG = "CREATE_AD_FRAG";
     private static final int MAP_ACTIVITY_RESULT = 90;
-    Thread frameGrabberThread;
     private View rootView;
-    private Handler saveFileHandler;
+    private Thread frameGrabberThread;
+    private Handler frameGrabHandler;
+    private String filename; // glued video
+
     public CreateAdFragment() {
     }
 
@@ -44,18 +51,32 @@ public class CreateAdFragment extends Fragment {
         final SeekBar frameSeekBar = (SeekBar) rootView.findViewById(R.id.frameSeekBar);
 
         Bundle args = getArguments();
-        final String filename = args.getString("filename");
+        filename = args.getString("filename");
+        if (filename == null) {
+            SuperToast superToast = new SuperToast(getActivity(), Style.getStyle(Style.RED, SuperToast.Animations.POPUP));
+            superToast.setDuration(SuperToast.Duration.MEDIUM);
+            superToast.setText("Error saving video. Please, try again");
+            superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
+            superToast.show();
 
+            BaseActivity.setContent(new SearchResultFragment());
+        }
+
+        takeVideoBtn.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                getFragmentManager().popBackStack();
+            }
+        });
 
         frameSeekBar.setMax((int) Utils.getVideoDuration(filename) * 1000);
 
         frameSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
-                saveFileHandler = new Handler();
+                frameGrabHandler = new Handler();
                 frameGrabberThread = new Thread(new Runnable() {
                     @Override public void run() {
                         final Bitmap bmp = Utils.getVideoFrame(filename, progress);
-                        saveFileHandler.post(new Runnable() {
+                        frameGrabHandler.post(new Runnable() {
                             @Override public void run() {
                                 adPic.setImageBitmap(bmp);
                             }
@@ -68,7 +89,7 @@ public class CreateAdFragment extends Fragment {
 
             @Override public void onStartTrackingTouch(SeekBar seekBar) {
                 if (frameGrabberThread != null) {
-                    saveFileHandler.removeCallbacks(frameGrabberThread);
+                    frameGrabHandler.removeCallbacks(frameGrabberThread);
                     frameGrabberThread = null;
                 }
             }
@@ -132,5 +153,10 @@ public class CreateAdFragment extends Fragment {
                 }
                 break;
         }
+    }
+
+    @Override public void onDestroy() {
+        super.onDestroy();
+        new File(filename).delete();
     }
 }
