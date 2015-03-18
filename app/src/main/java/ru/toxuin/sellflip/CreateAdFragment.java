@@ -14,12 +14,15 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import com.beardedhen.androidbootstrap.FontAwesomeText;
 import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.Style;
 
@@ -49,6 +52,11 @@ public class CreateAdFragment extends Fragment {
         final ImageButton takeVideoBtn = (ImageButton) rootView.findViewById(R.id.takeVideoBtn);
         final Button locationSelectBtn = (Button) rootView.findViewById(R.id.location_select_btn);
         final SeekBar frameSeekBar = (SeekBar) rootView.findViewById(R.id.frameSeekBar);
+        final RadioButton radioButtonFree = (RadioButton) rootView.findViewById(R.id.radioButtonFree);
+        final RadioButton radioButtonContact = (RadioButton) rootView.findViewById(R.id.radioButtonContact);
+        final EditText priceEdit = (EditText) rootView.findViewById(R.id.priceEdit);
+        final FontAwesomeText backArrowBtn = (FontAwesomeText) rootView.findViewById(R.id.backArrowBtn);
+        final FontAwesomeText nextArrowBtn = (FontAwesomeText) rootView.findViewById(R.id.nextArrowBtn);
 
         Bundle args = getArguments();
         filename = args.getString("filename");
@@ -61,6 +69,37 @@ public class CreateAdFragment extends Fragment {
 
             BaseActivity.setContent(new SearchResultFragment());
         }
+
+        backArrowBtn.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                getFragmentManager().popBackStack();
+            }
+        });
+
+        radioButtonFree.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    radioButtonContact.setChecked(false);
+                    priceEdit.setText("");
+                }
+            }
+        });
+
+        radioButtonContact.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                if (isChecked) {
+                    radioButtonFree.setChecked(false);
+                    priceEdit.setText("");
+                }
+            }
+        });
+
+        priceEdit.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                radioButtonContact.setChecked(false);
+                radioButtonFree.setChecked(false);
+            }
+        });
 
         takeVideoBtn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
@@ -117,13 +156,10 @@ public class CreateAdFragment extends Fragment {
                 if (valid && adTitle.length() != 0) {
                     adTitle.setText(s.toString());
                 }
+                if (adTitle.length() == 0) {
+                    adTitle.setText("Ad Title");
+                }
 
-            }
-        });
-
-        //TODO: remove
-        takeVideoBtn.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
             }
         });
 

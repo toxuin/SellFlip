@@ -29,7 +29,7 @@ import ru.toxuin.sellflip.library.Utils;
 
 public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Callback {
     public static final String TAG = "CaptureVideoFrag";
-    public static int VIDEO_MINIMUM_LENGTH = 10;
+    public static int VIDEO_MINIMUM_LENGTH = 1; // easier debugging
     public static int VIDEO_MAXIMUM_LENGTH = 15;
 
     private Camera mCamera;
