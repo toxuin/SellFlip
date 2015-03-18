@@ -19,6 +19,7 @@ import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
 import android.widget.FrameLayout;
+
 import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.Style;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -31,6 +32,7 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+
 import ru.toxuin.sellflip.entities.Coordinates;
 
 public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCallback {
@@ -51,13 +53,162 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
     private ScaleGestureDetector scaleDetector;
     private Location gpsLocation;
     private Coordinates coords;
+    private GoogleMap.OnMarkerDragListener markerDrag = new GoogleMap.OnMarkerDragListener() {
+        private LatLng lastKnownPosition;
+
+        @Override
+        public void onMarkerDragStart(Marker marker) {
+            lastKnownPosition = marker.getPosition();
+            // TODO: START MARKER ANIMATION
+        }
+
+        @Override
+        public void onMarkerDrag(Marker marker) {
+            float[] distance = new float[2];
+            Location.distanceBetween(marker.getPosition().latitude, marker.getPosition().longitude,
+                    gpsLocation.getLatitude(), gpsLocation.getLongitude(), distance);
+            if (distance[0] > ALLOWED_MARKER_DRAG || gpsLocation == null) {
+                marker.setPosition(lastKnownPosition);
+                return;
+            }
+            lastKnownPosition = marker.getPosition();
+        }
+
+        @Override
+        public void onMarkerDragEnd(Marker marker) {
+            lastKnownPosition = null;
+            float[] distance = new float[2];
+            Location.distanceBetween(marker.getPosition().latitude, marker.getPosition().longitude,
+                    gpsLocation.getLatitude(), gpsLocation.getLongitude(), distance);
+            if (distance[0] > ALLOWED_MARKER_DRAG || gpsLocation == null) {
+                marker.setPosition(new LatLng(gpsLocation.getLatitude(), gpsLocation.getLongitude()));
+            }
+
+            // TODO: END MARKER ANIMATION
+            coords = new Coordinates((float) marker.getPosition().latitude, (float) marker.getPosition().longitude, 0);
+        }
+    };
     private String title;
     private Marker marker;
     private Circle circle;
+    private final GoogleMap.OnInfoWindowClickListener removeRadius = new GoogleMap.OnInfoWindowClickListener() {
+        @Override
+        public void onInfoWindowClick(Marker marker) {
+            marker.hideInfoWindow();
+            if (circle == null) return;
+            circle.remove();
+            circle = null;
+            // NO ACTION LISTENER
+            mapZoomer.setOnTouchListener(new View.OnTouchListener() {
+                @Override
+                public boolean onTouch(View view, MotionEvent motionEvent) {
+                    return false;
+                }
+            });
+        }
+    };
     private MenuItem nextBtn;
     private boolean isMapFrozen = false;
+    // BLUE CIRCLE STUFF
+    private final ScaleGestureDetector.OnScaleGestureListener onScaleListener = new ScaleGestureDetector.OnScaleGestureListener() {
+        double radius = 1;
+
+        @Override
+        public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
+            if (circle != null) {
+                circle.setRadius(radius * scaleGestureDetector.getScaleFactor());
+                if (circle.getRadius() > MAX_CIRCLE_RADIUS) {
+                    circle.setRadius(MAX_CIRCLE_RADIUS);
+                }
+                return false;
+            }
+            return false;
+        }
+
+        @Override
+        public boolean onScaleBegin(ScaleGestureDetector scaleGestureDetector) {
+            if (marker == null) return false;
+            if (circle == null) {
+                radius = DEFAULT_CIRCLE_RADIUS;
+                addCircle(marker.getPosition(), (float) radius);
+                return true;
+            }
+            radius = circle.getRadius();
+            return isMapFrozen;
+        }
+
+        @Override
+        public void onScaleEnd(ScaleGestureDetector scaleGestureDetector) {
+            isMapFrozen = false;
+            if (circle == null) return;
+            if (circle.getRadius() < MIN_CIRCLE_RADIUS) {
+                circle.remove();
+                circle = null;
+                return;
+            } else if (circle.getRadius() > MAX_CIRCLE_RADIUS) {
+                circle.setRadius(MAX_CIRCLE_RADIUS);
+            }
+            coords.setRadius((float) circle.getRadius());
+        }
+    };
+    private final View.OnTouchListener zoomTouchListener = new View.OnTouchListener() {
+        @Override
+        public boolean onTouch(View view, MotionEvent event) {
+            Point touched = new Point(Math.round(event.getX()), Math.round(event.getY()));
+            Point markerPoint = map.getProjection().toScreenLocation(marker.getPosition());
+            if (isNear(touched, markerPoint) || isInsideCircle(touched)) {
+                isMapFrozen = true;
+            }
+            if (event.getAction() == MotionEvent.ACTION_UP) isMapFrozen = false;
+            if (isMapFrozen) return scaleDetector.onTouchEvent(event);
+            return false;
+        }
+
+        private boolean isInsideCircle(Point point) {
+            if (map == null) return false;
+            if (circle == null) return false;
+            float[] distance = new float[2];
+            LatLng latLng = map.getProjection().fromScreenLocation(point);
+            Location.distanceBetween(latLng.latitude, latLng.longitude,
+                    circle.getCenter().latitude, circle.getCenter().longitude, distance);
+            return (distance[0] < circle.getRadius());
+        }
+
+        private boolean isNear(Point point1, Point point2) {
+            float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) NEAR_MARKER_TOUCH_RADIUS, getResources().getDisplayMetrics());
+            return Math.abs(point1.x - point2.x) < px && Math.abs(point1.y - point2.y) < px;
+        }
+    };
+    private final GoogleMap.OnInfoWindowClickListener addRadius = new GoogleMap.OnInfoWindowClickListener() {
+        @Override
+        public void onInfoWindowClick(Marker marker) {
+            if (circle != null) return;
+            addCircle(marker.getPosition(), (float) DEFAULT_CIRCLE_RADIUS);
+            marker.hideInfoWindow();
+            mapZoomer.setOnTouchListener(zoomTouchListener);
+        }
+    };
     private boolean knowsAboutRadius = false;
     private Circle markerMoveBoundaries;
+    // GPS STUFF
+    private LocationListener locationListener = new LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            handleLocationChange(location);
+        }
+
+        @Override
+        public void onStatusChanged(String s, int i, Bundle bundle) {
+        }
+
+        @Override
+        public void onProviderEnabled(String s) {
+        }
+
+        @Override
+        public void onProviderDisabled(String s) {
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,120 +273,8 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
             }
 
 
-
         }
     }
-
-
-    // BLUE CIRCLE STUFF
-    private final ScaleGestureDetector.OnScaleGestureListener onScaleListener = new ScaleGestureDetector.OnScaleGestureListener() {
-        double radius = 1;
-        @Override
-        public boolean onScale(ScaleGestureDetector scaleGestureDetector) {
-            if (circle != null) {
-                circle.setRadius(radius * scaleGestureDetector.getScaleFactor());
-                if (circle.getRadius() > MAX_CIRCLE_RADIUS) {
-                    circle.setRadius(MAX_CIRCLE_RADIUS);
-                }
-                return false;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean onScaleBegin(ScaleGestureDetector scaleGestureDetector) {
-            if (marker == null) return false;
-            if (circle == null) {
-                radius = DEFAULT_CIRCLE_RADIUS;
-                addCircle(marker.getPosition(), (float) radius);
-                return true;
-            }
-            radius = circle.getRadius();
-            return isMapFrozen;
-        }
-        @Override
-        public void onScaleEnd(ScaleGestureDetector scaleGestureDetector) {
-            isMapFrozen = false;
-            if (circle == null) return;
-            if (circle.getRadius() < MIN_CIRCLE_RADIUS) {
-                circle.remove();
-                circle = null;
-                return;
-            } else if (circle.getRadius() > MAX_CIRCLE_RADIUS) {
-                circle.setRadius(MAX_CIRCLE_RADIUS);
-            }
-            coords.setRadius((float) circle.getRadius());
-        }
-    };
-
-    private final View.OnTouchListener zoomTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent event) {
-            Point touched = new Point(Math.round(event.getX()), Math.round(event.getY()));
-            Point markerPoint = map.getProjection().toScreenLocation(marker.getPosition());
-            if (isNear(touched, markerPoint) || isInsideCircle(touched)) {
-                isMapFrozen = true;
-            }
-            if (event.getAction() == MotionEvent.ACTION_UP) isMapFrozen = false;
-            if (isMapFrozen) return scaleDetector.onTouchEvent(event);
-            return false;
-        }
-
-        private boolean isInsideCircle(Point point) {
-            if (map == null) return false;
-            if (circle == null) return false;
-            float[] distance = new float[2];
-            LatLng latLng = map.getProjection().fromScreenLocation(point);
-            Location.distanceBetween(latLng.latitude, latLng.longitude,
-                    circle.getCenter().latitude, circle.getCenter().longitude, distance);
-            return (distance[0] < circle.getRadius());
-        }
-
-        private boolean isNear(Point point1, Point point2) {
-            float px = TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, (float) NEAR_MARKER_TOUCH_RADIUS, getResources().getDisplayMetrics());
-            return Math.abs(point1.x - point2.x) < px && Math.abs(point1.y - point2.y) < px;
-        }
-    };
-
-
-
-
-
-    private GoogleMap.OnMarkerDragListener markerDrag = new GoogleMap.OnMarkerDragListener() {
-        private LatLng lastKnownPosition;
-
-        @Override
-        public void onMarkerDragStart(Marker marker) {
-            lastKnownPosition = marker.getPosition();
-            // TODO: START MARKER ANIMATION
-        }
-
-        @Override
-        public void onMarkerDrag(Marker marker) {
-            float[] distance = new float[2];
-            Location.distanceBetween(marker.getPosition().latitude, marker.getPosition().longitude,
-                    gpsLocation.getLatitude(), gpsLocation.getLongitude(), distance);
-            if (distance[0] > ALLOWED_MARKER_DRAG || gpsLocation == null) {
-                marker.setPosition(lastKnownPosition);
-                return;
-            }
-            lastKnownPosition = marker.getPosition();
-        }
-
-        @Override
-        public void onMarkerDragEnd(Marker marker) {
-            lastKnownPosition = null;
-            float[] distance = new float[2];
-            Location.distanceBetween(marker.getPosition().latitude, marker.getPosition().longitude,
-                    gpsLocation.getLatitude(), gpsLocation.getLongitude(), distance);
-            if (distance[0] > ALLOWED_MARKER_DRAG || gpsLocation == null) {
-                marker.setPosition(new LatLng(gpsLocation.getLatitude(), gpsLocation.getLongitude()));
-            }
-
-            // TODO: END MARKER ANIMATION
-            coords = new Coordinates((float) marker.getPosition().latitude, (float) marker.getPosition().longitude, 0);
-        }
-    };
 
     private Marker addMarker(LatLng latlng) {
         if (map == null) return null;
@@ -262,8 +301,6 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
         return circle;
     }
 
-
-
     private void toggleInfoWindow() {
         if (marker == null) return;
         if (marker.getTitle().startsWith("Add")) {
@@ -274,54 +311,6 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
             map.setOnInfoWindowClickListener(addRadius);
         }
     }
-
-    private final GoogleMap.OnInfoWindowClickListener addRadius = new GoogleMap.OnInfoWindowClickListener() {
-        @Override
-        public void onInfoWindowClick(Marker marker) {
-            if (circle != null) return;
-            addCircle(marker.getPosition(), (float) DEFAULT_CIRCLE_RADIUS);
-            marker.hideInfoWindow();
-            mapZoomer.setOnTouchListener(zoomTouchListener);
-        }
-    };
-    private final GoogleMap.OnInfoWindowClickListener removeRadius = new GoogleMap.OnInfoWindowClickListener() {
-        @Override
-        public void onInfoWindowClick(Marker marker) {
-            marker.hideInfoWindow();
-            if (circle == null) return;
-            circle.remove();
-            circle = null;
-            // NO ACTION LISTENER
-            mapZoomer.setOnTouchListener(new View.OnTouchListener() {
-                @Override
-                public boolean onTouch(View view, MotionEvent motionEvent) {
-                    return false;
-                }
-            });
-        }
-    };
-
-
-
-
-
-
-
-    // GPS STUFF
-    private LocationListener locationListener = new LocationListener() {
-        @Override
-        public void onLocationChanged(Location location) {
-            handleLocationChange(location);
-        }
-
-        @Override
-        public void onStatusChanged(String s, int i, Bundle bundle) {}
-        @Override
-        public void onProviderEnabled(String s) {}
-        @Override
-        public void onProviderDisabled(String s) {}
-    };
-
 
     public void handleLocationChange(final Location location) {
         Log.d(TAG, "GOT LOCATION! ACCURACY: " + location.getAccuracy());
@@ -353,9 +342,6 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
     }
 
 
-
-
-
     @Override
     public void onPause() {
         super.onPause();
@@ -371,11 +357,6 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
         }
         initMap();
     }
-
-
-
-
-
 
 
     // MENU STUFF

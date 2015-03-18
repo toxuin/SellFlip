@@ -1,6 +1,5 @@
 package ru.toxuin.sellflip;
 
-import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -16,6 +15,7 @@ import ru.toxuin.sellflip.entities.SideMenuItem;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
 
 public class BaseActivity extends ActionBarActivity {
+    public static final String TAG = "BaseActivity";
 
     private static final float MENU_FADE_DEGREE = 0.35f;
     private static BaseActivity self;
@@ -24,18 +24,20 @@ public class BaseActivity extends ActionBarActivity {
     private FragmentManager fragmentManager;
     private Fragment activeFragment;
 
+
     /**
      * Call this to set contents.
      *
      * @param fragment Fragment to set as content.
      */
     public static void setContent(Fragment fragment) {
+        String fragName = fragment.getClass().getName();
         if (self == null) return;
         if (self.leftMenu.isMenuShowing()) self.leftMenu.toggle();
         if (self.rightMenu.isMenuShowing()) self.rightMenu.toggle();
-        self.fragmentManager.beginTransaction().replace(R.id.content, fragment)
-                .addToBackStack(null)
-                .commit();
+        self.fragmentManager.beginTransaction()
+                .replace(R.id.content, fragment, fragment.getClass().getName())
+                .addToBackStack(fragName).commit(); // add frags with a tag will allow to pop them by tag
         self.activeFragment = fragment;
     }
 
@@ -102,14 +104,10 @@ public class BaseActivity extends ActionBarActivity {
 
         leftMenuAdapter.add(new SideMenuItem("Add ad", "fa-plus", new View.OnClickListener() {
             @Override public void onClick(View v) {
-                BaseActivity.setContent(new CreateAdFragment());
+                BaseActivity.setContent(new CaptureVideoFragment());
             }
         }));
-        leftMenuAdapter.add(new SideMenuItem("Video", "fa-camera-retro", new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                startActivity(new Intent(getApplication(), CaptureVideoActivity.class));
-            }
-        }));
+
         leftMenuAdapter.add(new SideMenuItem("My Favourites", "fa-heart", null));
         leftMenuAdapter.add(new SideMenuItem("Settings", "fa-cogs", null));
 
@@ -145,6 +143,7 @@ public class BaseActivity extends ActionBarActivity {
                 rightMenu.toggle();
                 return false;
             }
+
         }
         return super.onKeyDown(keyCode, event);
     }

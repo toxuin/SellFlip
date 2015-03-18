@@ -4,7 +4,7 @@
     xmlns:bootstrap="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/single_ad_backgroud"
+    android:background="@color/single_ad_background"
     android:fillViewport="true"
     android:overScrollMode="never">
 
@@ -12,9 +12,7 @@
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="vertical"
-
-        >
+        android:orientation="vertical">
 
         <TextView
             android:layout_width="wrap_content"
@@ -22,7 +20,7 @@
             android:layout_gravity="center"
             android:layout_marginBottom="10dp"
             android:padding="16dp"
-            android:text="Post Your Ad - Kijiji is absolutely FREE to use"
+            android:text="@string/create_post_ad"
             android:textAppearance="?android:attr/textAppearanceLarge"/>
 
         <RelativeLayout
@@ -37,7 +35,7 @@
                 android:layout_height="150dp"
                 android:adjustViewBounds="true"
                 android:scaleType="centerCrop"
-                />
+                android:contentDescription="@string/create_ad_image"/>
 
             <TextView
                 android:id="@+id/adTitle"
@@ -46,7 +44,7 @@
                 android:layout_alignBottom="@id/adPic"
                 android:background="#22000000"
                 android:gravity="center"
-                android:text="Ad Title"
+                android:text="@string/create_ad_title"
                 android:textColor="#FFFFFF"
                 android:textSize="24sp"/>
 
@@ -58,9 +56,11 @@
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/adPic"
                 android:layout_alignParentRight="true"
+                android:layout_alignParentEnd="true"
                 android:layout_margin="6dp"
                 android:background="@drawable/circle_button"
-                android:src="@drawable/ic_image_photo_camera"/>
+                android:src="@drawable/ic_image_photo_camera"
+                android:contentDescription="@string/create_take_video"/>
         </RelativeLayout>
 
         <LinearLayout
@@ -69,9 +69,8 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-
             <TableRow
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
                 android:paddingTop="10dp">
@@ -79,7 +78,25 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Title"
+                    android:text="Select Frame"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    />
+
+                <SeekBar
+                    android:id="@+id/frameSeekBar"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"/>
+            </TableRow>
+
+            <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp" android:gravity="center_vertical">
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/create_title"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     />
 
@@ -89,29 +106,29 @@
                     android:layout_height="wrap_content"
                     android:ems="10"
                     android:inputType="textAutoCorrect"
-                    android:maxLength="20"/>
+                    android:maxLength="50"/>
             </TableRow>
 
             <TableRow
-                android:layout_width="wrap_content"
+                android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="10dp">
+                android:layout_marginTop="10dp" android:baselineAligned="true" android:gravity="center_vertical">
 
                 <TextView
                     android:id="@+id/textView"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Price"
+                    android:text="@string/create_price"
                     android:textAppearance="?android:attr/textAppearanceMedium"/>
 
                 <EditText
-                    android:id="@+id/editText"
+                    android:id="@+id/create_price_edit"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:ems="5"
+                    android:ems="7"
                     android:gravity="center"
                     android:inputType="numberDecimal"
-                    android:maxLength="5"/>
+                    android:maxLength="7"/>
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -120,43 +137,41 @@
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     />
 
-                <RadioButton
-                    android:id="@+id/radioButtonFree"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:text="Free"/>
+                <RadioGroup
+                        android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content"
+                        android:layout_gravity="left" android:gravity="center_vertical" android:baselineAligned="true">
+                    <RadioButton
+                        android:id="@+id/radioButtonFree"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="10dp"
+                        android:text="@string/create_free"/>
 
-                <RadioButton
-                    android:id="@+id/radioButtonContact"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginLeft="10dp"
-                    android:text="Contact"/>
+                    <RadioButton
+                        android:id="@+id/radioButtonContact"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_marginLeft="10dp"
+                        android:layout_marginStart="10dp"
+                        android:text="@string/create_contact"/>
+                </RadioGroup>
 
             </TableRow>
 
-            <TableRow
+            <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:paddingTop="10dp">
+                android:text="@string/create_description"
+                android:textAppearance="?android:attr/textAppearanceMedium" android:layout_marginTop="10dp"/>
 
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="Description"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    />
-
-                <EditText
-                    android:id="@+id/etEdit"
-                    android:layout_width="fill_parent"
-                    android:layout_height="wrap_content"
-                    android:inputType="textImeMultiLine"
-                    android:maxHeight="100dp"/>
-
-            </TableRow>
+            <EditText
+                android:id="@+id/create_description"
+                android:maxLines="10"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:inputType="textImeMultiLine|textMultiLine"
+                android:maxHeight="100dp" android:layout_marginTop="10dp"/>
 
             <TextView
                 android:layout_width="fill_parent"
@@ -164,7 +179,7 @@
                 android:layout_marginTop="10dp"
                 android:background="#33000000"
                 android:gravity="center"
-                android:text="Location Info"
+                android:text="@string/create_location_info"
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"/>
 
@@ -172,30 +187,22 @@
             <TableRow
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:gravity="center_horizontal"
-                android:paddingTop="10dp">
+                android:baselineAligned="true" android:gravity="center_vertical" android:layout_marginTop="10dp">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Location"
+                    android:text="@string/create_location"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                    />
+                        />
 
                 <Spinner
-                    android:id="@+id/spinner"
+                    android:id="@+id/create_location_spinner"
+                    android:visibility="gone"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:layout_weight="1"/>
-
-                <Button
-                    style="?android:attr/buttonStyleSmall"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="center"
-                    android:layout_margin="4dp"
-                    android:text="Select location"
-                    android:id="@+id/location_select_btn"/>
+                    android:layout_weight="1"
+                    android:spinnerMode="dropdown"/>
 
             </TableRow>
 
@@ -205,7 +212,7 @@
                 android:layout_marginTop="10dp"
                 android:background="#33000000"
                 android:gravity="center"
-                android:text="Contact Info"
+                android:text="@string/create_contact_info"
                 android:textColor="#FFFFFF"
                 android:textSize="20sp"/>
 
@@ -213,15 +220,13 @@
             <TableRow
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="10dp">
+                android:layout_marginTop="10dp" android:baselineAligned="true" android:gravity="center_vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Phone"
-
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    />
+                    android:text="@string/create_phone"
+                    android:textAppearance="?android:attr/textAppearanceMedium"/>
 
                 <EditText
                     android:layout_width="wrap_content"
@@ -235,12 +240,12 @@
             <TableRow
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:paddingTop="10dp">
+                android:layout_marginTop="10dp" android:gravity="center_vertical" android:baselineAligned="true">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Email"
+                    android:text="@string/create_email"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     />
 
@@ -257,24 +262,24 @@
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"
                 android:layout_margin="10dp"
-                android:gravity="end">
+                android:gravity="center_vertical|end|right" android:baselineAligned="true">
 
                 <com.beardedhen.androidbootstrap.BootstrapButton
-                    android:id="@+id/contact_mail_btn"
+                    android:id="@+id/create_post_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
-                    android:text="Post"
+                    android:text="@string/post"
                     android:textSize="16sp"
                     bootstrap:bb_type="success"
                     />
 
                 <com.beardedhen.androidbootstrap.BootstrapButton
-                    android:id="@+id/mapButton"
+                    android:id="@+id/create_cancel_btn"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_margin="8dp"
-                    android:text="Cancel"
+                    android:text="@string/cancel"
                     android:textSize="16sp"
                     bootstrap:bb_type="danger"
                     />
