@@ -45,6 +45,7 @@ public class SingleAdFragment extends Fragment implements
     private VideoControllerView controller;
 
     private boolean playerReady = false;
+    private boolean playerIsPreparing = false;
 
     public SingleAdFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -107,7 +108,6 @@ public class SingleAdFragment extends Fragment implements
             @Override
             public void onSuccess(final SingleAd ad, Response response) {
                 thisAd = ad;
-                Log.d(TAG, "GOT AD! " + ad.getId());
                 BaseActivity.setContentTitle(ad.getTitle());
 
                 // Set the fields
@@ -190,7 +190,10 @@ public class SingleAdFragment extends Fragment implements
 
     @Override public void surfaceCreated(SurfaceHolder holder) {
         player.setDisplay(holder);
-        if (!playerReady) player.prepareAsync();
+        if (!playerReady && !playerIsPreparing) {
+            playerIsPreparing = true;
+            player.prepareAsync();
+        }
     }
 
     @Override public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
@@ -253,6 +256,7 @@ public class SingleAdFragment extends Fragment implements
 
     @Override public void onPrepared(MediaPlayer mp) {
         playerReady = true;
+        playerIsPreparing = false;
         controller.setMediaPlayer(this);
         controller.setAnchorView((FrameLayout) rootView.findViewById(R.id.videoSurfaceContainer));
         player.start();
@@ -265,6 +269,7 @@ public class SingleAdFragment extends Fragment implements
             player.stop();
             player.release();
             playerReady = false;
+            playerIsPreparing = false;
         }
     }
 }
