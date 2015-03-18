@@ -37,6 +37,13 @@ import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.Style;
 
 import java.io.File;
+import android.widget.SeekBar;
+import android.widget.TextView;
+
+import com.github.johnpersano.supertoasts.SuperToast;
+import com.github.johnpersano.supertoasts.util.Style;
+
+import java.io.File;
 
 import ru.toxuin.sellflip.entities.Coordinates;
 import ru.toxuin.sellflip.entities.SingleAd;
@@ -67,7 +74,7 @@ public class CreateAdFragment extends Fragment {
     private ArrayAdapter<String> locationAdapter;
 
     private Map<String, Pair<Coordinates, String>> knownCoordinates;
-
+    
     public CreateAdFragment() {
     }
 
