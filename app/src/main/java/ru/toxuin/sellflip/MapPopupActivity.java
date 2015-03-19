@@ -53,13 +53,23 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
     private ScaleGestureDetector scaleDetector;
     private Location gpsLocation;
     private Coordinates coords;
+
+    private String title;
+    private Marker marker;
+    private Circle markerMoveBoundaries;
+
+    private Circle circle;
+    private MenuItem nextBtn;
+
+    private boolean isMapFrozen = false;
+    private boolean knowsAboutRadius = false;
+
     private GoogleMap.OnMarkerDragListener markerDrag = new GoogleMap.OnMarkerDragListener() {
         private LatLng lastKnownPosition;
 
         @Override
         public void onMarkerDragStart(Marker marker) {
             lastKnownPosition = marker.getPosition();
-            // TODO: START MARKER ANIMATION
         }
 
         @Override
@@ -84,13 +94,10 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
                 marker.setPosition(new LatLng(gpsLocation.getLatitude(), gpsLocation.getLongitude()));
             }
 
-            // TODO: END MARKER ANIMATION
             coords = new Coordinates((float) marker.getPosition().latitude, (float) marker.getPosition().longitude, 0);
         }
     };
-    private String title;
-    private Marker marker;
-    private Circle circle;
+
     private final GoogleMap.OnInfoWindowClickListener removeRadius = new GoogleMap.OnInfoWindowClickListener() {
         @Override
         public void onInfoWindowClick(Marker marker) {
@@ -107,8 +114,11 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
             });
         }
     };
-    private MenuItem nextBtn;
-    private boolean isMapFrozen = false;
+
+
+
+
+
     // BLUE CIRCLE STUFF
     private final ScaleGestureDetector.OnScaleGestureListener onScaleListener = new ScaleGestureDetector.OnScaleGestureListener() {
         double radius = 1;
@@ -151,6 +161,7 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
             coords.setRadius((float) circle.getRadius());
         }
     };
+
     private final View.OnTouchListener zoomTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent event) {
@@ -179,6 +190,7 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
             return Math.abs(point1.x - point2.x) < px && Math.abs(point1.y - point2.y) < px;
         }
     };
+
     private final GoogleMap.OnInfoWindowClickListener addRadius = new GoogleMap.OnInfoWindowClickListener() {
         @Override
         public void onInfoWindowClick(Marker marker) {
@@ -188,8 +200,11 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
             mapZoomer.setOnTouchListener(zoomTouchListener);
         }
     };
-    private boolean knowsAboutRadius = false;
-    private Circle markerMoveBoundaries;
+
+
+
+
+
     // GPS STUFF
     private LocationListener locationListener = new LocationListener() {
         @Override
@@ -330,16 +345,22 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
         };
         mapZoomer.postDelayed(flymap, 50);
         addMarker(new LatLng(gpsLocation.getLatitude(), gpsLocation.getLongitude()));
-        markerMoveBoundaries = map.addCircle(new CircleOptions()
-                        .center(new LatLng(gpsLocation.getLatitude(), gpsLocation.getLongitude()))
-                        .radius(ALLOWED_MARKER_DRAG)
-                        .strokeWidth(3)
-                        .strokeColor(Color.GREEN)
-        );
+        if (markerMoveBoundaries == null) {
+            markerMoveBoundaries = map.addCircle(new CircleOptions()
+                            .center(new LatLng(gpsLocation.getLatitude(), gpsLocation.getLongitude()))
+                            .radius(ALLOWED_MARKER_DRAG)
+                            .strokeWidth(3)
+                            .strokeColor(Color.GREEN)
+            );
+        }
 
         marker.setDraggable(true);
         map.setOnMarkerDragListener(markerDrag);
     }
+
+
+
+
 
 
     @Override
@@ -357,6 +378,10 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
         }
         initMap();
     }
+
+
+
+
 
 
     // MENU STUFF
