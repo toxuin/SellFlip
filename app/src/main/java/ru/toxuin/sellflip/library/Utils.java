@@ -2,6 +2,7 @@ package ru.toxuin.sellflip.library;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.hardware.Camera;
@@ -11,14 +12,18 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.WindowManager;
 
+import android.view.WindowManager;
 import com.coremedia.iso.boxes.Container;
 import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.Style;
+import com.google.gson.Gson;
 import com.googlecode.mp4parser.authoring.Movie;
 import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 import com.googlecode.mp4parser.authoring.tracks.AppendTrack;
+import ru.toxuin.sellflip.R;
+import ru.toxuin.sellflip.entities.Coordinates;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -30,8 +35,10 @@ import java.security.MessageDigest;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 
 public class Utils {
@@ -202,10 +209,12 @@ public class Utils {
     public static void mergeAsync(final Context context) {
         if (saveFileHandler == null) saveFileHandler = new Handler();
         new Thread(new Runnable() {
-            @Override public void run() {
+            @Override
+            public void run() {
                 final String filePath = Utils.mergeVideos(context);
                 saveFileHandler.post(new Runnable() {
-                    @Override public void run() {
+                    @Override
+                    public void run() {
                         SuperToast superToast = new SuperToast(context, Style.getStyle(Style.BLUE, SuperToast.Animations.POPUP));
                         superToast.setDuration(SuperToast.Duration.LONG);
                         superToast.setText("Video saved in: " + filePath);
@@ -233,6 +242,35 @@ public class Utils {
             retriever.release();
         }
         return null;
+    }
+
+    public static void saveCoordinatesToPreferences(Context cnt, Coordinates coord, String locationName, String key) {
+        SharedPreferences sPref = cnt.getSharedPreferences(cnt.getString(R.string.location_preference_key), Context.MODE_PRIVATE);
+        SharedPreferences.Editor edit = sPref.edit();
+
+        Set<String> savedLocations = sPref.getStringSet("SAVED_LOCATIONS_KEYS", null);
+        if (savedLocations == null) savedLocations = new HashSet<>();
+
+        if (coord == null) {
+            edit.remove(key);
+            savedLocations.remove(key);
+            edit.remove("LOCATION_NAME_" + key);
+        } else {
+            Gson gson = new Gson();
+            String json = gson.toJson(coord);
+            edit.putString(key, json);
+            savedLocations.add(key);
+            edit.putString("LOCATION_NAME_" + key, locationName);
+        }
+        edit.putStringSet("SAVED_LOCATIONS_KEYS", savedLocations);
+        edit.apply();
+    }
+
+    public static Coordinates getCoordinatesFromPreferences(Context cnt, String key) {
+        SharedPreferences sPref = cnt.getSharedPreferences(cnt.getString(R.string.location_preference_key), Context.MODE_PRIVATE);
+        Gson gson = new Gson();
+        String json = sPref.getString(key, "");
+        return gson.fromJson(json, Coordinates.class);
     }
 
     public static void toggleFullScreen(Activity activity) {

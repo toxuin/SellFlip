@@ -7,7 +7,6 @@ import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
 import ru.toxuin.sellflip.entities.SingleAd;
-import ru.toxuin.sellflip.library.SearchResultAdapter;
 
 import java.util.List;
 
@@ -50,6 +49,11 @@ public class ApiConnector {
         int limit = getItemsOnPage();
         apiService.listTopAds(skip, limit, callback);
         Log.d(TAG, "REQUESTING TOP ADS FROM " + skip + " TO " + (skip+limit) + "(" + limit + " ITEMS)");
+    }
+
+    public void createNewAd(SingleAd ad, Callback<Void> callback) {
+        apiService.createNewAd(ad.getTitle(), ad.getPrice(), ad.getDescription(), ad.getCoords().getLat(), ad.getCoords().getLng(), ad.getCoords().getRadius(), callback);
+        Log.d(TAG, "POSTING NEW AD");
     }
 
 
