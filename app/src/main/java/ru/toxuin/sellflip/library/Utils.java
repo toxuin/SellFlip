@@ -12,7 +12,6 @@ import android.os.Handler;
 import android.util.Log;
 import android.view.WindowManager;
 
-import android.view.WindowManager;
 import com.coremedia.iso.boxes.Container;
 import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.Style;
@@ -22,8 +21,6 @@ import com.googlecode.mp4parser.authoring.Track;
 import com.googlecode.mp4parser.authoring.builder.DefaultMp4Builder;
 import com.googlecode.mp4parser.authoring.container.mp4.MovieCreator;
 import com.googlecode.mp4parser.authoring.tracks.AppendTrack;
-import ru.toxuin.sellflip.R;
-import ru.toxuin.sellflip.entities.Coordinates;
 
 import java.io.BufferedInputStream;
 import java.io.File;
@@ -39,6 +36,9 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
+
+import ru.toxuin.sellflip.R;
+import ru.toxuin.sellflip.entities.Coordinates;
 
 
 public class Utils {
@@ -63,6 +63,7 @@ public class Utils {
      */
     public static Camera getCameraInstance() {
         Camera c = null;
+
         try {
             c = Camera.open(); // attempt to get a Camera instance
         } catch (Exception e) {

@@ -4,6 +4,7 @@
     <string name="app_name">SellFlip</string>
     <string name="action_settings">Settings</string>
     <string name="search_results">Search results</string>
+    <string name="login">Login</string>
     <string name="create_ad">Post Your Ad</string>
     <string name="description_label"><font fgcolor="#FFFFFFFF">Descripion</font>: Hello world asdasda </string>
     <string name="map_hybrid">Hybrid</string>
@@ -43,4 +44,6 @@
     <string name="yes_str">Yes</string>
     <string name="no_str">No</string>
     <string name="video_cancel">Are you sure you want to discard the video?</string>
+
+    <string name="facebook_app_id">1589994231215559</string>
 </resources>

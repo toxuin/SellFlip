@@ -4,9 +4,9 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -17,19 +17,15 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.RadioButton;
 import android.widget.SeekBar;
-
-import com.github.johnpersano.supertoasts.SuperToast;
-import com.github.johnpersano.supertoasts.util.Style;
-
-import java.io.File;
-import android.widget.SeekBar;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import com.beardedhen.androidbootstrap.FontAwesomeText;
@@ -37,12 +33,6 @@ import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.Style;
 
 import java.io.File;
-
-import ru.toxuin.sellflip.entities.Coordinates;
-import ru.toxuin.sellflip.entities.SingleAd;
-import ru.toxuin.sellflip.library.Utils;
-import ru.toxuin.sellflip.restapi.ApiConnector;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -50,6 +40,9 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
+
+import ru.toxuin.sellflip.entities.Coordinates;
+import ru.toxuin.sellflip.library.Utils;
 
 
 public class CreateAdFragment extends Fragment {
@@ -81,13 +74,9 @@ public class CreateAdFragment extends Fragment {
         final ImageButton takeVideoBtn = (ImageButton) rootView.findViewById(R.id.takeVideoBtn);
         final RadioButton freeRadioBtn = (RadioButton) rootView.findViewById(R.id.radioButtonFree);
         final RadioButton contactRadioBtn = (RadioButton) rootView.findViewById(R.id.radioButtonContact);
-        final EditText priceEdit = (EditText) rootView.findViewById(R.id.create_price_edit);
         final EditText descriptionEdit = (EditText) rootView.findViewById(R.id.create_description);
         locationSpinner = (Spinner) rootView.findViewById(R.id.create_location_spinner);
-        final BootstrapButton postBtn = (BootstrapButton) rootView.findViewById(R.id.create_post_btn);
         final SeekBar frameSeekBar = (SeekBar) rootView.findViewById(R.id.frameSeekBar);
-        final RadioButton radioButtonFree = (RadioButton) rootView.findViewById(R.id.radioButtonFree);
-        final RadioButton radioButtonContact = (RadioButton) rootView.findViewById(R.id.radioButtonContact);
         final EditText priceEdit = (EditText) rootView.findViewById(R.id.priceEdit);
         final FontAwesomeText backArrowBtn = (FontAwesomeText) rootView.findViewById(R.id.backArrowBtn);
         final FontAwesomeText nextArrowBtn = (FontAwesomeText) rootView.findViewById(R.id.nextArrowBtn);
@@ -107,31 +96,6 @@ public class CreateAdFragment extends Fragment {
         backArrowBtn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 getFragmentManager().popBackStack();
-            }
-        });
-
-        radioButtonFree.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    radioButtonContact.setChecked(false);
-                    priceEdit.setText("");
-                }
-            }
-        });
-
-        radioButtonContact.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                if (isChecked) {
-                    radioButtonFree.setChecked(false);
-                    priceEdit.setText("");
-                }
-            }
-        });
-
-        priceEdit.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                radioButtonContact.setChecked(false);
-                radioButtonFree.setChecked(false);
             }
         });
 
@@ -233,37 +197,9 @@ public class CreateAdFragment extends Fragment {
                 MEANS: IF USER ENTERS PRICE AND SELECTS FREE – IT IS FREE
          */
 
-
-        //TODO: remove
-        takeVideoBtn.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
-            }
-        });
-        //TODO: remove
-
         redrawLocationSpinner();
 
         getActivity().setTitle(getString(R.string.create_ad));
-
-        postBtn.setOnClickListener(new OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                ApiConnector.getInstance().createNewAd(
-                        new SingleAd("NEW AD", titleEdit.getText().toString(), price, null, null, "CATEGORY!!!", descriptionEdit.getText().toString(), coord, null),
-                        new Callback<Void>() {
-                            @Override
-                            public void success(Void nothing, Response response) {
-                                Log.d(TAG, "POSTED NEW AD!");
-                            }
-
-                            @Override
-                            public void failure(RetrofitError error) {
-                                Log.d(TAG, "COULD NOT POST NEW AD!");
-                            }
-                        }
-                );
-            }
-        });
 
         String title = getString(R.string.create_ad);
         getActivity().setTitle(title);
@@ -304,7 +240,7 @@ public class CreateAdFragment extends Fragment {
             }
         }
 
-        locationSpinner.setOnItemSelectedListener(new OnItemSelectedListener() {
+        locationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 Log.d(TAG, "POSITION: " + position + ", " + parent.getCount());

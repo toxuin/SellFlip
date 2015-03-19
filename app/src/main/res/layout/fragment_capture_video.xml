@@ -59,6 +59,18 @@
                 android:layout_height="wrap_content"
                 android:layout_centerHorizontal="true">
 
+                <com.beardedhen.androidbootstrap.FontAwesomeText
+                    android:id="@+id/cameraBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:gravity="center"
+                    android:textColor="@android:color/holo_red_light"
+                    android:textSize="36sp"
+                    fontawesometext:fa_icon="fa-camera-retro"
+                    />
+
+
                 <Button
                     android:id="@+id/button_capture"
                     android:layout_width="wrap_content"

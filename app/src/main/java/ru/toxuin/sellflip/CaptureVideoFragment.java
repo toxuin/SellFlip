@@ -12,10 +12,13 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
@@ -51,6 +54,24 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
         final Button capture = (Button) rootView.findViewById(R.id.button_capture);
         final FontAwesomeText nextArrowBtn = (FontAwesomeText) rootView.findViewById(R.id.nextArrowBtn);
         final FontAwesomeText closeXBtn = (FontAwesomeText) rootView.findViewById(R.id.closeXBtn);
+        final FontAwesomeText cameraBtn = (FontAwesomeText) rootView.findViewById(R.id.cameraBtn);
+
+        final Animation vanish = AnimationUtils.loadAnimation(getActivity(), R.anim.camera_capture_anim);
+
+        cameraBtn.setOnTouchListener(new View.OnTouchListener() {
+            @Override public boolean onTouch(View v, MotionEvent event) {
+                if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
+                    cameraBtn.startAnimation(vanish);
+                    return true;
+                } else if (event.getAction() == MotionEvent.ACTION_UP) {
+
+                    cameraBtn.stopAnimation();
+                    return true;
+                }
+
+                return false;
+            }
+        });
 
         progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
         mPreview = (SurfaceView) rootView.findViewById(R.id.surface_preview);
@@ -273,4 +294,5 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
         Utils.removeTempFiles();
         Utils.toggleFullScreen(getActivity());
     }
+
 }

@@ -7,8 +7,17 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
+import com.facebook.Request;
+import com.facebook.Response;
+import com.facebook.Session;
+import com.facebook.SessionState;
+import com.facebook.UiLifecycleHelper;
+import com.facebook.model.GraphUser;
+import com.facebook.widget.ProfilePictureView;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import ru.toxuin.sellflip.entities.SideMenuItem;
@@ -23,7 +32,16 @@ public class BaseActivity extends ActionBarActivity {
     private SlidingMenu rightMenu;
     private FragmentManager fragmentManager;
     private Fragment activeFragment;
+    private UiLifecycleHelper uiLifecycleHelper;
 
+    private ProfilePictureView facebook_profile_pic;
+    private TextView facebook_username;
+    private LinearLayout facebook_container;
+    private Session.StatusCallback statusCallback = new Session.StatusCallback() {
+        @Override public void call(Session session, SessionState sessionState, Exception e) {
+            onSessionStateChange(session, sessionState, e);
+        }
+    };
 
     /**
      * Call this to set contents.
@@ -52,6 +70,16 @@ public class BaseActivity extends ActionBarActivity {
 
     public static void setContentTitle(String title) {
         self.setTitle(title);
+    }
+
+    @Override protected void onResume() {
+        super.onResume();
+        Session session = Session.getActiveSession();
+        if (session != null &&
+                (session.isOpened() || session.isClosed())) {
+            onSessionStateChange(session, session.getState(), null);
+        }
+        uiLifecycleHelper.onResume();
     }
 
     @Override
@@ -94,14 +122,18 @@ public class BaseActivity extends ActionBarActivity {
         ListView leftMenuList = (ListView) leftMenu.getMenu().findViewById(R.id.left_menu_list);
 
         LeftMenuAdapter leftMenuAdapter = new LeftMenuAdapter(this);
+
         leftMenuAdapter.add(new SideMenuItem("Top ads", "fa-line-chart", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 BaseActivity.setContent(new SearchResultFragment());
             }
         }));
-        leftMenuAdapter.add(new SideMenuItem("Login", "fa-sign-in", null));
-
+        leftMenuAdapter.add(new SideMenuItem("Login", "fa-sign-in", new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                BaseActivity.setContent(new LogInFragment());
+            }
+        }));
         leftMenuAdapter.add(new SideMenuItem("Add ad", "fa-plus", new View.OnClickListener() {
             @Override public void onClick(View v) {
                 BaseActivity.setContent(new CaptureVideoFragment());
@@ -112,6 +144,23 @@ public class BaseActivity extends ActionBarActivity {
         leftMenuAdapter.add(new SideMenuItem("Settings", "fa-cogs", null));
 
         leftMenuList.setAdapter(leftMenuAdapter);
+
+        facebook_container = (LinearLayout) findViewById(R.id.facebook_container);
+        facebook_profile_pic = (ProfilePictureView) findViewById(R.id.facebook_profile_pic);
+        facebook_username = (TextView) findViewById(R.id.facebook_username);
+
+        uiLifecycleHelper = new UiLifecycleHelper(this, statusCallback);
+        uiLifecycleHelper.onCreate(savedInstanceState);
+    }
+
+    private void onSessionStateChange(final Session session, SessionState state, Exception exception) {
+        if (session.isClosed()) {
+            facebook_container.setVisibility(View.GONE);
+            facebook_profile_pic.setProfileId(null);
+            facebook_username.setText("");
+        } else {
+            makeMeRequest(session);
+        }
     }
 
     @Override
@@ -146,5 +195,29 @@ public class BaseActivity extends ActionBarActivity {
 
         }
         return super.onKeyDown(keyCode, event);
+    }
+
+    private void makeMeRequest(final Session session) {
+        // Make an API call to get user data and define a
+        // new callback to handle the response.
+        Request request = Request.newMeRequest(session,
+                new Request.GraphUserCallback() {
+                    @Override
+                    public void onCompleted(GraphUser user, Response response) {
+                        // If the response is successful
+                        if (session == Session.getActiveSession()) {
+                            if (user != null) {
+                                // Set the id for the ProfilePictureView
+                                facebook_container.setVisibility(View.VISIBLE);
+                                facebook_profile_pic.setProfileId(user.getId());
+                                facebook_username.setText(user.getName());
+                            }
+                        }
+                        if (response.getError() != null) {
+                            // Handle errors, will do so later.
+                        }
+                    }
+                });
+        request.executeAsync();
     }
 }
