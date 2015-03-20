@@ -1,5 +1,7 @@
 package ru.toxuin.sellflip;
 
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Color;
 import android.graphics.Point;
@@ -18,8 +20,10 @@ import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.ScaleGestureDetector;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.FrameLayout;
 
+import android.widget.TextView;
 import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.Style;
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -34,6 +38,7 @@ import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
 
 import ru.toxuin.sellflip.entities.Coordinates;
+import ru.toxuin.sellflip.library.Utils;
 
 public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCallback {
     private static final String TAG = "MAP_UI";
@@ -63,6 +68,78 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
 
     private boolean isMapFrozen = false;
     private boolean knowsAboutRadius = false;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        self = this;
+        setContentView(R.layout.activity_map_popup);
+        mapZoomer = (FrameLayout) findViewById(R.id.map_zoom_layer);
+
+        coords = getIntent().getParcelableExtra("coords");
+        title = getIntent().getStringExtra("title");
+        if (title == null || !getIntent().hasExtra("title")) {
+            title = getString(R.string.determining_location);
+        }
+
+        setTitle(title);
+        fragmentManager = getSupportFragmentManager();
+
+        // HANDLES BLUE CIRCLE
+        scaleDetector = new ScaleGestureDetector(self, onScaleListener);
+
+        initMap();
+    }
+
+    private void initMap() {
+        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
+        mapFragment.getMapAsync(this);
+    }
+
+    @Override
+    public void onMapReady(GoogleMap googleMap) {
+        map = googleMap;
+        map.setMyLocationEnabled(true);
+        map.moveCamera(CameraUpdateFactory.newLatLng(DEFAULT_MAP_CENTER));
+
+        if (coords != null) {
+            // WE HAVE COORDINATES
+
+            if (coords.getRadius() != 0) addCircle(coords.getLatLng(), coords.getRadius());
+            addMarker(coords.getLatLng()).setTitle(title);
+            map.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 14));
+        } else {
+            // PICKING THE COORDINATES
+
+            locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
+            boolean enabledGPS = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            boolean enabledWiFi = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+
+            String provider = locationManager.getBestProvider(new Criteria(), false);
+            Location location = locationManager.getLastKnownLocation(provider);
+            if (location != null) {
+                handleLocationChange(location);
+            }
+            if (enabledGPS) {
+                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
+                Log.d(TAG, "WAITING FOR SIGNAL FROM GPS...");
+            } else if (enabledWiFi) {
+                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 10, locationListener);
+                Log.d(TAG, "WAITING FOR SIGNAL FROM WIFI...");
+            } else {
+                Log.d(TAG, "NO LOCATION PROVIDERS ENABLED!!!");
+                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                startActivity(intent);
+            }
+
+
+        }
+    }
+
+
+
+
+
 
     private GoogleMap.OnMarkerDragListener markerDrag = new GoogleMap.OnMarkerDragListener() {
         private LatLng lastKnownPosition;
@@ -225,72 +302,6 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
         }
     };
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        self = this;
-        setContentView(R.layout.activity_map_popup);
-        mapZoomer = (FrameLayout) findViewById(R.id.map_zoom_layer);
-
-        coords = getIntent().getParcelableExtra("coords");
-        title = getIntent().getStringExtra("title");
-        if (title == null || !getIntent().hasExtra("title")) {
-            title = getString(R.string.determining_location);
-        }
-
-        setTitle(title);
-        fragmentManager = getSupportFragmentManager();
-
-        // HANDLES BLUE CIRCLE
-        scaleDetector = new ScaleGestureDetector(self, onScaleListener);
-
-        initMap();
-    }
-
-    private void initMap() {
-        MapFragment mapFragment = (MapFragment) getFragmentManager().findFragmentById(R.id.map);
-        mapFragment.getMapAsync(this);
-    }
-
-    @Override
-    public void onMapReady(GoogleMap googleMap) {
-        map = googleMap;
-        map.setMyLocationEnabled(true);
-        map.moveCamera(CameraUpdateFactory.newLatLng(DEFAULT_MAP_CENTER));
-
-        if (coords != null) {
-            // WE HAVE COORDINATES
-            if (coords.getRadius() != 0) addCircle(coords.getLatLng(), coords.getRadius());
-            addMarker(coords.getLatLng()).setTitle(title);
-            map.animateCamera(CameraUpdateFactory.newLatLngZoom(marker.getPosition(), 14));
-        } else {
-            // PICKING THE COORDINATES
-
-            locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
-            boolean enabledGPS = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            boolean enabledWiFi = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-
-            String provider = locationManager.getBestProvider(new Criteria(), false);
-            Location location = locationManager.getLastKnownLocation(provider);
-            if (location != null) {
-                handleLocationChange(location);
-            }
-            if (enabledGPS) {
-                locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 5000, 10, locationListener);
-                Log.d(TAG, "WAITING FOR SIGNAL FROM GPS...");
-            } else if (enabledWiFi) {
-                locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, 5000, 10, locationListener);
-                Log.d(TAG, "WAITING FOR SIGNAL FROM WIFI...");
-            } else {
-                Log.d(TAG, "NO LOCATION PROVIDERS ENABLED!!!");
-                Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                startActivity(intent);
-            }
-
-
-        }
-    }
-
     private Marker addMarker(LatLng latlng) {
         if (map == null) return null;
         if (marker == null) {
@@ -300,6 +311,7 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
                     .flat(true)
                     .anchor(0.5f, 0.5f)
                     .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
+            coords = new Coordinates((float) latlng.latitude, (float) latlng.longitude, coords == null?0:coords.getRadius());
         }
         return marker;
     }
@@ -336,6 +348,7 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
             }
         } else gpsLocation = location;
         locationManager.removeUpdates(locationListener);
+        if (marker != null) marker.setTitle("Your location");
         setTitle(getString(R.string.map_move_marker));
         final Runnable flymap = new Runnable() {
             public void run() {
@@ -388,8 +401,8 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         getMenuInflater().inflate(R.menu.menu_map, menu);
-        if (coords == null) {
-            nextBtn = menu.findItem(R.id.action_map_ready);
+        nextBtn = menu.findItem(R.id.action_map_ready);
+        if (!getIntent().hasExtra("coords")) {
             nextBtn.setVisible(true);
             this.invalidateOptionsMenu();
         }
@@ -431,17 +444,50 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
                     toggleInfoWindow();
                     marker.showInfoWindow();
                 } else if (knowsAboutRadius) {
-                    // TODO: SAVE LOCATION TO PREFS
-
                     if (circle != null) coords.setRadius((float) circle.getRadius());
-                    Intent intent = new Intent();
-                    intent.putExtra("coords", coords);
-                    setResult(RESULT_OK, intent);
-                    finish();
+                    new AlertDialog.Builder(this)
+                            .setTitle(title)
+                            .setMessage("Would you like to save this location for future use?")
+                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    // TODO: PLEASE NAME THIS LOCATION
+                                    final String[] name = new String[1];
+                                    final EditText txt = new EditText(self);
+                                    new AlertDialog.Builder(self)
+                                            .setTitle("Please name this location (like Home or Work)")
+                                            .setView(txt)
+                                            .setPositiveButton("Save", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    name[0] = txt.getText().toString();
+                                                    Utils.saveCoordinatesToPreferences(self, coords, name[0], Utils.generateKey(7));
+                                                    dialog.dismiss();
+                                                    closeActivityWithResult();
+                                                }
+                                            })
+                                            .create().show();
+                                }
+                            })
+                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    closeActivityWithResult();
+                                }
+                            })
+                            .create()
+                            .show();
                 }
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void closeActivityWithResult() {
+        Intent intent = new Intent();
+        intent.putExtra("coords", coords);
+        setResult(RESULT_OK, intent);
+        finish();
     }
 
 }

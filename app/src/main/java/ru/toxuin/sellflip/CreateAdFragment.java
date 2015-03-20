@@ -1,7 +1,9 @@
 package ru.toxuin.sellflip;
 
 import android.app.Activity;
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -17,9 +19,12 @@ import android.text.TextWatcher;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemSelectedListener;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
@@ -34,7 +39,6 @@ import com.github.johnpersano.supertoasts.util.Style;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -42,6 +46,7 @@ import java.util.Map;
 import java.util.Set;
 
 import ru.toxuin.sellflip.entities.Coordinates;
+import ru.toxuin.sellflip.library.TaggingAdapter;
 import ru.toxuin.sellflip.library.Utils;
 
 
@@ -56,10 +61,8 @@ public class CreateAdFragment extends Fragment {
     private float price;
     private Coordinates coord;
 
-    private Spinner locationSpinner;
-    private ArrayAdapter<String> locationAdapter;
-
-    private Map<String, Pair<Coordinates, String>> knownCoordinates;
+    private Button locationSelectBtn;
+    private TaggingAdapter<Coordinates> locationAdapter;
     
     public CreateAdFragment() {
     }
@@ -75,7 +78,7 @@ public class CreateAdFragment extends Fragment {
         final RadioButton freeRadioBtn = (RadioButton) rootView.findViewById(R.id.radioButtonFree);
         final RadioButton contactRadioBtn = (RadioButton) rootView.findViewById(R.id.radioButtonContact);
         final EditText descriptionEdit = (EditText) rootView.findViewById(R.id.create_description);
-        locationSpinner = (Spinner) rootView.findViewById(R.id.create_location_spinner);
+        locationSelectBtn = (Button) rootView.findViewById(R.id.create_location_btn);
         final SeekBar frameSeekBar = (SeekBar) rootView.findViewById(R.id.frameSeekBar);
         final EditText priceEdit = (EditText) rootView.findViewById(R.id.priceEdit);
         final FontAwesomeText backArrowBtn = (FontAwesomeText) rootView.findViewById(R.id.backArrowBtn);
@@ -86,21 +89,23 @@ public class CreateAdFragment extends Fragment {
         if (filename == null) {
             SuperToast superToast = new SuperToast(getActivity(), Style.getStyle(Style.RED, SuperToast.Animations.POPUP));
             superToast.setDuration(SuperToast.Duration.MEDIUM);
-            superToast.setText("Error saving video. Please, try again");
+            superToast.setText(getString(R.string.create_save_video_error));
             superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
             superToast.show();
 
             BaseActivity.setContent(new SearchResultFragment());
         }
 
-        backArrowBtn.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
+        backArrowBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 getFragmentManager().popBackStack();
             }
         });
 
-        takeVideoBtn.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View v) {
+        takeVideoBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
                 getFragmentManager().popBackStack();
             }
         });
@@ -147,13 +152,13 @@ public class CreateAdFragment extends Fragment {
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
                 String input = s.toString();
-                if (input.length() > 50) titleEdit.setError("Title is too long! 50 letters max.");
+                if (input.length() > 50) titleEdit.setError(getString(R.string.create_title_too_long));
             }
 
             @Override
             public void afterTextChanged(Editable s) {
                 String input = s.toString();
-                if (input.length() == 0) titleEdit.setError("Title can not be empty!");
+                if (input.length() == 0) titleEdit.setError(getString(R.string.create_title_empty));
             }
         });
 
@@ -164,10 +169,8 @@ public class CreateAdFragment extends Fragment {
             public void beforeTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() > 0) oldValue = s.toString();
             }
-
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-            }
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -197,22 +200,35 @@ public class CreateAdFragment extends Fragment {
                 MEANS: IF USER ENTERS PRICE AND SELECTS FREE – IT IS FREE
          */
 
-        redrawLocationSpinner();
+        locationAdapter = new TaggingAdapter<>(getActivity());
+        locationSelectBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                new AlertDialog.Builder(getActivity())
+                        .setAdapter(locationAdapter, new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int position) {
+                                if (!locationAdapter.isEmpty() && locationAdapter.getItem(position).second == null) {
+                                    openMapSelectActivity();
+                                } else {
+                                    coord = locationAdapter.getItemContents(position);
+                                    locationSelectBtn.setText(locationAdapter.getItem(position).first);
+                                }
+                                dialog.dismiss();
+                            }
+                        }).create().show();
+            }
+        });
+        repopulateLocations();
 
         getActivity().setTitle(getString(R.string.create_ad));
-
-        String title = getString(R.string.create_ad);
-        getActivity().setTitle(title);
 
         return rootView;
     }
 
-    private void redrawLocationSpinner() {
-        if (locationSpinner == null) return;
-        knownCoordinates = new HashMap<>();
-
-        final Map<Integer, String> positionToKey = new HashMap<>();
-
+    private void repopulateLocations() {
+        if (locationAdapter == null) return;
+        locationAdapter.clear();
         SharedPreferences sPref = getActivity().getSharedPreferences(getString(R.string.location_preference_key), Context.MODE_PRIVATE);
         Set<String> savedLocations = sPref.getStringSet("SAVED_LOCATIONS_KEYS", null);
 
@@ -221,7 +237,7 @@ public class CreateAdFragment extends Fragment {
             for (String key : savedLocations) {
                 Coordinates coord = Utils.getCoordinatesFromPreferences(getActivity(), key);
                 String name = sPref.getString("LOCATION_NAME_" + key, "No name");
-                knownCoordinates.put(key, new Pair<>(coord, name));
+                locationAdapter.add(new Pair<>(name, coord));
             }
         }
 
@@ -236,61 +252,18 @@ public class CreateAdFragment extends Fragment {
             } catch (IOException e) {
                 e.printStackTrace();
             } finally {
-                knownCoordinates.put("ANONYMOUS", new Pair<>(coord, address));
+                Pair <String, Coordinates> coordPair = new Pair<>(address, coord);
+                locationAdapter.add(coordPair);
             }
         }
 
-        locationSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                Log.d(TAG, "POSITION: " + position + ", " + parent.getCount());
-                if (position == parent.getCount() - 1) { // LAST ONE
-                    openMapSelectActivity();
-                } else {
-                    if (positionToKey.isEmpty()) return;
-                    coord = knownCoordinates.get(positionToKey.get(position)).first;
-                    Log.d(TAG, "SELECTED " + coord);
-                }
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> adapterView) {
-            }
-        });
-
-        if (locationAdapter == null) locationAdapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_spinner_item);
-        else locationAdapter.clear();
-
-        // FILL POSITION MAP
-        Iterator<String> iterator = knownCoordinates.keySet().iterator();
-        int i = 0;
-        while (iterator.hasNext()) {
-            positionToKey.put(i++, iterator.next());
-        }
-
-        // LOAD EVERYTHING FROM knownLocations TO ADAPTER
-        for (Integer position : positionToKey.keySet()) {
-            String key = positionToKey.get(position);
-            locationAdapter.insert(knownCoordinates.get(key).second, position);
-        }
-
-        locationAdapter.add(getString(R.string.create_new_location));
-        locationSpinner.setVisibility(View.VISIBLE);
-
-        locationAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        if (locationSpinner.getAdapter() == null) locationSpinner.setAdapter(locationAdapter);
-        locationAdapter.notifyDataSetChanged();
-
-        if (coord != null) {
-            locationSpinner.setSelection(0);
-        }
+        locationAdapter.add(new Pair<>(getString(R.string.create_new_location), null));
     }
 
     private void openMapSelectActivity() {
         Intent intent = new Intent(getActivity(), MapPopupActivity.class);
         startActivityForResult(intent, MAP_ACTIVITY_RESULT);
     }
-
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent intent) {
@@ -299,7 +272,7 @@ public class CreateAdFragment extends Fragment {
                 if (resultCode == Activity.RESULT_OK) {
                     coord = intent.getParcelableExtra("coords");
                     Log.d(TAG, "result: " + coord.getLat() + ", " + coord.getLng() + ", " + coord.getRadius());
-                    redrawLocationSpinner();
+                    repopulateLocations();
                 }
                 break;
         }

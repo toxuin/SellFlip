@@ -6,7 +6,7 @@
     <string name="search_results">Search results</string>
     <string name="login">Login</string>
     <string name="create_ad">Post Your Ad</string>
-    <string name="description_label"><font fgcolor="#FFFFFFFF">Descripion</font>: Hello world asdasda </string>
+    <string name="description_label"><font fgcolor="#FFFFFFFF">Description</font>: Hello world asdasda </string>
     <string name="map_hybrid">Hybrid</string>
     <string name="map_satellite">Satellite</string>
     <string name="map_terrain">Terrain</string>
@@ -34,16 +34,18 @@
     <string name="create_location">Location:</string>
     <string name="create_new_location">Add new location…</string>
     <string name="create_contact_info">Contact Info</string>
+    <string name="create_select_cover_frame">Select Cover:</string>
     <string name="create_phone">Phone:</string>
     <string name="create_email">Email:</string>
     <string name="cancel">Cancel</string>
     <string name="post">Post</string>
     <string name="location_preference_key">ru.toxuin.sellflip.SAVED_LOCATIONS_KEY</string>
-
     <string name="quit_str">Discard Video</string>
     <string name="yes_str">Yes</string>
     <string name="no_str">No</string>
     <string name="video_cancel">Are you sure you want to discard the video?</string>
-
     <string name="facebook_app_id">1589994231215559</string>
+    <string name="create_save_video_error">Error saving video. Please try again</string>
+    <string name="create_title_too_long">Title is too long! 50 letters max.</string>
+    <string name="create_title_empty">Title can not be empty!</string>
 </resources>

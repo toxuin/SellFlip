@@ -78,7 +78,7 @@
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="Select Frame"
+                    android:text="@string/create_select_cover_frame"
                     android:textAppearance="?android:attr/textAppearanceMedium"
                     />
 
@@ -91,7 +91,8 @@
             <TableRow
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp" android:gravity="center_vertical">
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -112,7 +113,9 @@
             <TableRow
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp" android:baselineAligned="true" android:gravity="center_vertical">
+                android:layout_marginTop="10dp"
+                android:baselineAligned="true"
+                android:gravity="center_vertical">
 
                 <TextView
                     android:id="@+id/textView"
@@ -138,8 +141,13 @@
                     />
 
                 <RadioGroup
-                        android:orientation="horizontal" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                        android:layout_gravity="left" android:gravity="center_vertical" android:baselineAligned="true">
+                        android:orientation="horizontal"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start"
+                        android:gravity="center_vertical"
+                        android:baselineAligned="true">
+
                     <RadioButton
                         android:id="@+id/radioButtonFree"
                         android:layout_width="wrap_content"
@@ -155,6 +163,7 @@
                         android:layout_marginLeft="10dp"
                         android:layout_marginStart="10dp"
                         android:text="@string/create_contact"/>
+
                 </RadioGroup>
 
             </TableRow>
@@ -163,7 +172,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:text="@string/create_description"
-                android:textAppearance="?android:attr/textAppearanceMedium" android:layout_marginTop="10dp"/>
+                android:textAppearance="?android:attr/textAppearanceMedium"
+                android:layout_marginTop="10dp"/>
 
             <EditText
                 android:id="@+id/create_description"
@@ -171,7 +181,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:inputType="textImeMultiLine|textMultiLine"
-                android:maxHeight="100dp" android:layout_marginTop="10dp"/>
+                android:maxHeight="100dp"
+                android:layout_marginTop="10dp"/>
 
             <TextView
                 android:layout_width="fill_parent"
@@ -187,7 +198,9 @@
             <TableRow
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:baselineAligned="true" android:gravity="center_vertical" android:layout_marginTop="10dp">
+                android:baselineAligned="true"
+                android:gravity="center_vertical"
+                android:layout_marginTop="10dp">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -196,13 +209,15 @@
                     android:textAppearance="?android:attr/textAppearanceMedium"
                         />
 
-                <Spinner
-                    android:id="@+id/create_location_spinner"
-                    android:visibility="gone"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:spinnerMode="dropdown"/>
+
+                <Button android:id="@+id/create_location_btn"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="5dp"
+                        android:layout_weight="1"
+                        android:gravity="start|center_vertical"
+                        android:background="@android:drawable/btn_dropdown"
+                        android:text="..." />
 
             </TableRow>
 
@@ -220,7 +235,9 @@
             <TableRow
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp" android:baselineAligned="true" android:gravity="center_vertical">
+                android:layout_marginTop="10dp"
+                android:baselineAligned="true"
+                android:gravity="center_vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
@@ -241,7 +258,9 @@
             <TableRow
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="10dp" android:gravity="center_vertical" android:baselineAligned="true">
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical"
+                android:baselineAligned="true">
 
                 <TextView
                     android:layout_width="wrap_content"
