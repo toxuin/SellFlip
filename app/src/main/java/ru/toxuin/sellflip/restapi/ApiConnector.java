@@ -52,7 +52,8 @@ public class ApiConnector {
     }
 
     public void createNewAd(SingleAd ad, Callback<Void> callback) {
-        apiService.createNewAd(ad.getTitle(), ad.getPrice(), ad.getDescription(), ad.getCoords().getLat(), ad.getCoords().getLng(), ad.getCoords().getRadius(), callback);
+        //apiService.createNewAd(ad.getTitle(), ad.getPrice(), ad.getDescription(), ad.getCoords().getLat(), ad.getCoords().getLng(), ad.getCoords().getRadius(), callback);
+        apiService.createNewAd(ad, callback);
         Log.d(TAG, "POSTING NEW AD");
     }
 

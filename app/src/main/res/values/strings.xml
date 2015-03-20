@@ -47,5 +47,8 @@
     <string name="facebook_app_id">1589994231215559</string>
     <string name="create_save_video_error">Error saving video. Please try again</string>
     <string name="create_title_too_long">Title is too long! 50 letters max.</string>
-    <string name="create_title_empty">Title can not be empty!</string>
+    <string name="error_empty_field">Field should not be empty</string>
+    <string name="create_error_specify_phone_or_email">Please specify either phone or email</string>
+    <string name="create_error_specify_price">Please specify price!</string>
+    <string name="create_error_no_location">Please select location first!</string>
 </resources>

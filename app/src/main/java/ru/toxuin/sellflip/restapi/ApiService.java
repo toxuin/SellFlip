@@ -3,6 +3,9 @@ package ru.toxuin.sellflip.restapi;
 import java.util.List;
 
 import retrofit.Callback;
+import retrofit.http.Body;
+import retrofit.http.Field;
+import retrofit.http.FormUrlEncoded;
 import retrofit.http.GET;
 import retrofit.http.POST;
 import retrofit.http.Path;
@@ -15,5 +18,9 @@ public interface ApiService {
 
     @GET(LIST_ADS) void listTopAds(@Query("skip") int skip, @Query("limit") int limit, Callback<List<SingleAd>> callback);
     @GET(SINGLE_AD) void getSingleAd(@Path("id") String id, Callback<SingleAd> callback);
-    @POST(SINGLE_AD) void createNewAd(@Path("id") String title, float price, String description, float lat, float lng, float radius, Callback<Void> callback);
+
+    @FormUrlEncoded
+    @POST(LIST_ADS) void createNewAd(@Field("title") String title, @Field("price") float price, @Field("description") String description, @Field("lat") float lat, @Field("lng") float lng, @Field("radius") float radius, Callback<Void> callback);
+
+    @POST(LIST_ADS) void createNewAd(@Body SingleAd ad, Callback<Void> callback);
 }

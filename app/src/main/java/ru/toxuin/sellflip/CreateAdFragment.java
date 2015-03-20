@@ -45,9 +45,14 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
 import ru.toxuin.sellflip.entities.Coordinates;
+import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.TaggingAdapter;
 import ru.toxuin.sellflip.library.Utils;
+import ru.toxuin.sellflip.restapi.ApiConnector;
 
 
 public class CreateAdFragment extends Fragment {
@@ -78,6 +83,8 @@ public class CreateAdFragment extends Fragment {
         final RadioButton freeRadioBtn = (RadioButton) rootView.findViewById(R.id.radioButtonFree);
         final RadioButton contactRadioBtn = (RadioButton) rootView.findViewById(R.id.radioButtonContact);
         final EditText descriptionEdit = (EditText) rootView.findViewById(R.id.create_description);
+        final EditText phoneEdit = (EditText) rootView.findViewById(R.id.create_phone);
+        final EditText emailEdit = (EditText) rootView.findViewById(R.id.create_email);
         locationSelectBtn = (Button) rootView.findViewById(R.id.create_location_btn);
         final SeekBar frameSeekBar = (SeekBar) rootView.findViewById(R.id.frameSeekBar);
         final EditText priceEdit = (EditText) rootView.findViewById(R.id.priceEdit);
@@ -158,7 +165,7 @@ public class CreateAdFragment extends Fragment {
             @Override
             public void afterTextChanged(Editable s) {
                 String input = s.toString();
-                if (input.length() == 0) titleEdit.setError(getString(R.string.create_title_empty));
+                if (input.length() == 0) titleEdit.setError(getString(R.string.error_empty_field));
             }
         });
 
@@ -220,6 +227,73 @@ public class CreateAdFragment extends Fragment {
             }
         });
         repopulateLocations();
+
+        nextArrowBtn.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                titleEdit.setError(null);
+                priceEdit.setError(null);
+                descriptionEdit.setError(null);
+                phoneEdit.setError(null);
+                emailEdit.setError(null);
+                boolean valid = true;
+
+                // TODO: VALIDATE COVER SELECTED
+
+                if (titleEdit.getText().length() == 0) {
+                    titleEdit.setError(getString(R.string.error_empty_field));
+                    valid = false;
+                }
+                if (priceEdit.getText().length() == 0 && !freeRadioBtn.isChecked() && !contactRadioBtn.isChecked()) {
+                    priceEdit.setError(getString(R.string.create_error_specify_price));
+                    valid = false;
+                }
+                if (descriptionEdit.getText().length() == 0) {
+                    descriptionEdit.setError(getString(R.string.error_empty_field));
+                    valid = false;
+                }
+                if (phoneEdit.getText().length() == 0 && emailEdit.getText().length() == 0) {
+                    phoneEdit.setError(getString(R.string.create_error_specify_phone_or_email));
+                    valid = false;
+                }
+
+                if (coord == null) {
+                    SuperToast superToast = new SuperToast(rootView.getContext().getApplicationContext(), Style.getStyle(Style.RED, SuperToast.Animations.POPUP));
+                    superToast.setDuration(SuperToast.Duration.SHORT);
+                    superToast.setText(getString(R.string.create_error_no_location));
+                    superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
+                    superToast.show();
+                    valid = false;
+                }
+
+                // VALIDATE ABOVE THIS LINE
+                if (!valid) return;
+
+                String title = titleEdit.getText().toString();
+                float price = -1;
+                if (freeRadioBtn.isChecked()) price = 0;
+                else if (contactRadioBtn.isChecked()) price = -1;
+                else price = Float.parseFloat(priceEdit.getText().toString());
+                String description = descriptionEdit.getText().toString();
+                String category = "NEED MOAR CATEGORIES";
+                String phone = phoneEdit.getText().toString();
+                String email = emailEdit.getText().toString();
+
+                ApiConnector.getInstance().createNewAd(new SingleAd(null, title, price, email, phone, category, description, coord, null), new Callback<Void>() {
+                    @Override
+                    public void success(Void aVoid, Response response) {
+                        Log.d(TAG, "CREATED AD! WOW WOW WOW!!! OMG!!!?");
+                    }
+
+                    @Override
+                    public void failure(RetrofitError error) {
+                        Log.d(TAG, "COULD NOT CREATE AD: " + error.getMessage());
+                        error.printStackTrace();
+                    }
+                });
+                // TODO: CLOSE THIS ACTIVITY?
+            }
+        });
 
         getActivity().setTitle(getString(R.string.create_ad));
 
