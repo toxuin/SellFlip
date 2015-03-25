@@ -1,12 +1,15 @@
 package ru.toxuin.sellflip.restapi;
 
+import android.os.AsyncTask;
 import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.json.JSONArray;
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
 import ru.toxuin.sellflip.entities.SingleAd;
+import ru.toxuin.sellflip.library.JsonDownloader;
 
 import java.util.List;
 
@@ -55,6 +58,12 @@ public class ApiConnector {
         //apiService.createNewAd(ad.getTitle(), ad.getPrice(), ad.getDescription(), ad.getCoords().getLat(), ad.getCoords().getLng(), ad.getCoords().getRadius(), callback);
         apiService.createNewAd(ad, callback);
         Log.d(TAG, "POSTING NEW AD");
+    }
+
+    public void requestCategories() {
+        JsonDownloader categoriesTask = new JsonDownloader();
+        categoriesTask.setServerUrl(API_ENDPOINT_URL + "/categories");
+        categoriesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
     }
 
 
