@@ -64,7 +64,7 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
             }
             if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + ApiConnector.getItemsOnPage())) {
                 if (currentPage * ApiConnector.getItemsOnPage() < totalServerItems) {
-                    requestData(currentPage + 1);
+                    requestData(currentPage);
                     loading = true;
                 }
             }

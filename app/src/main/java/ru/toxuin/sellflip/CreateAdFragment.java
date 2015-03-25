@@ -9,6 +9,7 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -273,10 +274,43 @@ public class CreateAdFragment extends Fragment {
                 String phone = phoneEdit.getText().toString();
                 String email = emailEdit.getText().toString();
 
-                ApiConnector.getInstance().createNewAd(new SingleAd(null, title, price, email, phone, category, description, coord, null), new Callback<Void>() {
+                ApiConnector.getInstance().createNewAd(new SingleAd(null, title, price, email, phone, category, description, coord, null), new Callback<SingleAd>() {
                     @Override
-                    public void success(Void aVoid, Response response) {
-                        Log.d(TAG, "CREATED AD! WOW WOW WOW!!! OMG!!!?");
+                    public void success(final SingleAd newAd, Response response) {
+                        Log.d(TAG, "CREATED AD, STARTING VIDEO UPLOAD");
+
+                        SuperToast superToast = new SuperToast(rootView.getContext().getApplicationContext(), Style.getStyle(Style.BLUE, SuperToast.Animations.POPUP));
+                        superToast.setDuration(SuperToast.Duration.VERY_SHORT);
+                        superToast.setText(getString(R.string.starting_video_upload));
+                        superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
+                        superToast.show();
+
+                        ApiConnector.getInstance().uploadVideo(newAd.getId(), filename, new Callback<Void>() {
+                            @Override
+                            public void success(Void aVoid, Response response) {
+                                Log.d(TAG, "UPLOADED VIDEO!");
+                                BaseActivity.setContent(new SingleAdFragment().setAdId(newAd.getId()));
+                            }
+
+                            @Override
+                            public void failure(RetrofitError error) {
+                                Log.d(TAG, "ERROR UPLOADING VIDEO!");
+                                SuperToast superToast = new SuperToast(rootView.getContext().getApplicationContext(), Style.getStyle(Style.RED, SuperToast.Animations.POPUP));
+                                superToast.setDuration(SuperToast.Duration.VERY_SHORT);
+                                superToast.setText(getString(R.string.error_video_upload));
+                                superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
+                                superToast.show();
+                                error.printStackTrace();
+                            }
+                        });
+                        /*
+                        String url = "http://appfrontend-mavd.rhcloud.com/api/v1/adsItems/" + newAd.getId() + "/upload";
+
+                        VideoUploadTask uploader = new VideoUploadTask();
+                        uploader.setFileName(filename);
+                        uploader.setServerUrl(url);
+                        uploader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+                        */
                     }
 
                     @Override

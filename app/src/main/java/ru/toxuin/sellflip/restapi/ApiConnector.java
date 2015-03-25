@@ -1,6 +1,5 @@
 package ru.toxuin.sellflip.restapi;
 
-import android.os.AsyncTask;
 import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -8,9 +7,10 @@ import org.json.JSONArray;
 import retrofit.Callback;
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
+import retrofit.mime.TypedFile;
 import ru.toxuin.sellflip.entities.SingleAd;
-import ru.toxuin.sellflip.library.JsonDownloader;
 
+import java.io.File;
 import java.util.List;
 
 public class ApiConnector {
@@ -54,16 +54,24 @@ public class ApiConnector {
         Log.d(TAG, "REQUESTING TOP ADS FROM " + skip + " TO " + (skip+limit) + "(" + limit + " ITEMS)");
     }
 
-    public void createNewAd(SingleAd ad, Callback<Void> callback) {
-        //apiService.createNewAd(ad.getTitle(), ad.getPrice(), ad.getDescription(), ad.getCoords().getLat(), ad.getCoords().getLng(), ad.getCoords().getRadius(), callback);
-        apiService.createNewAd(ad, callback);
+    public void createNewAd(SingleAd ad, Callback<SingleAd> callback) {
         Log.d(TAG, "POSTING NEW AD");
+        apiService.createNewAd(ad, callback);
     }
 
-    public void requestCategories() {
+    public void requestCategories(Callback<JSONArray> callback) {
+        Log.d(TAG, "REQUESTING CATEGORIES...");
+        apiService.getCategories(callback);
+        /*
         JsonDownloader categoriesTask = new JsonDownloader();
         categoriesTask.setServerUrl(API_ENDPOINT_URL + "/categories");
         categoriesTask.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
+        */
+    }
+
+    public void uploadVideo(String id, String filename, Callback<Void> callback) {
+        apiService.uploadVideo(new TypedFile("video/mp4", new File(filename)), id, callback);
+        Log.d(TAG, "UPLOADING VIDEO...");
     }
 
 

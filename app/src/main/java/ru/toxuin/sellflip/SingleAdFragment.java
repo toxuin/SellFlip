@@ -34,7 +34,8 @@ public class SingleAdFragment extends Fragment implements
         SurfaceHolder.Callback, MediaPlayer.OnPreparedListener,
         VideoControllerView.MediaPlayerControl {
     public static final String TAG = "SINGLE_AD_UI";
-    public static final String VIDEO_URL = "http://nighthunters.ca/minecraft/TEST_VIDEO_PLEASE_IGNORE.mp4";
+    private static final String SERVER_URL = "http://appfrontend-mavd.rhcloud.com/api/v1/adsItems/";
+    public static String videoUrl;
 
     private View rootView;
     private String adId;
@@ -98,7 +99,8 @@ public class SingleAdFragment extends Fragment implements
 
         try {
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            player.setDataSource(getActivity(), Uri.parse(VIDEO_URL));
+            videoUrl = SERVER_URL + adId + "/video";
+            player.setDataSource(getActivity(), Uri.parse(videoUrl));
             player.setOnPreparedListener(this);
         } catch (Exception e) {
             e.printStackTrace();

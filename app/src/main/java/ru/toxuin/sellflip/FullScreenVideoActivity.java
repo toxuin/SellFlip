@@ -37,7 +37,7 @@ public class FullScreenVideoActivity extends ActionBarActivity {
 
         try {
             videoView.setMediaController(mediaController);
-            videoView.setVideoURI(Uri.parse(SingleAdFragment.VIDEO_URL));
+            videoView.setVideoURI(Uri.parse(SingleAdFragment.videoUrl));
             videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                 @Override public void onPrepared(MediaPlayer mp) {
                     progressDialog.dismiss();

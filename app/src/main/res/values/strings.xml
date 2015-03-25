@@ -51,4 +51,6 @@
     <string name="create_error_specify_phone_or_email">Please specify either phone or email</string>
     <string name="create_error_specify_price">Please specify price!</string>
     <string name="create_error_no_location">Please select location first!</string>
+    <string name="starting_video_upload">Uploading video...</string>
+    <string name="error_video_upload">Error uploading video.</string>
 </resources>

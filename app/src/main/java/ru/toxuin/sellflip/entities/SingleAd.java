@@ -119,6 +119,6 @@ public class SingleAd {
     // TODO: proper toString
     // 'title' is stored as 'name' in the back end
     @Override public String toString() {
-        return "Title:" + getTitle() + ", Price:" + getPrice() + ", Date:" + getDate().toString();
+        return "Id: " + getId() + ", Title:" + getTitle() + ", Price:" + getPrice() + ", Date:" + getDate().toString();
     }
 }
