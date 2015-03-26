@@ -274,7 +274,7 @@ public class CreateAdFragment extends Fragment {
                 String phone = phoneEdit.getText().toString();
                 String email = emailEdit.getText().toString();
 
-                ApiConnector.getInstance().createNewAd(new SingleAd(null, title, price, email, phone, category, description, coord, null), new Callback<SingleAd>() {
+                ApiConnector.getInstance(getActivity()).createNewAd(new SingleAd(null, title, price, email, phone, category, description, coord, null), new Callback<SingleAd>() {
                     @Override
                     public void success(final SingleAd newAd, Response response) {
                         Log.d(TAG, "CREATED AD, STARTING VIDEO UPLOAD");
@@ -285,7 +285,7 @@ public class CreateAdFragment extends Fragment {
                         superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
                         superToast.show();
 
-                        ApiConnector.getInstance().uploadVideo(newAd.getId(), filename, new Callback<Void>() {
+                        ApiConnector.getInstance(getActivity()).uploadVideo(newAd.getId(), filename, new Callback<Void>() {
                             @Override
                             public void success(Void aVoid, Response response) {
                                 Log.d(TAG, "UPLOADED VIDEO!");

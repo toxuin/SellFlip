@@ -67,7 +67,7 @@ public class SingleAdFragment extends Fragment implements
         String title = getString(R.string.search_results);
         getActivity().setTitle(title);
 
-        ApiConnector api = ApiConnector.getInstance();
+        ApiConnector api = ApiConnector.getInstance(getActivity());
 
         if (adId == null) {
             throw new IllegalStateException("SingleAdFragment instantiated without id! Use .setAdId(\"lalal\")!");

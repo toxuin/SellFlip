@@ -79,7 +79,7 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
     }
 
     public void requestData(int page) {
-        ApiConnector api = ApiConnector.getInstance();
+        ApiConnector api = ApiConnector.getInstance(context);
         api.requestTopAdsPaged(page, new Callback<List<SingleAd>>() {
             @Override
             public void success(List<SingleAd> allAds, Response response) {
