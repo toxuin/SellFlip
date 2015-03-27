@@ -12,13 +12,10 @@ import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.MotionEvent;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.ProgressBar;
 
@@ -82,7 +79,7 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
                     capture.setText("Capture");
                     isRecording = false;
                     progressHandler.removeCallbacks(this);
-                    Utils.mergeAsync(getActivity());
+
                     String filename = Utils.mergeVideos(getActivity());
                     CreateAdFragment createAdFragment = new CreateAdFragment();
                     Bundle args = new Bundle();

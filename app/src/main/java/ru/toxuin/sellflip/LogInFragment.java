@@ -1,12 +1,14 @@
 package ru.toxuin.sellflip;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 
 import com.facebook.Session;
 import com.facebook.SessionState;
@@ -15,9 +17,6 @@ import com.facebook.widget.LoginButton;
 
 import java.util.Arrays;
 
-/**
- * Created by max on 2015-03-18.
- */
 public class LogInFragment extends Fragment {
     private static final String TAG = "LOGIN_FRAG";
     private View rootView;
@@ -37,6 +36,16 @@ public class LogInFragment extends Fragment {
         getActivity().setTitle(title);
 
         LoginButton authButton = (LoginButton) rootView.findViewById(R.id.authButton);
+
+        Button loginBtn = (Button) rootView.findViewById(R.id.loginBtn);
+        loginBtn.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                Intent intent = new Intent(
+                        Intent.ACTION_VIEW,
+                        Uri.parse("http://appfrontend-mavd.rhcloud.com/auth/facebook"));
+                startActivity(intent);
+            }
+        });
 
         authButton.setFragment(this);
         authButton.setReadPermissions(Arrays.asList("user_status"));
