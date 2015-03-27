@@ -43,6 +43,7 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
     private ProgressBar progressBar;
 
     private View rootView;
+    private Button capture;
 
     public CaptureVideoFragment() {
     }
@@ -51,28 +52,13 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
         super.onCreate(savedInstanceState);
         rootView = inflater.inflate(R.layout.fragment_capture_video, container, false);
 
-        final Button capture = (Button) rootView.findViewById(R.id.button_capture);
         final FontAwesomeText nextArrowBtn = (FontAwesomeText) rootView.findViewById(R.id.nextArrowBtn);
         final FontAwesomeText closeXBtn = (FontAwesomeText) rootView.findViewById(R.id.closeXBtn);
-        final FontAwesomeText cameraBtn = (FontAwesomeText) rootView.findViewById(R.id.cameraBtn);
+        final FontAwesomeText recordIndicator = (FontAwesomeText) rootView.findViewById(R.id.recordIndicator);
 
-        final Animation vanish = AnimationUtils.loadAnimation(getActivity(), R.anim.camera_capture_anim);
+        capture = (Button) rootView.findViewById(R.id.button_capture);
 
-        cameraBtn.setOnTouchListener(new View.OnTouchListener() {
-            @Override public boolean onTouch(View v, MotionEvent event) {
-                if ((event.getAction() & MotionEvent.ACTION_MASK) == MotionEvent.ACTION_DOWN) {
-                    cameraBtn.startAnimation(vanish);
-                    return true;
-                } else if (event.getAction() == MotionEvent.ACTION_UP) {
-
-                    cameraBtn.stopAnimation();
-                    return true;
-                }
-
-                return false;
-            }
-        });
-
+        capture.setEnabled(false);
         progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
         mPreview = (SurfaceView) rootView.findViewById(R.id.surface_preview);
         mHolder = mPreview.getHolder();
@@ -86,17 +72,23 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
             public void run() {
                 progressBar.setProgress(progressBar.getProgress() + 1);
 
-                if (progressBar.getProgress() >= progressBar.getMax()) {  // user has reached the limit
+                if (progressBar.getProgress() >= progressBar.getMax() && isRecording) {  // user has reached the limit
                     /*
                     * Stop recording, release resources and write to the file
                     * */
                     mMediaRecorder.stop();
                     releaseMediaRecorder();
-                    mCamera.lock();
+                    releaseCamera();
                     capture.setText("Capture");
                     isRecording = false;
                     progressHandler.removeCallbacks(this);
                     Utils.mergeAsync(getActivity());
+                    String filename = Utils.mergeVideos(getActivity());
+                    CreateAdFragment createAdFragment = new CreateAdFragment();
+                    Bundle args = new Bundle();
+                    args.putString("filename", filename);
+                    createAdFragment.setArguments(args);
+                    BaseActivity.setContent(createAdFragment);
                     // go to the next activity
                 }
                 progressHandler.postDelayed(this, 500);
@@ -109,21 +101,22 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
                     public void onClick(View v) {
                         if (isRecording) {
                             mMediaRecorder.stop();  // stop the recording
-                            releaseMediaRecorder(); // release the MediaRecorder object
-                            mCamera.lock();         // take camera access back from MediaRecorder
+                            mMediaRecorder.reset();   // clear recorder configuration
+//                            mCamera.lock();         // take camera access back from MediaRecorder
                             closeXBtn.setEnabled(true);
                             // inform the user that recording has stopped
-                            capture.setText("Capture");
                             isRecording = false;
                             progressHandler.removeCallbacks(progressRunnable);
+                            capture.setText("Capture");
                         } else {
+                            mCamera.stopPreview();
                             prepareVideoRecorder();
                             mMediaRecorder.start();
                             // inform the user that recording has started
-                            capture.setText("Stop");
                             isRecording = true;
                             closeXBtn.setEnabled(false);
                             progressHandler.postDelayed(progressRunnable, 0);
+                            capture.setText("Stop");
                         }
                     }
                 }
@@ -132,6 +125,9 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
         nextArrowBtn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 if (progressBar.getProgress() > VIDEO_MINIMUM_LENGTH) { // user has minimum length
+                    releaseMediaRecorder();
+                    releaseCamera();
+
                     String filename = Utils.mergeVideos(getActivity());
                     CreateAdFragment createAdFragment = new CreateAdFragment();
                     Bundle args = new Bundle();
@@ -180,19 +176,23 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
     }
 
     private boolean prepareVideoRecorder() {
-        mMediaRecorder = new MediaRecorder();
+        if (mMediaRecorder == null) {
+            mMediaRecorder = new MediaRecorder();
+        }
 
         // Step 1: Unlock and set camera to MediaRecorder
         mCamera.unlock();
         mMediaRecorder.setCamera(mCamera);
 
         // Step 2: Set sources
-        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.CAMCORDER);
+        mMediaRecorder.setAudioSource(MediaRecorder.AudioSource.MIC);
         mMediaRecorder.setVideoSource(MediaRecorder.VideoSource.CAMERA);
 
         // Step 3: Set a CamcorderProfile (requires API Level 8 or higher)
         //TODO: tweak video profile
-        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_480P));
+        mMediaRecorder.setProfile(CamcorderProfile.get(CamcorderProfile.QUALITY_HIGH));
+        mMediaRecorder.setVideoFrameRate(30);
+        mMediaRecorder.setVideoEncodingBitRate(15000000);
 
 //        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 //        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
@@ -252,7 +252,7 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
 
     @Override public void surfaceCreated(SurfaceHolder holder) {
         mCamera = Utils.getCameraInstance();
-
+        capture.setEnabled(true);
         try {
             mCamera.setPreviewDisplay(mHolder);
             mCamera.startPreview();

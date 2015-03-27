@@ -127,8 +127,6 @@ public class CreateAdFragment extends Fragment {
                         });
                     }
                 });
-
-
             }
 
             @Override public void onStartTrackingTouch(SeekBar seekBar) {
@@ -140,7 +138,6 @@ public class CreateAdFragment extends Fragment {
 
             @Override public void onStopTrackingTouch(SeekBar seekBar) {
                 if (frameGrabberThread != null) {
-
                     frameGrabberThread.start();
                 }
             }
