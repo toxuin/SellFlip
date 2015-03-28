@@ -22,6 +22,7 @@ import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import ru.toxuin.sellflip.entities.SideMenuItem;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
+import ru.toxuin.sellflip.library.OnBackPressedListener;
 
 public class BaseActivity extends ActionBarActivity {
     public static final String TAG = "BaseActivity";
@@ -33,6 +34,8 @@ public class BaseActivity extends ActionBarActivity {
     private FragmentManager fragmentManager;
     private Fragment activeFragment;
     private UiLifecycleHelper uiLifecycleHelper;
+
+    private OnBackPressedListener backPressedListener;
 
     private ProfilePictureView facebook_profile_pic;
     private TextView facebook_username;
@@ -219,5 +222,14 @@ public class BaseActivity extends ActionBarActivity {
                     }
                 });
         request.executeAsync();
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (backPressedListener == null || !backPressedListener.onBackPressed()) super.onBackPressed();
+    }
+
+    public static void registerBackPressedListener(OnBackPressedListener listener) {
+        self.backPressedListener = listener;
     }
 }

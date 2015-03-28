@@ -21,4 +21,12 @@ public class Category {
     public List<Category> getSubcategories() {
         return subcategories;
     }
+
+    public boolean hasSubcategories() {
+        return subcategories != null && !subcategories.isEmpty();
+    }
+
+    public boolean contains(Category other) {
+        return subcategories != null && subcategories.contains(other);
+    }
 }

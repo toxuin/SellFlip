@@ -18,8 +18,9 @@ import java.util.List;
 
 public class TaggingAdapter<T> extends BaseAdapter implements SpinnerAdapter {
     // Caption, Something
-    private final List<Pair<String, T>> content;
-    private LayoutInflater inflater;
+    protected final List<Pair<String, T>> content;
+    protected LayoutInflater inflater;
+    protected int layoutResource = R.layout.button_spinner_item;
 
     public TaggingAdapter(Activity context) {
         content = new LinkedList<>();
@@ -54,9 +55,13 @@ public class TaggingAdapter<T> extends BaseAdapter implements SpinnerAdapter {
         return content.get(position).second;
     }
 
+    public void setLayoutResource(int resource) {
+        this.layoutResource = resource;
+    }
+
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-        View spinView = convertView!=null ? convertView : inflater.inflate(R.layout.button_spinner_item, parent, false);
+        View spinView = convertView!=null ? convertView : inflater.inflate(layoutResource, parent, false);
         TextView tv = (TextView) spinView.findViewById(android.R.id.text1);
         tv.setText(content.get(position).first);
         return spinView;
@@ -64,9 +69,12 @@ public class TaggingAdapter<T> extends BaseAdapter implements SpinnerAdapter {
 
     @Override
     public View getDropDownView(int position, View convertView, ViewGroup parent) {
-        View view = convertView!=null ? convertView : inflater.inflate(android.R.layout.simple_spinner_dropdown_item, parent, false);
+       /* //View view = convertView!=null ? convertView : inflater.inflate(android.R.layout.simple_spinner_dropdown_item, parent, false);
+        View view = convertView!=null ? convertView : inflater.inflate(layoutResource, parent, false);
         CheckedTextView tv = (CheckedTextView) view.findViewById(android.R.id.text1);
         tv.setText(content.get(position).first);
         return view;
+        */
+        return getView(position, convertView, parent);
     }
 }

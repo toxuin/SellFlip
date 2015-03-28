@@ -9,7 +9,6 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
-import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -63,7 +62,8 @@ public class CreateAdFragment extends Fragment {
 
     private Button locationSelectBtn;
     private TaggingAdapter<Coordinates> locationAdapter;
-    
+    private String category;
+
     public CreateAdFragment() {
     }
 
@@ -87,6 +87,7 @@ public class CreateAdFragment extends Fragment {
         final FontAwesomeText nextArrowBtn = (FontAwesomeText) rootView.findViewById(R.id.nextArrowBtn);
 
         Bundle args = getArguments();
+        category = args.getString("category");
         filename = args.getString("filename");
         if (filename == null) {
             SuperToast superToast = new SuperToast(getActivity(), Style.getStyle(Style.RED, SuperToast.Animations.POPUP));
@@ -127,8 +128,6 @@ public class CreateAdFragment extends Fragment {
                         });
                     }
                 });
-
-
             }
 
             @Override public void onStartTrackingTouch(SeekBar seekBar) {
@@ -265,12 +264,10 @@ public class CreateAdFragment extends Fragment {
                 if (!valid) return;
 
                 String title = titleEdit.getText().toString();
-                float price = -1;
                 if (freeRadioBtn.isChecked()) price = 0;
                 else if (contactRadioBtn.isChecked()) price = -1;
                 else price = Float.parseFloat(priceEdit.getText().toString());
                 String description = descriptionEdit.getText().toString();
-                String category = "NEED MOAR CATEGORIES";
                 String phone = phoneEdit.getText().toString();
                 String email = emailEdit.getText().toString();
 

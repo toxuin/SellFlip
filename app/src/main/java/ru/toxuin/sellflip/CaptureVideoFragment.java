@@ -47,7 +47,7 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
     public CaptureVideoFragment() {
     }
 
-    @Override public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+    @Override public View onCreateView(LayoutInflater inflater, @Nullable final ViewGroup container, @Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         rootView = inflater.inflate(R.layout.fragment_capture_video, container, false);
 
@@ -133,11 +133,11 @@ public class CaptureVideoFragment extends Fragment implements SurfaceHolder.Call
             @Override public void onClick(View v) {
                 if (progressBar.getProgress() > VIDEO_MINIMUM_LENGTH) { // user has minimum length
                     String filename = Utils.mergeVideos(getActivity());
-                    CreateAdFragment createAdFragment = new CreateAdFragment();
+                    CategorySelectFragment content = new CategorySelectFragment();
                     Bundle args = new Bundle();
                     args.putString("filename", filename);
-                    createAdFragment.setArguments(args);
-                    BaseActivity.setContent(createAdFragment);
+                    content.setArguments(args);
+                    BaseActivity.setContent(content);
                 } else {
                     // INFORM that the user needs to record more
 

@@ -3,6 +3,7 @@ package ru.toxuin.sellflip.library;
 import android.content.Context;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.LayerDrawable;
+import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -80,9 +81,9 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
 
     public void requestData(int page) {
         ApiConnector api = ApiConnector.getInstance(context);
-        api.requestTopAdsPaged(page, new Callback<List<SingleAd>>() {
+        api.requestTopAdsPaged(page, new LoadingCallback<List<SingleAd>>(context) {
             @Override
-            public void success(List<SingleAd> allAds, Response response) {
+            public void onSuccess(List<SingleAd> allAds, Response response) {
                 for (Header header : response.getHeaders()) {
                     try {
                         if (header.getName().equals("X-Total-Items")) {
@@ -99,7 +100,7 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
             }
 
             @Override
-            public void failure(RetrofitError error) {
+            public void onFailure(RetrofitError error) {
                 Toast.makeText(context, "ERROR: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });

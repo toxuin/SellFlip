@@ -39,8 +39,9 @@ public class LocalJsonClient implements Client {
         fwfolder.mkdirs();
         File file = new File(fwfolder, fileName + ".json");
 
+        //file.delete();
         if (!file.exists()) {
-            Log.wtf(TAG, "Could not find " +  file.getAbsolutePath());
+            Log.wtf(TAG, "Could not find " + file.getAbsolutePath());
             Log.wtf(TAG, "FALLING BACK TO " + fallbackClient.get().getClass().getSimpleName());
             Response httpResponse = fallbackClient.get().execute(request);
 
@@ -48,7 +49,6 @@ public class LocalJsonClient implements Client {
             if (file.exists() && file.lastModified() + MAXFILEAGE < System.currentTimeMillis()) file.delete();
             if (!file.exists()) file.createNewFile();
             saveToFile(file, httpResponse.getBody().in());
-            Log.d(TAG, "I'M A DISK CACHE, BABY ;-)");
             return httpResponse;
         }
 

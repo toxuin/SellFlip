@@ -2,7 +2,6 @@ package ru.toxuin.sellflip.library;
 
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.util.Log;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -34,7 +33,6 @@ public abstract class LoadingCallback<T> implements Callback<T> {
 
     public void failure(RetrofitError error) {
         hideLoading();
-        Log.e(TAG, "LOADING ERROR: " + error.getMessage());
         onFailure(error);
     }
 
