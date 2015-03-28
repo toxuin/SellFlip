@@ -18,13 +18,19 @@ import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.ProfilePictureView;
+import com.github.johnpersano.supertoasts.SuperToast;
+import com.github.johnpersano.supertoasts.util.Style;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import ru.toxuin.sellflip.entities.SideMenuItem;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
 import ru.toxuin.sellflip.library.OnBackPressedListener;
+import ru.toxuin.sellflip.restapi.ApiConnector;
+import ru.toxuin.sellflip.restapi.AuthRequestTask;
+import ru.toxuin.sellflip.restapi.AuthResponseListener;
 
-public class BaseActivity extends ActionBarActivity {
+public class BaseActivity extends ActionBarActivity implements AuthResponseListener {
+
     public static final String TAG = "BaseActivity";
 
     private static final float MENU_FADE_DEGREE = 0.35f;
@@ -161,9 +167,28 @@ public class BaseActivity extends ActionBarActivity {
             facebook_container.setVisibility(View.GONE);
             facebook_profile_pic.setProfileId(null);
             facebook_username.setText("");
+            ApiConnector.getAuthHeaders().clearToken();
         } else {
-            makeMeRequest(session);
+            // perform AuthRequest to the back end
+            new AuthRequestTask().registerResponseListener(this).execute(session.getAccessToken());
         }
+    }
+
+    @Override public void onAuthSuccess() {
+        if (Session.getActiveSession().isOpened()) {
+            makeMeRequest(Session.getActiveSession());
+        }
+
+        SuperToast superToast = new SuperToast(this, Style.getStyle(Style.GREEN, SuperToast.Animations.POPUP));
+        superToast.setDuration(SuperToast.Duration.LONG);
+        superToast.setText("You are logged in");
+        superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
+        superToast.show();
+
+    }
+
+    @Override public void onAuthFailure() {
+        // authentication with back end failed
     }
 
     @Override

@@ -139,7 +139,6 @@ public class CreateAdFragment extends Fragment {
 
             @Override public void onStopTrackingTouch(SeekBar seekBar) {
                 if (frameGrabberThread != null) {
-
                     frameGrabberThread.start();
                 }
             }
