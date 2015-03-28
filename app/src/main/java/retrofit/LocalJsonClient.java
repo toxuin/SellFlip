@@ -22,11 +22,16 @@ public class LocalJsonClient implements Client {
     private static final String TAG = "LocalJSONClient";
     private static final long MAXFILEAGE = 2678400000L; // MONTH!
     private Context context;
-    private Provider fallbackClient;
+    private Client fallbackClient;
 
     public LocalJsonClient(Context ctx) {
         this.context = ctx;
-        this.fallbackClient = Platform.get().defaultClient();
+        this.fallbackClient = Platform.get().defaultClient().get();
+    }
+
+    public LocalJsonClient(Context ctx, Client fallback) {
+        this.context = ctx;
+        this.fallbackClient = fallback;
     }
 
     @Override
@@ -42,8 +47,8 @@ public class LocalJsonClient implements Client {
         //file.delete();
         if (!file.exists()) {
             Log.wtf(TAG, "Could not find " + file.getAbsolutePath());
-            Log.wtf(TAG, "FALLING BACK TO " + fallbackClient.get().getClass().getSimpleName());
-            Response httpResponse = fallbackClient.get().execute(request);
+            Log.wtf(TAG, "FALLING BACK TO " + fallbackClient.getClass().getSimpleName());
+            Response httpResponse = fallbackClient.execute(request);
 
             // SAVE TO FILE
             if (file.exists() && file.lastModified() + MAXFILEAGE < System.currentTimeMillis()) file.delete();

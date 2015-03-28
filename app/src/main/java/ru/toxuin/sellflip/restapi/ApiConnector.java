@@ -10,6 +10,7 @@ import java.io.File;
 import java.util.List;
 
 import retrofit.Callback;
+import retrofit.InterceptingClient;
 import retrofit.LocalJsonClient;
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
@@ -36,6 +37,7 @@ public class ApiConnector {
         restAdapter = new RestAdapter.Builder()
                 .setEndpoint(API_ENDPOINT_URL)
                 .setConverter(new GsonConverter(gson))
+                .setClient(new InterceptingClient(ctx))
                 .setRequestInterceptor(authHeaders)
                 .build();
 
@@ -43,7 +45,7 @@ public class ApiConnector {
 
         cachedRestAdapter = new RestAdapter.Builder()
                 .setEndpoint(API_ENDPOINT_URL)
-                .setClient(new LocalJsonClient(ctx))
+                .setClient(new LocalJsonClient(ctx, new InterceptingClient(ctx)))
                 .setConverter(new GsonConverter(gson))
                 .build();
 
