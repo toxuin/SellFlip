@@ -1,5 +1,6 @@
 package ru.toxuin.sellflip;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -161,7 +162,8 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
         }));
         leftMenuAdapter.add(new SideMenuItem("Login", "fa-sign-in", new View.OnClickListener() {
             @Override public void onClick(View v) {
-                BaseActivity.setContent(new LogInFragment());
+                //BaseActivity.setContent(new LogInFragment());
+                sendBroadcast(new Intent(getString(R.string.broadcast_intent_auth)));
             }
         }));
         leftMenuAdapter.add(new SideMenuItem("Add ad", "fa-plus", new View.OnClickListener() {

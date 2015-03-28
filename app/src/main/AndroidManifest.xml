@@ -31,6 +31,12 @@
         <activity android:name=".MapPopupActivity">
         </activity>
 
+        <receiver android:name=".AuthBroadcastReceiver">
+            <intent-filter>
+                <action android:name="ru.toxuin.sellflip.intent.action.AUTH_REQUESTED" />
+            </intent-filter>
+        </receiver>
+
         <meta-data
             android:name="com.google.android.maps.v2.API_KEY"
             android:value="AIzaSyDQVzivAeWIwg3PBxObh7QaviwHRhjk1z0"/>
@@ -45,9 +51,7 @@
         <activity
             android:name=".FullScreenVideoActivity"
             android:label="@string/title_activity_full_screen_video"
-            android:theme="@style/FullScreenTheme">
-            >
-        </activity>
+            android:theme="@style/FullScreenTheme"/>
 
         <activity
             android:name="com.facebook.LoginActivity"
