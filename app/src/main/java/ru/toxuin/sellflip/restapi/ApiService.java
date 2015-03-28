@@ -20,7 +20,7 @@ public interface ApiService {
     String VIDEO_UPLOAD = "/adsItems/{id}/upload";
     String CATEGORIES = "/categories";
 
-    @GET(LIST_ADS) void listTopAds(@Query("skip") int skip, @Query("limit") int limit, Callback<List<SingleAd>> callback);
+    @GET(LIST_ADS) void listTopAds(@Query("category") String category, @Query("skip") int skip, @Query("limit") int limit, Callback<List<SingleAd>> callback);
     @GET(SINGLE_AD) void getSingleAd(@Path("id") String id, Callback<SingleAd> callback);
     @POST(LIST_ADS) void createNewAd(@Body SingleAd ad, Callback<SingleAd> callback);
     @GET(CATEGORIES) void getCategories(Callback<List<Category>> callback);

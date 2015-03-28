@@ -1,11 +1,14 @@
 package ru.toxuin.sellflip;
 
 import android.content.Intent;
+import android.location.Address;
+import android.location.Geocoder;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
@@ -20,8 +23,10 @@ import android.widget.Toast;
 
 import com.beardedhen.androidbootstrap.BootstrapButton;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -77,6 +82,7 @@ public class SingleAdFragment extends Fragment implements
         final TextView adDescription = (TextView) rootView.findViewById(R.id.adDescription);
         final TextView adPrice = (TextView) rootView.findViewById(R.id.adPrice);
         final TextView adDate = (TextView) rootView.findViewById(R.id.adDate);
+        final TextView adAddress = (TextView) rootView.findViewById(R.id.adAddress);
 
         final BootstrapButton contactEmailBtn = (BootstrapButton) rootView.findViewById(R.id.contact_mail_btn);
         final BootstrapButton contactPhoneBtn = (BootstrapButton) rootView.findViewById(R.id.contact_phone_btn);
@@ -116,6 +122,26 @@ public class SingleAdFragment extends Fragment implements
                 adTitle.setText(ad.getTitle());
                 adDescription.setText(ad.getDescription());
 
+                String addr = "Show me the map!";
+                Geocoder geo = new Geocoder(getActivity());
+                try {
+                    Address address = geo.getFromLocation(ad.getCoords().getLat(), ad.getCoords().getLng(), 1).get(0);
+                    ArrayList<String> addressFragments = new ArrayList<>();
+                    for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+                        addressFragments.add(address.getAddressLine(i));
+                    }
+                    addr = TextUtils.join(", ", addressFragments).trim();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                adAddress.setText("Close to: " + addr);
+                adAddress.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        openMap();
+                    }
+                });
+
                 DateFormat dateFormat = DateFormat.getDateInstance();
                 adDate.setText(dateFormat.format(ad.getDate()));
 
@@ -133,10 +159,7 @@ public class SingleAdFragment extends Fragment implements
                     openMapBtn.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            Intent intent = new Intent(getActivity(), MapPopupActivity.class);
-                            intent.putExtra("coords", thisAd.getCoords());
-                            intent.putExtra("title", thisAd.getTitle());
-                            startActivity(intent);
+                            openMap();
                         }
                     });
                 }
@@ -171,6 +194,13 @@ public class SingleAdFragment extends Fragment implements
         });
 
         return rootView;
+    }
+
+    private void openMap() {
+        Intent intent = new Intent(getActivity(), MapPopupActivity.class);
+        intent.putExtra("coords", thisAd.getCoords());
+        intent.putExtra("title", thisAd.getTitle());
+        startActivity(intent);
     }
 
     @Override

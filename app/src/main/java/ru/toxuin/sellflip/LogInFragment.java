@@ -37,8 +37,8 @@ public class LogInFragment extends Fragment {
 
         LoginButton authButton = (LoginButton) rootView.findViewById(R.id.authButton);
 
-        Button loginBtn = (Button) rootView.findViewById(R.id.loginBtn);
-        loginBtn.setOnClickListener(new View.OnClickListener() {
+        //Button loginBtn = (Button) rootView.findViewById(R.id.loginBtn);
+        authButton.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
                 Intent intent = new Intent(
                         Intent.ACTION_VIEW,

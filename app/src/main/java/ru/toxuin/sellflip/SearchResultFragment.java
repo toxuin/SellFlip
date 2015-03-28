@@ -9,12 +9,26 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.AdapterView;
+import android.widget.AdapterView.OnItemClickListener;
+import retrofit.Callback;
+import retrofit.RetrofitError;
+import retrofit.client.Response;
+import ru.toxuin.sellflip.entities.Category;
+import ru.toxuin.sellflip.library.CategoryListAdapter;
 import ru.toxuin.sellflip.library.SearchResultAdapter;
+import ru.toxuin.sellflip.restapi.ApiConnector;
+
+import java.util.List;
 
 public class SearchResultFragment extends Fragment {
     private static final String TAG = "SEARCH_RESULT_UI";
     RecyclerView recyclerView;
+    SearchResultAdapter searchAdapter;
     private View rootView;
+
+    List<Category> categories;
+    CategoryListAdapter rightMenuAdapter;
 
     public SearchResultFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -25,19 +39,66 @@ public class SearchResultFragment extends Fragment {
         getActivity().setTitle(title);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.itemsList);
 
-        // DO STUFF
-
-        SearchResultAdapter adapter = new SearchResultAdapter(getActivity());
+        searchAdapter = new SearchResultAdapter(getActivity());
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         RecyclerView.ItemAnimator animator = new DefaultItemAnimator();
 
         recyclerView.setItemAnimator(animator);
-        recyclerView.setAdapter(adapter);
+        recyclerView.setAdapter(searchAdapter);
         recyclerView.setLayoutManager(manager);
-        adapter.setLayoutManager(manager);
-        recyclerView.setOnScrollListener(adapter.searchResultsEndlessScrollListener);
-        adapter.requestData(0);
+        searchAdapter.setLayoutManager(manager);
+        recyclerView.setOnScrollListener(searchAdapter.searchResultsEndlessScrollListener);
+        searchAdapter.requestData(0);
+
+        // RIGHT MENU STUFF
+        ApiConnector api = ApiConnector.getInstance(getActivity());
+        api.requestCategories(new Callback<List<Category>>() {
+            @Override
+            public void success(List<Category> cats, Response response) {
+                categories = cats;
+                drawRightMenu(null);
+            }
+
+            @Override
+            public void failure(RetrofitError error) {
+                error.printStackTrace();
+            }
+        });
 
         return rootView;
     }
+
+    private void drawRightMenu(Category root) {
+        if (root != null) {
+            if (root.hasSubcategories()) {
+                rightMenuAdapter = new CategoryListAdapter(getActivity());
+                rightMenuAdapter.setArrowButtonVisibitityMode(CategoryListAdapter.VisibilityMode.NAVIGATION);
+                rightMenuAdapter.setRoot(root);
+            }
+            searchAdapter.clear();
+            searchAdapter.setCategory(root.getId());
+            searchAdapter.requestData(0);
+        }
+        else {
+            rightMenuAdapter = new CategoryListAdapter(getActivity());
+            rightMenuAdapter.addAll(categories);
+        }
+        BaseActivity.setRightMenuItemClickListener(categoryClickListener);
+        BaseActivity.setRightMenuListAdapter(rightMenuAdapter);
+    }
+
+    private OnItemClickListener categoryClickListener = new OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Category selectedCat = rightMenuAdapter.getItem(position);
+            if (selectedCat.equals(rightMenuAdapter.getRoot())) {
+                Category papa = rightMenuAdapter.findParent(categories, selectedCat);
+                drawRightMenu(papa);
+                return;
+            }
+            drawRightMenu(selectedCat);
+        }
+    };
+
+
 }

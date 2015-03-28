@@ -3,14 +3,13 @@ package ru.toxuin.sellflip;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.util.Pair;
-import android.support.v7.internal.widget.AdapterViewCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import com.github.johnpersano.supertoasts.SuperToast;
+import com.github.johnpersano.supertoasts.util.Style;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
 import ru.toxuin.sellflip.entities.Category;
@@ -19,10 +18,6 @@ import ru.toxuin.sellflip.library.LoadingCallback;
 import ru.toxuin.sellflip.library.OnBackPressedListener;
 import ru.toxuin.sellflip.restapi.ApiConnector;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.LinkedList;
 import java.util.List;
 
 public class CategorySelectFragment extends Fragment implements OnBackPressedListener {
@@ -35,6 +30,7 @@ public class CategorySelectFragment extends Fragment implements OnBackPressedLis
 
     ListView list;
     List<Category> categories;
+    private boolean hintShown = false;
 
     public CategorySelectFragment() {}
 
@@ -50,7 +46,6 @@ public class CategorySelectFragment extends Fragment implements OnBackPressedLis
         ApiConnector.getInstance(getActivity()).requestCategories(new LoadingCallback<List<Category>>(getActivity()) {
             @Override
             public void onSuccess(List<Category> cats, Response response) {
-                Log.d(TAG, "SUCCESS! GOT CATEGORIES: " + cats.size());
                 categories = cats;
                 drawList(null);
             }
@@ -58,7 +53,6 @@ public class CategorySelectFragment extends Fragment implements OnBackPressedLis
 
             @Override
             public void onFailure(RetrofitError error) {
-                Log.e(TAG, "FAILURE! ERROR: " + error.getMessage());
                 error.printStackTrace();
             }
         });
@@ -72,6 +66,15 @@ public class CategorySelectFragment extends Fragment implements OnBackPressedLis
         else adapter.addAll(categories);
         list.setOnItemClickListener(selectCatClickListener);
         list.setAdapter(adapter);
+
+        if (!hintShown && root != null) {
+            SuperToast superToast = new SuperToast(rootView.getContext().getApplicationContext(), Style.getStyle(Style.BLUE, SuperToast.Animations.POPUP));
+            superToast.setDuration(SuperToast.Duration.SHORT);
+            superToast.setText(getString(R.string.use_back_btn_to_nav));
+            superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
+            superToast.show();
+            hintShown = true;
+        }
     }
 
     private AdapterView.OnItemClickListener selectCatClickListener = new AdapterView.OnItemClickListener() {
@@ -92,28 +95,11 @@ public class CategorySelectFragment extends Fragment implements OnBackPressedLis
         }
     };
 
-    private Category getParent(Category kid) {
-        return lookup(categories, kid);
-    }
-
-    private Category lookup(Collection<Category> haystack, Category needle) {
-        for (Category cat : haystack) {
-            if (!cat.hasSubcategories()) continue;
-            if (cat.contains(needle)) {
-                return cat;
-            }
-            return lookup(cat.getSubcategories(), needle);
-        }
-        Log.d(TAG, "NOT FOUND PARENT FOR " + needle.getName());
-        return null;
-    }
-
-
     @Override
     public boolean onBackPressed() {
         Category root = adapter.getRoot();
         if (root == null) return false;
-        Category parent = getParent(root);
+        Category parent = adapter.findParent(categories, root);
         drawList(parent);
         return true;
     }

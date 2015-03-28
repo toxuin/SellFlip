@@ -53,4 +53,8 @@
     <string name="create_error_no_location">Please select location first!</string>
     <string name="starting_video_upload">Uploading video...</string>
     <string name="error_video_upload">Error uploading video.</string>
+    <string name="address_warning">Please note that all specified locations are determined automatically and may not be actual seller\'s address.
+        Please use them only as reference.
+    </string>
+    <string name="use_back_btn_to_nav">Use device back button to navigate in category tree!</string>
 </resources>

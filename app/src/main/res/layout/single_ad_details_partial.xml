@@ -4,11 +4,11 @@
 
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="fill_parent"
-    android:layout_height="280dp"
+    android:layout_height="wrap_content"
     android:background="@color/single_ad_secondary"
     android:orientation="vertical"
     android:padding="10dp"
-    >
+    android:minHeight="280dp">
 
     <TextView
         android:id="@+id/adDate"
@@ -27,7 +27,8 @@
         android:layout_height="wrap_content"
         android:background="#22000000"
         android:gravity="center_horizontal"
-        android:padding="10dp">
+        android:padding="10dp"
+        android:id="@+id/titleRow">
 
         <TextView
             android:id="@+id/adTitle"
@@ -42,11 +43,10 @@
         android:id="@+id/adDescription"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/line"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
         android:text="Description"
-        android:textSize="16sp"/>
+        android:textSize="16sp" android:layout_below="@+id/titleRow" android:layout_marginTop="10dp"/>
 
     <View
         android:id="@+id/line"
@@ -65,7 +65,7 @@
         android:layout_above="@+id/adPhone"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
-        android:text="Address: Canada, BC, Near that garbage can"
+        android:text="Close to: "
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textSize="12sp"/>
 

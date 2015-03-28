@@ -74,11 +74,11 @@ public class ApiConnector {
         apiService.getSingleAd(adId, callback);
     }
 
-    public void requestTopAdsPaged(int page, Callback<List<SingleAd>> callback) {
+    public void requestTopAdsPaged(String category, int page, Callback<List<SingleAd>> callback) {
         int skip = getItemsOnPage() * page;
         int limit = getItemsOnPage();
         Log.d(TAG, "REQUESTING TOP ADS FROM " + skip + " TO " + (skip + limit) + "(" + limit + " ITEMS)");
-        apiService.listTopAds(skip, limit, callback);
+        apiService.listTopAds(category, skip, limit, callback);
     }
 
 

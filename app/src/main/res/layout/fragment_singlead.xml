@@ -73,60 +73,74 @@
             </LinearLayout>
         </LinearLayout>
 
+        <ScrollView android:layout_width="match_parent"
+                    android:layout_height="wrap_content">
+            <LinearLayout android:layout_width="match_parent"
+                          android:layout_height="wrap_content"
+                          android:orientation="vertical">
 
-        <LinearLayout
-            android:layout_width="fill_parent"
-            android:layout_height="wrap_content"
-            android:layout_margin="10dp"
 
-            android:background="@android:drawable/dialog_holo_light_frame">
+                <LinearLayout android:layout_width="fill_parent"
+                              android:layout_height="wrap_content"
+                              android:layout_margin="10dp"
+                              android:background="@android:drawable/dialog_holo_light_frame">
 
-            <include layout="@layout/single_ad_details_partial"/>
+                    <include layout="@layout/single_ad_details_partial"/>
 
-        </LinearLayout>
+                </LinearLayout>
 
-        <TableRow
-            android:layout_width="fill_parent"
-            android:layout_height="fill_parent"
-            android:layout_margin="10dp"
-            android:gravity="bottom">
 
-            <com.beardedhen.androidbootstrap.BootstrapButton
-                android:id="@+id/contact_mail_btn"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="Contact Seller"
-                android:textSize="16sp"
-                bootstrap:bb_icon_left="fa-envelope"
-                bootstrap:bb_type="success"
-                />
+                <TextView android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          style="@style/Base.TextAppearance.AppCompat.Small"
+                          android:text="@string/address_warning" android:layout_marginLeft="10dp" android:layout_marginRight="10dp"
+                          android:layout_marginBottom="10dp" android:textStyle="italic" android:textSize="12sp"/>
 
-            <com.beardedhen.androidbootstrap.BootstrapButton
-                    android:id="@+id/contact_phone_btn"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_margin="8dp"
-                    android:text="Contact Seller"
-                    android:textSize="16sp"
-                    android:visibility="gone"
-                    bootstrap:bb_icon_left="fa-phone"
-                    bootstrap:bb_type="success"
-                    />
 
-            <com.beardedhen.androidbootstrap.BootstrapButton
-                android:id="@+id/mapButton"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_margin="8dp"
-                android:text="Open map"
-                android:textSize="16sp"
-                android:visibility="gone"
-                bootstrap:bb_icon_left="fa-map-marker"
-                bootstrap:bb_type="primary"
-                />
+                <TableRow android:layout_width="fill_parent"
+                          android:layout_height="fill_parent"
+                          android:layout_margin="10dp"
+                          android:gravity="bottom">
 
-        </TableRow>
+                    <com.beardedhen.androidbootstrap.BootstrapButton
+                            android:id="@+id/contact_mail_btn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            android:text="Contact Seller"
+                            android:textSize="16sp"
+                            bootstrap:bb_icon_left="fa-envelope"
+                            bootstrap:bb_type="success"
+                            />
+
+                    <com.beardedhen.androidbootstrap.BootstrapButton
+                            android:id="@+id/contact_phone_btn"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            android:text="Contact Seller"
+                            android:textSize="16sp"
+                            android:visibility="gone"
+                            bootstrap:bb_icon_left="fa-phone"
+                            bootstrap:bb_type="success"
+                            />
+
+                    <com.beardedhen.androidbootstrap.BootstrapButton
+                            android:id="@+id/mapButton"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            android:text="Open map"
+                            android:textSize="16sp"
+                            android:visibility="gone"
+                            bootstrap:bb_icon_left="fa-map-marker"
+                            bootstrap:bb_type="primary"
+                            />
+
+                </TableRow>
+
+            </LinearLayout>
+        </ScrollView>
 
     </LinearLayout>
 

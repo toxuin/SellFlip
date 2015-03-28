@@ -2,7 +2,6 @@ package ru.toxuin.sellflip.library;
 
 import android.app.Activity;
 import android.content.Context;
-import android.graphics.Color;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -24,12 +23,16 @@ public class CategoryListAdapter extends BaseAdapter {
 
     private LayoutInflater inflater;
 
+    private VisibilityMode arrowVisibilityMode = VisibilityMode.SELECTION;
+
+    private final int ROOT_COLOR;
     private int layoutResource;
 
     public CategoryListAdapter(Activity context) {
         super();
         content = new LinkedList<>();
         inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        ROOT_COLOR = context.getResources().getColor(R.color.single_ad_secondary);
         this.setLayoutResource(R.layout.category_list_element);
     }
     
@@ -66,14 +69,23 @@ public class CategoryListAdapter extends BaseAdapter {
 
         View view = inflater.inflate(layoutResource, parent, false);
         TextView caption = (TextView) view.findViewById(R.id.cat_list_caption);
-        final ImageView expand = (ImageView) view.findViewById(R.id.cat_list_expand);
+        final ImageView forward = (ImageView) view.findViewById(R.id.cat_list_forwards);
+        final ImageView backward = (ImageView) view.findViewById(R.id.cat_list_backwards);
 
-        if (root!= null && root.equals(cat)) {
-            view.setBackgroundColor(Color.GREEN);
+        if (root != null && root.equals(cat)) {
+            view.setBackgroundColor(ROOT_COLOR);
         }
 
-        if (cat.hasSubcategories()) {
-            expand.setVisibility(View.VISIBLE);
+        if (root != null && cat.hasSubcategories()) {
+            if (arrowVisibilityMode == VisibilityMode.NAVIGATION) {
+                if (getRoot().equals(cat)) backward.setVisibility(View.VISIBLE);
+                else {
+                    forward.setImageResource(R.drawable.ic_action_next_item);
+                    forward.setVisibility(View.VISIBLE);
+                }
+            } else {
+                forward.setVisibility(View.VISIBLE);
+            }
         }
 
         caption.setText(cat.getName());
@@ -99,4 +111,24 @@ public class CategoryListAdapter extends BaseAdapter {
     public Category getRoot() {
         return root;
     }
+
+    public Category findParent(Collection<Category> haystack, Category needle) {
+        for (Category cat : haystack) {
+            if (!cat.hasSubcategories()) continue;
+            if (cat.contains(needle)) {
+                return cat;
+            }
+            return findParent(cat.getSubcategories(), needle);
+        }
+        return null;
+    }
+
+    public void setArrowButtonVisibitityMode(VisibilityMode mode) {
+        arrowVisibilityMode = mode;
+    }
+
+    public enum VisibilityMode {
+        NAVIGATION, SELECTION
+    };
+
 }

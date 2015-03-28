@@ -7,7 +7,9 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.KeyEvent;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.LinearLayout;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
@@ -37,6 +39,7 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
     private static BaseActivity self;
     private SlidingMenu leftMenu;
     private SlidingMenu rightMenu;
+    private ListView rightMenuList;
     private FragmentManager fragmentManager;
     private Fragment activeFragment;
     private UiLifecycleHelper uiLifecycleHelper;
@@ -62,10 +65,15 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
         if (self == null) return;
         if (self.leftMenu.isMenuShowing()) self.leftMenu.toggle();
         if (self.rightMenu.isMenuShowing()) self.rightMenu.toggle();
+        self.disableRightMenu();
+        if (fragment instanceof SearchResultFragment) {
+            self.enableRightMenu();
+        }
         self.fragmentManager.beginTransaction()
                 .replace(R.id.content, fragment, fragment.getClass().getName())
                 .addToBackStack(fragName).commit(); // add frags with a tag will allow to pop them by tag
         self.activeFragment = fragment;
+        self.backPressedListener = null;
     }
 
     /**
@@ -118,6 +126,7 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
         rightMenu.setTouchmodeMarginThreshold((int) getResources().getDimension(R.dimen.menu_swipe_threshold));
         rightMenu.attachToActivity(this, SlidingMenu.SLIDING_CONTENT);
         rightMenu.setMenu(R.layout.right_main_menu);
+        rightMenu.setSlidingEnabled(false);
         // MAKE HOME BUTTON IN ACTIONBAR SEXY
         getSupportActionBar().setDisplayShowCustomEnabled(true);
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
@@ -125,6 +134,18 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
 
         // CONTENT MANAGEMENT STUFF
         fragmentManager = getSupportFragmentManager();
+        fragmentManager.addOnBackStackChangedListener(new FragmentManager.OnBackStackChangedListener() {
+            @Override
+            public void onBackStackChanged() {
+                for (Fragment frag : fragmentManager.getFragments()) {
+                    if (frag != null && frag.isVisible()) {
+                        activeFragment = frag;
+                    }
+                }
+                if (activeFragment instanceof SearchResultFragment) enableRightMenu();
+                else disableRightMenu();
+            }
+        });
         setContent(new SearchResultFragment());
 
         // ADD ITEMS TO LEFT MENU
@@ -154,12 +175,25 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
 
         leftMenuList.setAdapter(leftMenuAdapter);
 
+        // RIGHT MENU STUFF
+        rightMenuList = (ListView) rightMenu.getMenu().findViewById(R.id.right_menu_list);
+
         facebook_container = (LinearLayout) findViewById(R.id.facebook_container);
         facebook_profile_pic = (ProfilePictureView) findViewById(R.id.facebook_profile_pic);
         facebook_username = (TextView) findViewById(R.id.facebook_username);
 
         uiLifecycleHelper = new UiLifecycleHelper(this, statusCallback);
         uiLifecycleHelper.onCreate(savedInstanceState);
+    }
+
+    public void disableRightMenu() {
+        if (rightMenu.isMenuShowing()) rightMenu.toggle(false);
+        rightMenu.setSlidingEnabled(false);
+    }
+
+    public void enableRightMenu() {
+        if (rightMenu.isMenuShowing()) rightMenu.toggle(false);
+        rightMenu.setSlidingEnabled(true);
     }
 
     private void onSessionStateChange(final Session session, SessionState state, Exception exception) {
@@ -256,5 +290,13 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
 
     public static void registerBackPressedListener(OnBackPressedListener listener) {
         self.backPressedListener = listener;
+    }
+
+    public static void setRightMenuItemClickListener(AdapterView.OnItemClickListener listener) {
+        self.rightMenuList.setOnItemClickListener(listener);
+    }
+
+    public static void setRightMenuListAdapter(ListAdapter adapter) {
+        self.rightMenuList.setAdapter(adapter);
     }
 }

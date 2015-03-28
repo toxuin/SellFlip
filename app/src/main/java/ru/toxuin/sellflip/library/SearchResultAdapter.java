@@ -43,8 +43,9 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
     private static Context context;
     private final List<SingleAd> itemsList;
     private int totalServerItems = 0;
+    private int currentPage = 0;
+
     public OnScrollListener searchResultsEndlessScrollListener = new OnScrollListener() {
-        private int currentPage = 0;
         private int previousTotal = 0;
         private boolean loading = true;
 
@@ -72,6 +73,7 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
         }
     };
     private LinearLayoutManager layoutManager;
+    private String category;
 
     public SearchResultAdapter(Context context) {
         super();
@@ -81,7 +83,8 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
 
     public void requestData(int page) {
         ApiConnector api = ApiConnector.getInstance(context);
-        api.requestTopAdsPaged(page, new LoadingCallback<List<SingleAd>>(context) {
+
+        LoadingCallback<List<SingleAd>> callback = new LoadingCallback<List<SingleAd>>(context) {
             @Override
             public void onSuccess(List<SingleAd> allAds, Response response) {
                 for (Header header : response.getHeaders()) {
@@ -103,9 +106,10 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
             public void onFailure(RetrofitError error) {
                 Toast.makeText(context, "ERROR: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
-        });
-    }
+        };
 
+        api.requestTopAdsPaged(category, page, callback);
+    }
 
     @Override
     public SearchResultViewHolder onCreateViewHolder(ViewGroup viewGroup, int i) {
@@ -127,6 +131,16 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
 
     public void setLayoutManager(LinearLayoutManager layoutManager) {
         this.layoutManager = layoutManager;
+    }
+
+    public void clear() {
+        itemsList.clear();
+        currentPage = 0;
+        notifyDataSetChanged();
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 
     public static class SearchResultViewHolder extends ViewHolder implements OnClickListener {
@@ -164,16 +178,17 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
             long secondsAgo = TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
             long minutesAgo = TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
             long hoursAgo = TimeUnit.MILLISECONDS.toHours(now.getTime() - past.getTime());
-            if (secondsAgo < 60) dateAgo = secondsAgo + context.getString(R.string.seconds_ago);
+            if (secondsAgo < 60) dateAgo = secondsAgo + " " + context.getString(R.string.seconds_ago);
             else if (minutesAgo < 60)
-                dateAgo = minutesAgo + context.getString(R.string.minutes_ago);
-            else if (hoursAgo < 24) dateAgo = hoursAgo + context.getString(R.string.hours_ago);
+                dateAgo = minutesAgo + " " + context.getString(R.string.minutes_ago);
+            else if (hoursAgo < 24) dateAgo = hoursAgo + " " + context.getString(R.string.hours_ago);
             else dateAgo = DateFormat.getDateFormat(context.getApplicationContext()).format(past);
             date.setText(dateAgo);
 
             // PRICE
 
             if (ad.getPrice() == 0) price.setText("Free");
+            else if (ad.getPrice() == -1) price.setText("Please contact");
             else {
                 NumberFormat formatter = NumberFormat.getCurrencyInstance();
                 price.setText(formatter.format(ad.getPrice()));
@@ -192,7 +207,6 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
 
         @Override
         public void onClick(View view) {
-            Log.d(TAG, "CLICKED " + view.getClass().getSimpleName());
             if (id == null) return;
             SingleAdFragment adFragment = new SingleAdFragment();
             adFragment.setAdId(id);
