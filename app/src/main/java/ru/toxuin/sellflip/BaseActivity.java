@@ -21,8 +21,6 @@ import com.facebook.SessionState;
 import com.facebook.UiLifecycleHelper;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.ProfilePictureView;
-import com.github.johnpersano.supertoasts.SuperToast;
-import com.github.johnpersano.supertoasts.util.Style;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import ru.toxuin.sellflip.entities.SideMenuItem;
@@ -38,10 +36,10 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
 
     private static final float MENU_FADE_DEGREE = 0.35f;
     private static BaseActivity self;
+    private static FragmentManager fragmentManager;
     private SlidingMenu leftMenu;
     private SlidingMenu rightMenu;
     private ListView rightMenuList;
-    private FragmentManager fragmentManager;
     private Fragment activeFragment;
     private UiLifecycleHelper uiLifecycleHelper;
 
@@ -50,6 +48,8 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
     private ProfilePictureView facebook_profile_pic;
     private TextView facebook_username;
     private LinearLayout facebook_container;
+    private LeftMenuAdapter leftMenuAdapter;
+
     private Session.StatusCallback statusCallback = new Session.StatusCallback() {
         @Override public void call(Session session, SessionState sessionState, Exception e) {
             onSessionStateChange(session, sessionState, e);
@@ -88,6 +88,23 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
 
     public static void setContentTitle(String title) {
         self.setTitle(title);
+    }
+
+    public static void registerBackPressedListener(OnBackPressedListener listener) {
+        self.backPressedListener = listener;
+    }
+
+    public static void setRightMenuItemClickListener(AdapterView.OnItemClickListener listener) {
+        self.rightMenuList.setOnItemClickListener(listener);
+    }
+
+    public static void setRightMenuListAdapter(ListAdapter adapter) {
+        self.rightMenuList.setAdapter(adapter);
+    }
+
+    public static void showLogInDialog() {
+        AuthDialog authDialog = new AuthDialog();
+        authDialog.show(fragmentManager, "Authenticate");
     }
 
     @Override protected void onResume() {
@@ -152,7 +169,7 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
         // ADD ITEMS TO LEFT MENU
         ListView leftMenuList = (ListView) leftMenu.getMenu().findViewById(R.id.left_menu_list);
 
-        LeftMenuAdapter leftMenuAdapter = new LeftMenuAdapter(this);
+        leftMenuAdapter = new LeftMenuAdapter(this);
 
         leftMenuAdapter.add(new SideMenuItem("Top ads", "fa-line-chart", new View.OnClickListener() {
             @Override
@@ -160,12 +177,13 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
                 BaseActivity.setContent(new SearchResultFragment());
             }
         }));
+
         leftMenuAdapter.add(new SideMenuItem("Login", "fa-sign-in", new View.OnClickListener() {
             @Override public void onClick(View v) {
-                //BaseActivity.setContent(new LogInFragment());
                 sendBroadcast(new Intent(getString(R.string.broadcast_intent_auth)));
             }
         }));
+
         leftMenuAdapter.add(new SideMenuItem("Add ad", "fa-plus", new View.OnClickListener() {
             @Override public void onClick(View v) {
                 BaseActivity.setContent(new CaptureVideoFragment());
@@ -200,6 +218,7 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
 
     private void onSessionStateChange(final Session session, SessionState state, Exception exception) {
         if (session.isClosed()) {
+
             facebook_container.setVisibility(View.GONE);
             facebook_profile_pic.setProfileId(null);
             facebook_username.setText("");
@@ -211,16 +230,10 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
     }
 
     @Override public void onAuthSuccess() {
-        if (Session.getActiveSession().isOpened()) {
+        if (Session.getActiveSession().isOpened() &&
+                facebook_container.getVisibility() == View.GONE) {
             makeMeRequest(Session.getActiveSession());
         }
-
-        SuperToast superToast = new SuperToast(this, Style.getStyle(Style.GREEN, SuperToast.Animations.POPUP));
-        superToast.setDuration(SuperToast.Duration.LONG);
-        superToast.setText("You are logged in");
-        superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
-        superToast.show();
-
     }
 
     @Override public void onAuthFailure() {
@@ -287,18 +300,7 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
 
     @Override
     public void onBackPressed() {
-        if (backPressedListener == null || !backPressedListener.onBackPressed()) super.onBackPressed();
-    }
-
-    public static void registerBackPressedListener(OnBackPressedListener listener) {
-        self.backPressedListener = listener;
-    }
-
-    public static void setRightMenuItemClickListener(AdapterView.OnItemClickListener listener) {
-        self.rightMenuList.setOnItemClickListener(listener);
-    }
-
-    public static void setRightMenuListAdapter(ListAdapter adapter) {
-        self.rightMenuList.setAdapter(adapter);
+        if (backPressedListener == null || !backPressedListener.onBackPressed())
+            super.onBackPressed();
     }
 }

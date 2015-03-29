@@ -1,16 +1,14 @@
 package retrofit;
 
 import android.content.Context;
-
 import android.content.Intent;
+
+import java.io.IOException;
+
 import retrofit.client.Client;
 import retrofit.client.Request;
 import retrofit.client.Response;
-import ru.toxuin.sellflip.BaseActivity;
-import ru.toxuin.sellflip.LogInFragment;
 import ru.toxuin.sellflip.R;
-
-import java.io.IOException;
 
 public class InterceptingClient implements Client {
     private static final String TAG = "InterceptingClient";
@@ -29,11 +27,11 @@ public class InterceptingClient implements Client {
 
     @Override
     public Response execute(Request request) throws IOException {
-            Response httpResponse = fallbackClient.execute(request);
-            int status = httpResponse.getStatus();
-            if (status == 401 || status == 419) {
-                context.sendBroadcast(new Intent(context.getString(R.string.broadcast_intent_auth)));
-            }
-            return httpResponse;
+        Response httpResponse = fallbackClient.execute(request);
+        int status = httpResponse.getStatus();
+        if (status == 401 || status == 419) {
+            context.sendBroadcast(new Intent(context.getString(R.string.broadcast_intent_auth)));
+        }
+        return httpResponse;
     }
 }

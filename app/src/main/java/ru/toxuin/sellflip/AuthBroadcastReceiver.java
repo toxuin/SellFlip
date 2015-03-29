@@ -7,6 +7,6 @@ import android.content.Intent;
 public class AuthBroadcastReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        BaseActivity.setContent(new LogInFragment());
+        BaseActivity.showLogInDialog();
     }
 }
