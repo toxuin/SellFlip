@@ -14,10 +14,10 @@
 
         <FrameLayout
             android:id="@+id/camera_preview"
-            android:layout_height="fill_parent"
-            android:layout_width="fill_parent">
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent">
 
-            <SurfaceView
+        <SurfaceView
                 android:id="@+id/surface_preview"
                 android:layout_width="fill_parent"
                 android:layout_height="fill_parent"/>
@@ -27,13 +27,13 @@
             android:id="@+id/recordIndicator"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
             android:layout_margin="10dp"
             android:gravity="center"
             android:textColor="@android:color/holo_red_light"
             android:textSize="28sp"
-            fontawesometext:fa_icon="fa-camera-retro"
-            android:layout_alignParentBottom="true"
-            android:visibility="gone"/>
+            android:visibility="gone"
+            fontawesometext:fa_icon="fa-camera-retro"/>
     </RelativeLayout>
 
 
@@ -84,7 +84,6 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="Capture"
-
                     />
 
             </TableRow>

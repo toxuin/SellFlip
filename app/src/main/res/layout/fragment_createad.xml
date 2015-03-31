@@ -32,10 +32,10 @@
             <ImageView
                 android:id="@+id/adPic"
                 android:layout_width="fill_parent"
-                android:layout_height="150dp"
+                android:layout_height="@dimen/ad_pic_preview_height"
                 android:adjustViewBounds="true"
-                android:scaleType="centerCrop"
-                android:contentDescription="@string/create_ad_image"/>
+                android:contentDescription="@string/create_ad_image"
+                android:scaleType="centerCrop"/>
 
             <TextView
                 android:id="@+id/adTitle"
@@ -55,12 +55,12 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_alignBottom="@+id/adPic"
-                android:layout_alignParentRight="true"
                 android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
                 android:layout_margin="6dp"
                 android:background="@drawable/circle_button"
-                android:src="@drawable/ic_image_photo_camera"
-                android:contentDescription="@string/create_take_video"/>
+                android:contentDescription="@string/create_take_video"
+                android:src="@drawable/ic_image_photo_camera"/>
         </RelativeLayout>
 
         <LinearLayout
@@ -69,7 +69,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-        <TableRow
+            <TableRow
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:gravity="center_horizontal"
@@ -141,12 +141,12 @@
                     />
 
                 <RadioGroup
-                        android:orientation="horizontal"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="start"
-                        android:gravity="center_vertical"
-                        android:baselineAligned="true">
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="start"
+                    android:baselineAligned="true"
+                    android:gravity="center_vertical"
+                    android:orientation="horizontal">
 
                     <RadioButton
                         android:id="@+id/radioButtonFree"
@@ -171,18 +171,18 @@
             <TextView
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:text="@string/create_description"
-                android:textAppearance="?android:attr/textAppearanceMedium"
-                android:layout_marginTop="10dp"/>
+                android:textAppearance="?android:attr/textAppearanceMedium"/>
 
             <EditText
                 android:id="@+id/create_description"
-                android:maxLines="10"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:inputType="textImeMultiLine|textMultiLine"
                 android:maxHeight="100dp"
-                android:layout_marginTop="10dp"/>
+                android:maxLines="10"/>
 
             <TextView
                 android:layout_width="fill_parent"
@@ -198,26 +198,27 @@
             <TableRow
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
                 android:baselineAligned="true"
-                android:gravity="center_vertical"
-                android:layout_marginTop="10dp">
+                android:gravity="center_vertical">
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/create_location"
                     android:textAppearance="?android:attr/textAppearanceMedium"
-                        />
+                    />
 
 
-                <Button android:id="@+id/create_location_btn"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_margin="5dp"
-                        android:layout_weight="1"
-                        android:gravity="start|center_vertical"
-                        android:background="@android:drawable/btn_dropdown"
-                        android:text="..." />
+                <Button
+                    android:id="@+id/create_location_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1"
+                    android:background="@android:drawable/btn_dropdown"
+                    android:gravity="start|center_vertical"
+                    android:text="..."/>
 
             </TableRow>
 
@@ -259,8 +260,8 @@
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="10dp"
-                android:gravity="center_vertical"
-                android:baselineAligned="true">
+                android:baselineAligned="true"
+                android:gravity="center_vertical">
 
                 <TextView
                     android:layout_width="wrap_content"

@@ -6,9 +6,9 @@
     android:layout_width="fill_parent"
     android:layout_height="wrap_content"
     android:background="@color/single_ad_secondary"
+    android:minHeight="@dimen/min_ad_box_height"
     android:orientation="vertical"
-    android:padding="10dp"
-    android:minHeight="280dp">
+    android:padding="10dp">
 
     <TextView
         android:id="@+id/adDate"
@@ -23,12 +23,12 @@
         android:textStyle="italic"/>
 
     <TableRow
+        android:id="@+id/titleRow"
         android:layout_width="fill_parent"
         android:layout_height="wrap_content"
         android:background="#22000000"
         android:gravity="center_horizontal"
-        android:padding="10dp"
-        android:id="@+id/titleRow">
+        android:padding="10dp">
 
         <TextView
             android:id="@+id/adTitle"
@@ -45,14 +45,16 @@
         android:layout_height="wrap_content"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_below="@+id/titleRow"
+        android:layout_marginTop="10dp"
         android:text="Description"
-        android:textSize="16sp" android:layout_below="@+id/titleRow" android:layout_marginTop="10dp"/>
+        android:textSize="16sp"/>
 
     <View
         android:id="@+id/line"
         android:layout_width="fill_parent"
         android:layout_height="2dip"
-        android:layout_above="@+id/adAddress"
+        android:layout_below="@+id/adDescription"
         android:layout_centerHorizontal="true"
         android:layout_marginBottom="5dp"
         android:layout_marginTop="5dp"
@@ -62,9 +64,9 @@
         android:id="@+id/adAddress"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_above="@+id/adPhone"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_below="@+id/line"
         android:text="Close to: "
         android:textAppearance="?android:attr/textAppearanceSmall"
         android:textSize="12sp"/>
@@ -85,9 +87,9 @@
         android:id="@+id/adPrice"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
         android:layout_alignParentLeft="true"
         android:layout_alignParentStart="true"
+        android:layout_below="@+id/adAddress"
         android:text="Price"
         android:textAppearance="?android:attr/textAppearanceMedium"
         android:textStyle="bold"/>

@@ -62,12 +62,6 @@ public class AuthDialog extends DialogFragment {
 
                     }
                 })
-                .setNeutralButton("Sign up", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int id) {
-
-                    }
-                })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
                         AuthDialog.this.getDialog().cancel();

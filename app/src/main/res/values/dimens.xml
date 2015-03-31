@@ -6,4 +6,8 @@
     <dimen name="menu_shadow_offset">15dp</dimen>
     <dimen name="menu_swipe_threshold">60dp</dimen>
     <dimen name="font_awesome_icon_video_size">26sp</dimen>
+    <dimen name="min_ad_box_height">150dp</dimen>
+    <dimen name="video_preview_height">300dp</dimen>
+    <dimen name="ad_pic_preview_height">150dp</dimen>
+    <dimen name="card_result_picture_height">150dp</dimen>
 </resources>
