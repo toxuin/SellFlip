@@ -3,64 +3,70 @@
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
               android:background="#F3F3F3"
+              android:gravity="center_vertical"
               android:orientation="horizontal"
-              android:padding="5dp"
-              android:gravity="center_vertical">
+              android:padding="5dp">
 
     <android.support.v7.widget.CardView xmlns:card_view="http://schemas.android.com/apk/res-auto"
-                                        android:layout_gravity="center"
                                         android:layout_width="fill_parent"
                                         android:layout_height="wrap_content"
-                                        card_view:cardCornerRadius="4dp"
+                                        android:layout_gravity="center"
                                         android:layout_margin="6dp"
-                                        android:clickable="true">
+                                        android:clickable="true"
+                                        card_view:cardCornerRadius="4dp">
 
-        <LinearLayout android:layout_width="fill_parent"
-                      android:layout_height="fill_parent"
-                      android:orientation="vertical"
-                      android:id="@+id/item_card"
-                      android:background="@color/odd_card"
-                      android:padding="16dp">
+        <LinearLayout
+            android:id="@+id/item_card"
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:background="@color/odd_card"
+            android:orientation="vertical"
+            android:padding="16dp">
 
-            <ImageView android:id="@+id/item_thumbnail"
-                       android:layout_width="match_parent"
-                       android:layout_height="200dp"
-                       android:scaleType="fitCenter"
-                       android:layout_marginBottom="6dp"/>
+            <ImageView
+                android:id="@+id/item_thumbnail"
+                android:layout_width="match_parent"
+                android:layout_height="@dimen/card_result_picture_height"
+                android:layout_marginBottom="6dp"
+                android:scaleType="fitCenter"/>
 
-            <TextView android:id="@+id/item_title"
-                      android:layout_width="fill_parent"
-                      android:layout_height="wrap_content"
-                      android:textSize="18sp"
-                      android:textStyle="bold"
-                      android:text="Super Abusive Ad Title: TITLE TITLE TITLE"
-                      android:maxLines="2"/>
+            <TextView
+                android:id="@+id/item_title"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:maxLines="2"
+                android:text="Super Abusive Ad Title: TITLE TITLE TITLE"
+                android:textSize="18sp"
+                android:textStyle="bold"/>
 
             <LinearLayout
-                    android:orientation="horizontal"
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:gravity="center_vertical"
+                android:orientation="horizontal">
+
+                <TextView
+                    android:id="@+id/item_price"
                     android:layout_width="fill_parent"
-                    android:layout_height="fill_parent" android:gravity="center_vertical">
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:maxLines="1"
+                    android:text="$100.00"
+                    android:textSize="18sp"
+                    android:textStyle="bold"/>
 
-                <TextView android:id="@+id/item_price"
-                          android:layout_width="fill_parent"
-                          android:layout_height="wrap_content"
-                          android:textSize="18sp"
-                          android:textStyle="bold"
-                          android:text="$100.00"
-                          android:maxLines="1" android:layout_weight="1"/>
-
-                <TextView android:id="@+id/item_date"
-                          android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          android:textSize="16sp"
-                          android:text="371 Febromarchuary 20145"
-                          android:maxLines="1" android:layout_marginLeft="6dp"/>
+                <TextView
+                    android:id="@+id/item_date"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginLeft="6dp"
+                    android:maxLines="1"
+                    android:text="371 Febromarchuary 20145"
+                    android:textSize="16sp"/>
             </LinearLayout>
 
 
         </LinearLayout>
-
-
 
 
     </android.support.v7.widget.CardView>

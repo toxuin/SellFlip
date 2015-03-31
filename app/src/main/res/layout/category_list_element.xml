@@ -2,29 +2,29 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
-              android:orientation="horizontal"
               android:gravity="center_vertical"
+              android:orientation="horizontal"
               android:padding="16dp">
 
     <ImageView android:id="@+id/cat_list_backwards"
                android:layout_width="30dp"
                android:layout_height="30dp"
-               android:contentDescription="expand"
-               android:visibility="gone"
-               android:src="@drawable/ic_action_previous_item"/>
+               android:contentDescription="@string/expand"
+               android:src="@drawable/ic_action_previous_item"
+               android:visibility="gone"/>
 
     <TextView android:id="@+id/cat_list_caption"
               android:layout_width="wrap_content"
               android:layout_height="match_parent"
-              android:text="CAPTION"
               android:layout_weight="1"
-              android:gravity="center_vertical"/>
+              android:gravity="center_vertical"
+              android:text="CAPTION"/>
 
     <ImageView android:id="@+id/cat_list_forwards"
                android:layout_width="30dp"
                android:layout_height="30dp"
-               android:contentDescription="expand"
-               android:visibility="gone"
-               android:src="@drawable/ic_action_expand"/>
+               android:contentDescription="@string/expand"
+               android:src="@drawable/ic_action_expand"
+               android:visibility="gone"/>
 
 </LinearLayout>

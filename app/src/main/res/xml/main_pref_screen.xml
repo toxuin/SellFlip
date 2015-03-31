@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<preference-headers xmlns:android="http://schemas.android.com/apk/res/android">
+    <header
+        android:fragment="ru.toxuin.sellflip.fragments.PrefsFragment"
+        android:summary="Check this out"
+        android:title="Perf1"/>
+    <extra
+        android:name="settings"
+        android:value="perf1"/>
+    <header
+        android:fragment="ru.toxuin.sellflip.fragments.PrefsFragment"
+        android:summary="But it is the copy of the first one"
+        android:title="Perf2">
+        <!-- key/value pairs can be included as arguments for the fragment. -->
+        <extra
+            android:name="settings"
+            android:value="perf2"/>
+    </header>
+</preference-headers>

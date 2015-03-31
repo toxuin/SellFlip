@@ -7,15 +7,16 @@
     android:fillViewport="true"
     android:overScrollMode="never">
 
-    <LinearLayout android:layout_width="fill_parent"
-                  android:layout_height="wrap_content"
-                  android:background="@color/single_ad_background"
-                  android:orientation="vertical">
+    <LinearLayout
+        android:layout_width="fill_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/single_ad_background"
+        android:orientation="vertical">
 
         <FrameLayout
             android:id="@+id/videoSurfaceContainer"
             android:layout_width="match_parent"
-            android:layout_height="300dp">
+            android:layout_height="@dimen/video_preview_height">
 
             <SurfaceView
                 android:id="@+id/videoSurface"
@@ -63,7 +64,7 @@
                     android:id="@+id/full_screen_icon"
                     android:layout_width="0dp"
                     android:layout_height="wrap_content"
-                    android:layout_gravity="right"
+                    android:layout_gravity="end"
                     android:layout_weight="1"
                     android:padding="10dp"
                     android:textSize="@dimen/font_awesome_icon_video_size"
@@ -73,69 +74,83 @@
             </LinearLayout>
         </LinearLayout>
 
-        <ScrollView android:layout_width="match_parent"
-                    android:layout_height="wrap_content">
-            <LinearLayout android:layout_width="match_parent"
-                          android:layout_height="wrap_content"
-                          android:orientation="vertical">
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
 
 
-                <LinearLayout android:layout_width="fill_parent"
-                              android:layout_height="wrap_content"
-                              android:layout_margin="10dp"
-                              android:background="@android:drawable/dialog_holo_light_frame">
+                <LinearLayout
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="10dp"
+                    android:background="@android:drawable/dialog_holo_light_frame">
 
                     <include layout="@layout/single_ad_details_partial"/>
 
                 </LinearLayout>
 
 
-                <TextView android:layout_width="wrap_content"
-                          android:layout_height="wrap_content"
-                          style="@style/Base.TextAppearance.AppCompat.Small"
-                          android:text="@string/address_warning" android:layout_marginLeft="10dp" android:layout_marginRight="10dp"
-                          android:layout_marginBottom="10dp" android:textStyle="italic" android:textSize="12sp"/>
+                <TextView
+                    style="@style/Base.TextAppearance.AppCompat.Small"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="10dp"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:padding="10dp"
+                    android:text="@string/address_warning"
+                    android:textSize="12sp"
+                    android:textStyle="italic"/>
 
 
-                <TableRow android:layout_width="fill_parent"
-                          android:layout_height="fill_parent"
-                          android:layout_margin="10dp"
-                          android:gravity="bottom">
-
-                    <com.beardedhen.androidbootstrap.BootstrapButton
-                            android:id="@+id/contact_mail_btn"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:text="Contact Seller"
-                            android:textSize="16sp"
-                            bootstrap:bb_icon_left="fa-envelope"
-                            bootstrap:bb_type="success"
-                            />
+                <TableRow
+                    android:layout_width="fill_parent"
+                    android:layout_height="fill_parent"
+                    android:layout_margin="10dp"
+                    android:gravity="bottom">
 
                     <com.beardedhen.androidbootstrap.BootstrapButton
-                            android:id="@+id/contact_phone_btn"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:text="Contact Seller"
-                            android:textSize="16sp"
-                            android:visibility="gone"
-                            bootstrap:bb_icon_left="fa-phone"
-                            bootstrap:bb_type="success"
-                            />
+                        android:id="@+id/contact_mail_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:text="@string/email_seller"
+                        android:textSize="16sp"
+                        bootstrap:bb_icon_left="fa-envelope"
+                        bootstrap:bb_roundedCorners="true"
+                        bootstrap:bb_type="warning"
+                        />
 
                     <com.beardedhen.androidbootstrap.BootstrapButton
-                            android:id="@+id/mapButton"
-                            android:layout_width="wrap_content"
-                            android:layout_height="wrap_content"
-                            android:layout_margin="8dp"
-                            android:text="Open map"
-                            android:textSize="16sp"
-                            android:visibility="gone"
-                            bootstrap:bb_icon_left="fa-map-marker"
-                            bootstrap:bb_type="primary"
-                            />
+                        android:id="@+id/contact_phone_btn"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:text="@string/contact_seller"
+                        android:textSize="16sp"
+                        android:visibility="gone"
+                        bootstrap:bb_icon_left="fa-phone"
+                        bootstrap:bb_roundedCorners="true"
+                        bootstrap:bb_type="success"
+                        />
+
+                    <com.beardedhen.androidbootstrap.BootstrapButton
+                        android:id="@+id/mapButton"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_margin="8dp"
+                        android:text="@string/open_map"
+                        android:textSize="16sp"
+                        android:visibility="gone"
+                        bootstrap:bb_icon_left="fa-map-marker"
+                        bootstrap:bb_roundedCorners="true"
+                        bootstrap:bb_type="primary"
+                        />
 
                 </TableRow>
 

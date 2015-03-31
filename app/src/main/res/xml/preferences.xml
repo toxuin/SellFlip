@@ -1,0 +1,41 @@
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <PreferenceCategory
+        android:key="pref_key_storage_settings"
+        android:title="Some title">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="pref_key_auto_delete"
+            android:summary="This is a summary"
+            android:title="Title"/>
+        <Preference
+            android:dependency="pref_key_auto_delete"
+            android:icon="@android:drawable/btn_dialog"
+            android:key="pref_key_sms_delete_limit"
+            android:summary="Summary"
+            android:title="Another title"/>
+        <Preference
+            android:dependency="pref_key_auto_delete"
+            android:key="pref_key_mms_delete_limit"
+            android:summary="Saddas"
+            android:title="Again title"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="pref_key_storage_settings"
+        android:title="This is another one">
+        <CheckBoxPreference
+            android:defaultValue="false"
+            android:key="pref_key_auto_delete"
+            android:summary="This is a summary"
+            android:title="Title"/>
+        <Preference
+            android:dependency="pref_key_auto_delete"
+            android:key="pref_key_sms_delete_limit"
+            android:summary="Summary"
+            android:title="Another title"/>
+        <Preference
+            android:dependency="pref_key_auto_delete"
+            android:key="pref_key_mms_delete_limit"
+            android:summary="Saddas"
+            android:title="Again title"/>
+    </PreferenceCategory>
+</PreferenceScreen>

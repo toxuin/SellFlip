@@ -24,6 +24,7 @@ import com.facebook.widget.ProfilePictureView;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
 import ru.toxuin.sellflip.entities.SideMenuItem;
+import ru.toxuin.sellflip.fragments.PrefsFragment;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
 import ru.toxuin.sellflip.library.OnBackPressedListener;
 import ru.toxuin.sellflip.restapi.ApiConnector;
@@ -191,7 +192,11 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
         }));
 
         leftMenuAdapter.add(new SideMenuItem("My Favourites", "fa-heart", null));
-        leftMenuAdapter.add(new SideMenuItem("Settings", "fa-cogs", null));
+        leftMenuAdapter.add(new SideMenuItem("Settings", "fa-cogs", new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                BaseActivity.setContent(new PrefsFragment());
+            }
+        }));
 
         leftMenuList.setAdapter(leftMenuAdapter);
 
@@ -218,7 +223,6 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
 
     private void onSessionStateChange(final Session session, SessionState state, Exception exception) {
         if (session.isClosed()) {
-
             facebook_container.setVisibility(View.GONE);
             facebook_profile_pic.setProfileId(null);
             facebook_username.setText("");

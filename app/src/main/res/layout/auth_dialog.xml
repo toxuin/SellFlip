@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:bootstrap="http://schemas.android.com/apk/res-auto"
               android:layout_width="wrap_content"
               android:layout_height="wrap_content"
               android:orientation="vertical">
@@ -12,7 +13,7 @@
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
         android:layout_marginTop="16dp"
-        android:hint="Username"
+        android:hint="@string/username"
         android:inputType="text"/>
 
     <EditText
@@ -24,8 +25,19 @@
         android:layout_marginRight="4dp"
         android:layout_marginTop="4dp"
         android:fontFamily="sans-serif"
-        android:hint="Password"
+        android:hint="@string/password"
         android:inputType="textPassword"/>
+
+    <TextView
+        android:id="@+id/forgotPassText"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:layout_marginLeft="10dp"
+        android:layout_marginRight="4dp"
+        android:text="@string/forgot_password"
+        android:textAppearance="?android:attr/textAppearanceSmall"
+        android:textColor="@android:color/holo_blue_light"/>
 
     <com.facebook.widget.LoginButton
         android:id="@+id/authButton"
@@ -38,6 +50,19 @@
         android:layout_marginTop="4dp"
         />
 
+    <com.beardedhen.androidbootstrap.BootstrapButton
+        android:id="@+id/registerNewAcc"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="16dp"
+        android:text="@string/register_new_acc"
+        android:textSize="15sp"
+        bootstrap:bb_icon_left="fa-user"
+        bootstrap:bb_roundedCorners="true"
+        bootstrap:bb_type="primary"
+        />
+
     <TextView
         android:id="@+id/failureText"
         android:layout_width="wrap_content"
@@ -46,7 +71,7 @@
         android:layout_marginBottom="16dp"
         android:layout_marginLeft="4dp"
         android:layout_marginRight="4dp"
-        android:text="Failed to Authenticate"
+        android:text="@string/fail_auth"
         android:textAppearance="?android:attr/textAppearanceLarge"
         android:textColor="@android:color/holo_red_light"
         android:visibility="gone"/>
