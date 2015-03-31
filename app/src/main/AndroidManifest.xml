@@ -58,6 +58,9 @@
             android:label="@string/app_name"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"/>
 
+        <service android:name=".restapi.SellFlipSpiceService"
+                 android:exported="false" />
+
     </application>
 
 </manifest>

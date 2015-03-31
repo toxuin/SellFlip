@@ -1,9 +1,11 @@
 package ru.toxuin.sellflip.library;
 
+import android.app.ProgressDialog;
+import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.LayerDrawable;
-import android.location.Geocoder;
 import android.os.AsyncTask;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -27,23 +29,24 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Header;
-import retrofit.client.Response;
+import com.octo.android.robospice.SpiceManager;
+import com.octo.android.robospice.persistence.DurationInMillis;
+import com.octo.android.robospice.persistence.exception.SpiceException;
+import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.BaseActivity;
 import ru.toxuin.sellflip.R;
+import ru.toxuin.sellflip.SearchResultFragment;
 import ru.toxuin.sellflip.SingleAdFragment;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.SearchResultAdapter.SearchResultViewHolder;
-import ru.toxuin.sellflip.restapi.ApiConnector;
+import ru.toxuin.sellflip.restapi.spicerequests.ListAdsRequest;
 
 public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
     private static final String TAG = "SEARCH_RESULT_ADAPTER";
     private static Context context;
     private final List<SingleAd> itemsList;
-    private int totalServerItems = 0;
     private int currentPage = 0;
+    SpiceManager manager;
 
     public OnScrollListener searchResultsEndlessScrollListener = new OnScrollListener() {
         private int previousTotal = 0;
@@ -64,8 +67,8 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
                     currentPage++;
                 }
             }
-            if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + ApiConnector.getItemsOnPage())) {
-                if (currentPage * ApiConnector.getItemsOnPage() < totalServerItems) {
+            if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + ListAdsRequest.getItemsPerPage())) {
+                if (currentPage * ListAdsRequest.getItemsPerPage() < SearchResultFragment.getTotalServerItems()) {
                     requestData(currentPage);
                     loading = true;
                 }
@@ -75,15 +78,17 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
     private LinearLayoutManager layoutManager;
     private String category;
 
-    public SearchResultAdapter(Context context) {
+    public SearchResultAdapter(Context context, SpiceManager manager) {
         super();
         SearchResultAdapter.context = context;
+        this.manager = manager;
         this.itemsList = new LinkedList<>();
     }
 
     public void requestData(int page) {
-        ApiConnector api = ApiConnector.getInstance(context);
+        //ApiConnector api = ApiConnector.getInstance(context);
 
+        /*
         LoadingCallback<List<SingleAd>> callback = new LoadingCallback<List<SingleAd>>(context) {
             @Override
             public void onSuccess(List<SingleAd> allAds, Response response) {
@@ -106,9 +111,34 @@ public class SearchResultAdapter extends Adapter<SearchResultViewHolder> {
             public void onFailure(RetrofitError error) {
                 Toast.makeText(context, "ERROR: " + error.getMessage(), Toast.LENGTH_SHORT).show();
             }
-        };
+        };*/
 
-        api.requestTopAdsPaged(category, page, callback);
+        //api.requestTopAdsPaged(category, page, callback);
+
+        ListAdsRequest request = new ListAdsRequest(category, page);
+
+        final ProgressDialog loading = new ProgressDialog(context);
+        loading.setTitle("Loading");
+        loading.setIndeterminate(true);
+        loading.setMessage("Wait while loading...");
+        loading.show();
+
+        manager.execute(request, request.getCacheKey(), DurationInMillis.ONE_MINUTE, new RequestListener<SingleAd.List>() {
+            @Override
+            public void onRequestSuccess(SingleAd.List allAds) {
+                loading.dismiss();
+                itemsList.addAll(allAds);
+                notifyDataSetChanged();
+                Log.d("LIST_ADAPTER", "GOT " + allAds.size() + " ITEMS!");
+            }
+
+            @Override
+            public void onRequestFailure(SpiceException spiceException) {
+                loading.dismiss();
+                Toast.makeText(context, "ERROR: " + spiceException.getMessage(), Toast.LENGTH_SHORT).show();
+                spiceException.printStackTrace();
+            }
+        });
     }
 
     @Override

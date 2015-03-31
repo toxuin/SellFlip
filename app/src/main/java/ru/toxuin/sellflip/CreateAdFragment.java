@@ -39,17 +39,20 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Set;
 
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import com.octo.android.robospice.SpiceManager;
+import com.octo.android.robospice.persistence.exception.SpiceException;
+import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.entities.Coordinates;
 import ru.toxuin.sellflip.entities.SingleAd;
+import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.library.TaggingAdapter;
 import ru.toxuin.sellflip.library.Utils;
-import ru.toxuin.sellflip.restapi.ApiConnector;
+import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
+import ru.toxuin.sellflip.restapi.spicerequests.CreateAdRequest;
+import ru.toxuin.sellflip.restapi.spicerequests.VideoUploadRequest;
 
 
-public class CreateAdFragment extends Fragment {
+public class CreateAdFragment extends SpiceFragment {
     private static final String TAG = "CREATE_AD_FRAG";
     private static final int MAP_ACTIVITY_RESULT = 90;
     private View rootView;
@@ -63,6 +66,7 @@ public class CreateAdFragment extends Fragment {
     private Button locationSelectBtn;
     private TaggingAdapter<Coordinates> locationAdapter;
     private String category;
+    protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
 
     public CreateAdFragment() {
     }
@@ -116,13 +120,16 @@ public class CreateAdFragment extends Fragment {
         frameSeekBar.setMax((int) Utils.getVideoDuration(filename) * 1000);
 
         frameSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, final int progress, boolean fromUser) {
                 frameGrabHandler = new Handler();
                 frameGrabberThread = new Thread(new Runnable() {
-                    @Override public void run() {
+                    @Override
+                    public void run() {
                         final Bitmap bmp = Utils.getVideoFrame(filename, progress);
                         frameGrabHandler.post(new Runnable() {
-                            @Override public void run() {
+                            @Override
+                            public void run() {
                                 adPic.setImageBitmap(bmp);
                             }
                         });
@@ -130,14 +137,16 @@ public class CreateAdFragment extends Fragment {
                 });
             }
 
-            @Override public void onStartTrackingTouch(SeekBar seekBar) {
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
                 if (frameGrabberThread != null) {
                     frameGrabHandler.removeCallbacks(frameGrabberThread);
                     frameGrabberThread = null;
                 }
             }
 
-            @Override public void onStopTrackingTouch(SeekBar seekBar) {
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
                 if (frameGrabberThread != null) {
                     frameGrabberThread.start();
                 }
@@ -169,8 +178,10 @@ public class CreateAdFragment extends Fragment {
             public void beforeTextChanged(CharSequence s, int start, int before, int count) {
                 if (s.length() > 0) oldValue = s.toString();
             }
+
             @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+            }
 
             @Override
             public void afterTextChanged(Editable s) {
@@ -270,9 +281,11 @@ public class CreateAdFragment extends Fragment {
                 String phone = phoneEdit.getText().toString();
                 String email = emailEdit.getText().toString();
 
-                ApiConnector.getInstance(getActivity()).createNewAd(new SingleAd(null, title, price, email, phone, category, description, coord, null), new Callback<SingleAd>() {
+                SingleAd singleAd = new SingleAd(null, title, price, email, phone, category, description, coord, null);
+                CreateAdRequest request = new CreateAdRequest(singleAd);
+                spiceManager.execute(request, new RequestListener<SingleAd>() {
                     @Override
-                    public void success(final SingleAd newAd, Response response) {
+                    public void onRequestSuccess(final SingleAd newAd) {
                         Log.d(TAG, "CREATED AD, STARTING VIDEO UPLOAD");
 
                         SuperToast superToast = new SuperToast(rootView.getContext().getApplicationContext(), Style.getStyle(Style.BLUE, SuperToast.Animations.POPUP));
@@ -281,41 +294,35 @@ public class CreateAdFragment extends Fragment {
                         superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
                         superToast.show();
 
-                        ApiConnector.getInstance(getActivity()).uploadVideo(newAd.getId(), filename, new Callback<Void>() {
+                        VideoUploadRequest videoRequest = new VideoUploadRequest(newAd.getId(), filename);
+                        spiceManager.execute(videoRequest, new RequestListener<Void>() {
                             @Override
-                            public void success(Void aVoid, Response response) {
+                            public void onRequestSuccess(Void aVoid) {
                                 Log.d(TAG, "UPLOADED VIDEO!");
                                 BaseActivity.setContent(new SingleAdFragment().setAdId(newAd.getId()));
                             }
 
                             @Override
-                            public void failure(RetrofitError error) {
+                            public void onRequestFailure(SpiceException spiceException) {
                                 Log.d(TAG, "ERROR UPLOADING VIDEO!");
                                 SuperToast superToast = new SuperToast(rootView.getContext().getApplicationContext(), Style.getStyle(Style.RED, SuperToast.Animations.POPUP));
                                 superToast.setDuration(SuperToast.Duration.VERY_SHORT);
                                 superToast.setText(getString(R.string.error_video_upload));
                                 superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
                                 superToast.show();
-                                error.printStackTrace();
+                                spiceException.printStackTrace();
                             }
                         });
-                        /*
-                        String url = "http://appfrontend-mavd.rhcloud.com/api/v1/adsItems/" + newAd.getId() + "/upload";
 
-                        VideoUploadTask uploader = new VideoUploadTask();
-                        uploader.setFileName(filename);
-                        uploader.setServerUrl(url);
-                        uploader.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR);
-                        */
+
                     }
 
                     @Override
-                    public void failure(RetrofitError error) {
-                        Log.d(TAG, "COULD NOT CREATE AD: " + error.getMessage());
-                        error.printStackTrace();
+                    public void onRequestFailure(SpiceException spiceException) {
+                        Log.d(TAG, "COULD NOT CREATE AD: " + spiceException.getMessage());
+                        spiceException.printStackTrace();
                     }
                 });
-                // TODO: CLOSE THIS ACTIVITY?
             }
         });
 
@@ -379,5 +386,10 @@ public class CreateAdFragment extends Fragment {
     @Override public void onDestroy() {
         super.onDestroy();
         new File(filename).delete();
+    }
+
+    @Override
+    public SpiceManager getSpiceManager() {
+        return spiceManager;
     }
 }

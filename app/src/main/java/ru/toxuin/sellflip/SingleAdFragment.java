@@ -28,14 +28,17 @@ import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import com.octo.android.robospice.SpiceManager;
+import com.octo.android.robospice.persistence.DurationInMillis;
+import com.octo.android.robospice.persistence.exception.SpiceException;
+import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.entities.SingleAd;
-import ru.toxuin.sellflip.library.LoadingCallback;
+import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.library.VideoControllerView;
-import ru.toxuin.sellflip.restapi.ApiConnector;
+import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
+import ru.toxuin.sellflip.restapi.spicerequests.SingleAdRequest;
 
-public class SingleAdFragment extends Fragment implements
+public class SingleAdFragment extends SpiceFragment implements
         SurfaceHolder.Callback, MediaPlayer.OnPreparedListener,
         VideoControllerView.MediaPlayerControl {
     public static final String TAG = "SINGLE_AD_UI";
@@ -52,6 +55,7 @@ public class SingleAdFragment extends Fragment implements
 
     private boolean playerReady = false;
     private boolean playerIsPreparing = false;
+    protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
 
     public SingleAdFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -72,8 +76,6 @@ public class SingleAdFragment extends Fragment implements
         String title = getString(R.string.search_results);
         getActivity().setTitle(title);
 
-        ApiConnector api = ApiConnector.getInstance(getActivity());
-
         if (adId == null) {
             throw new IllegalStateException("SingleAdFragment instantiated without id! Use .setAdId(\"lalal\")!");
         }
@@ -92,7 +94,8 @@ public class SingleAdFragment extends Fragment implements
 
         // SET UP VIDEO
         videoSurface.setOnTouchListener(new View.OnTouchListener() {
-            @Override public boolean onTouch(View v, MotionEvent event) {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
                 controller.show();
                 return false;
             }
@@ -112,13 +115,13 @@ public class SingleAdFragment extends Fragment implements
             e.printStackTrace();
         }
 
-        api.requestSingleAdForId(adId, new LoadingCallback<SingleAd>(getActivity()) {
+        SingleAdRequest request = new SingleAdRequest(adId);
+        spiceManager.execute(request, request.getCacheKey(), DurationInMillis.ONE_MINUTE * 5, new RequestListener<SingleAd>() {
             @Override
-            public void onSuccess(final SingleAd ad, Response response) {
+            public void onRequestSuccess(final SingleAd ad) {
                 thisAd = ad;
                 BaseActivity.setContentTitle(ad.getTitle());
 
-                // Set the fields
                 adTitle.setText(ad.getTitle());
                 adDescription.setText(ad.getDescription());
 
@@ -169,7 +172,7 @@ public class SingleAdFragment extends Fragment implements
                     contactPhoneBtn.setOnClickListener(new OnClickListener() {
                         @Override
                         public void onClick(View view) {
-                            String uri = "tel:" + ad.getPhone().trim() ;
+                            String uri = "tel:" + ad.getPhone().trim();
                             Intent intent = new Intent(Intent.ACTION_DIAL);
                             intent.setData(Uri.parse(uri));
                             startActivity(intent);
@@ -188,8 +191,8 @@ public class SingleAdFragment extends Fragment implements
             }
 
             @Override
-            public void onFailure(RetrofitError error) {
-                Toast.makeText(getActivity(), "ERROR: " + error.getMessage(), Toast.LENGTH_SHORT).show();
+            public void onRequestFailure(SpiceException spiceException) {
+                Toast.makeText(getActivity(), "ERROR: " + spiceException.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -303,5 +306,10 @@ public class SingleAdFragment extends Fragment implements
             playerReady = false;
             playerIsPreparing = false;
         }
+    }
+
+    @Override
+    public SpiceManager getSpiceManager() {
+        return spiceManager;
     }
 }

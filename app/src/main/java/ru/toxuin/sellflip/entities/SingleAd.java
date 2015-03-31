@@ -2,6 +2,7 @@ package ru.toxuin.sellflip.entities;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.util.ArrayList;
 import java.util.Date;
 
 public class SingleAd {
@@ -121,4 +122,6 @@ public class SingleAd {
     @Override public String toString() {
         return "Id: " + getId() + ", Title:" + getTitle() + ", Price:" + getPrice() + ", Date:" + getDate().toString();
     }
+
+    public static class List extends ArrayList<SingleAd> {}
 }

@@ -23,7 +23,8 @@ public class AuthRequestTask extends AsyncTask<String, String, String> {
         return this;
     }
 
-    @Override protected String doInBackground(String... params) {
+    @Override
+    protected String doInBackground(String... params) {
         // params[0] - token
         String secure_token = null;
 
@@ -68,9 +69,10 @@ public class AuthRequestTask extends AsyncTask<String, String, String> {
         return secure_token;
     }
 
-    @Override protected void onPostExecute(String secure_token) {
+    @Override
+    protected void onPostExecute(String secure_token) {
         if (secure_token != null) {
-            ApiConnector.getAuthHeaders().setAccessToken(secure_token);
+            SellFlipSpiceService.getAuthHeaders().setAccessToken(secure_token);
             listener.onAuthSuccess();
         } else {
             listener.onAuthFailure();

@@ -10,17 +10,20 @@ import android.widget.AdapterView;
 import android.widget.ListView;
 import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.Style;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import com.octo.android.robospice.SpiceManager;
+import com.octo.android.robospice.persistence.DurationInMillis;
+import com.octo.android.robospice.persistence.exception.SpiceException;
+import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.entities.Category;
 import ru.toxuin.sellflip.library.CategoryListAdapter;
-import ru.toxuin.sellflip.library.LoadingCallback;
 import ru.toxuin.sellflip.library.OnBackPressedListener;
-import ru.toxuin.sellflip.restapi.ApiConnector;
+import ru.toxuin.sellflip.library.SpiceFragment;
+import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
+import ru.toxuin.sellflip.restapi.spicerequests.CategoryRequest;
 
 import java.util.List;
 
-public class CategorySelectFragment extends Fragment implements OnBackPressedListener {
+public class CategorySelectFragment extends SpiceFragment implements OnBackPressedListener {
     private static final String TAG = "CATEGORY_UI";
     private View rootView;
 
@@ -31,6 +34,7 @@ public class CategorySelectFragment extends Fragment implements OnBackPressedLis
     ListView list;
     List<Category> categories;
     private boolean hintShown = false;
+    protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
 
     public CategorySelectFragment() {}
 
@@ -43,17 +47,15 @@ public class CategorySelectFragment extends Fragment implements OnBackPressedLis
         BaseActivity.setContentTitle("Select category");
         BaseActivity.registerBackPressedListener(this);
 
-        ApiConnector.getInstance(getActivity()).requestCategories(new LoadingCallback<List<Category>>(getActivity()) {
+        spiceManager.execute(new CategoryRequest(), CategoryRequest.getCacheKey(), DurationInMillis.ONE_WEEK, new RequestListener<Category.List>() {
             @Override
-            public void onSuccess(List<Category> cats, Response response) {
+            public void onRequestSuccess(Category.List cats) {
                 categories = cats;
                 drawList(null);
             }
-
-
             @Override
-            public void onFailure(RetrofitError error) {
-                error.printStackTrace();
+            public void onRequestFailure(SpiceException spiceException) {
+                spiceException.printStackTrace();
             }
         });
 
@@ -102,5 +104,10 @@ public class CategorySelectFragment extends Fragment implements OnBackPressedLis
         Category parent = adapter.findParent(categories, root);
         drawList(parent);
         return true;
+    }
+
+    @Override
+    public SpiceManager getSpiceManager() {
+        return spiceManager;
     }
 }

@@ -26,9 +26,9 @@ import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 import ru.toxuin.sellflip.entities.SideMenuItem;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
 import ru.toxuin.sellflip.library.OnBackPressedListener;
-import ru.toxuin.sellflip.restapi.ApiConnector;
 import ru.toxuin.sellflip.restapi.AuthRequestTask;
 import ru.toxuin.sellflip.restapi.AuthResponseListener;
+import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 
 public class BaseActivity extends ActionBarActivity implements AuthResponseListener {
 
@@ -222,7 +222,7 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
             facebook_container.setVisibility(View.GONE);
             facebook_profile_pic.setProfileId(null);
             facebook_username.setText("");
-            ApiConnector.getAuthHeaders().clearToken();
+            SellFlipSpiceService.getAuthHeaders().clearToken();
         } else {
             // perform AuthRequest to the back end
             new AuthRequestTask().registerResponseListener(this).execute(session.getAccessToken());

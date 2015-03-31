@@ -1,27 +1,36 @@
 package ru.toxuin.sellflip;
 
+import android.app.Activity;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import retrofit.Callback;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
+import com.octo.android.robospice.SpiceManager;
+import com.octo.android.robospice.persistence.DurationInMillis;
+import com.octo.android.robospice.persistence.exception.SpiceException;
+import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.entities.Category;
 import ru.toxuin.sellflip.library.CategoryListAdapter;
 import ru.toxuin.sellflip.library.SearchResultAdapter;
-import ru.toxuin.sellflip.restapi.ApiConnector;
+import ru.toxuin.sellflip.library.SpiceFragment;
+import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
+import ru.toxuin.sellflip.restapi.spicerequests.CategoryRequest;
 
 import java.util.List;
 
-public class SearchResultFragment extends Fragment {
+public class SearchResultFragment extends SpiceFragment {
     private static final String TAG = "SEARCH_RESULT_UI";
     RecyclerView recyclerView;
     SearchResultAdapter searchAdapter;
@@ -29,6 +38,9 @@ public class SearchResultFragment extends Fragment {
 
     List<Category> categories;
     CategoryListAdapter rightMenuAdapter;
+    private static int totalServerItems = 0;
+
+    protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
 
     public SearchResultFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -39,7 +51,7 @@ public class SearchResultFragment extends Fragment {
         getActivity().setTitle(title);
         recyclerView = (RecyclerView) rootView.findViewById(R.id.itemsList);
 
-        searchAdapter = new SearchResultAdapter(getActivity());
+        searchAdapter = new SearchResultAdapter(getActivity(), spiceManager);
         LinearLayoutManager manager = new LinearLayoutManager(getActivity());
         RecyclerView.ItemAnimator animator = new DefaultItemAnimator();
 
@@ -51,17 +63,17 @@ public class SearchResultFragment extends Fragment {
         searchAdapter.requestData(0);
 
         // RIGHT MENU STUFF
-        ApiConnector api = ApiConnector.getInstance(getActivity());
-        api.requestCategories(new Callback<List<Category>>() {
+
+        spiceManager.execute(new CategoryRequest(), CategoryRequest.getCacheKey(), DurationInMillis.ONE_WEEK, new RequestListener<Category.List>() {
             @Override
-            public void success(List<Category> cats, Response response) {
+            public void onRequestSuccess(Category.List cats) {
                 categories = cats;
                 drawRightMenu(null);
             }
 
             @Override
-            public void failure(RetrofitError error) {
-                error.printStackTrace();
+            public void onRequestFailure(SpiceException spiceException) {
+                spiceException.printStackTrace();
             }
         });
 
@@ -100,5 +112,32 @@ public class SearchResultFragment extends Fragment {
         }
     };
 
+    @Override
+    public void onResume() {
+        super.onResume();
+        getActivity().registerReceiver(totalItemsBroadcastReceiver, new IntentFilter(getActivity().getString(R.string.broadcast_intent_total_items)));
+    }
 
+    @Override
+    public void onPause() {
+        super.onPause();
+        getActivity().unregisterReceiver(totalItemsBroadcastReceiver);
+    }
+
+    @Override
+    public SpiceManager getSpiceManager() {
+        return spiceManager;
+    }
+
+    public static int getTotalServerItems() {
+        return totalServerItems;
+    }
+
+    private BroadcastReceiver totalItemsBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            totalServerItems = intent.getIntExtra("X-Total-Items", 0);
+            Log.d("TOTAL-BROADCAST", "GOT TOTAL ITEMS ON SERVER: " + totalServerItems);
+        }
+    };
 }
