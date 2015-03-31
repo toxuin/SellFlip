@@ -1,7 +1,10 @@
 package ru.toxuin.sellflip.restapi.spicerequests;
 
 import com.octo.android.robospice.request.retrofit.RetrofitSpiceRequest;
+import retrofit.mime.TypedFile;
 import ru.toxuin.sellflip.restapi.ApiService;
+
+import java.io.File;
 
 public class VideoUploadRequest extends RetrofitSpiceRequest<Void, ApiService> {
     private String adId;
@@ -15,6 +18,6 @@ public class VideoUploadRequest extends RetrofitSpiceRequest<Void, ApiService> {
 
     @Override
     public Void loadDataFromNetwork() throws Exception {
-        return null;
+        return getService().uploadVideo(new TypedFile("video/mp4", new File(fileName)), adId);
     }
 }

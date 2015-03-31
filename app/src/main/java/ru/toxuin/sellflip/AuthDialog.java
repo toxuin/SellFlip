@@ -19,10 +19,10 @@ import com.facebook.UiLifecycleHelper;
 import com.facebook.widget.LoginButton;
 
 import java.util.Arrays;
+import java.util.Collections;
 
 
 public class AuthDialog extends DialogFragment {
-    public static final String LOG_IN_ENDPOINT = "/login";
     public static final String TAG = "AuthDialog";
     ProgressDialog progress;
     private UiLifecycleHelper uiLifecycleHelper;
@@ -51,7 +51,7 @@ public class AuthDialog extends DialogFragment {
 
         LoginButton authButton = (LoginButton) rootView.findViewById(R.id.authButton);
         authButton.setFragment(this);
-        authButton.setReadPermissions(Arrays.asList("user_status"));
+        authButton.setReadPermissions(Collections.singletonList("user_status"));
 
         builder.setView(rootView)
                 // Add action buttons
@@ -130,7 +130,7 @@ public class AuthDialog extends DialogFragment {
         Session session = Session.getActiveSession();
         if (!session.isOpened() && !session.isClosed()) {
             session.openForRead(new Session.OpenRequest(this)
-                    .setPermissions(Arrays.asList("public_profile"))
+                    .setPermissions(Collections.singletonList("public_profile"))
                     .setCallback(statusCallback));
         } else {
             Session.openActiveSession(getActivity(), this, true, statusCallback);

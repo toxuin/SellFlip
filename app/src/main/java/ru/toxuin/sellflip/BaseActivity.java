@@ -23,16 +23,18 @@ import com.facebook.model.GraphUser;
 import com.facebook.widget.ProfilePictureView;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
 
+import com.octo.android.robospice.SpiceManager;
+import com.octo.android.robospice.persistence.exception.SpiceException;
+import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.entities.SideMenuItem;
 import ru.toxuin.sellflip.fragments.PrefsFragment;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
 import ru.toxuin.sellflip.library.OnBackPressedListener;
-import ru.toxuin.sellflip.restapi.AuthRequestTask;
-import ru.toxuin.sellflip.restapi.AuthResponseListener;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
+import ru.toxuin.sellflip.restapi.spicerequests.AuthRequest;
 
-public class BaseActivity extends ActionBarActivity implements AuthResponseListener {
 
+public class BaseActivity extends ActionBarActivity {
     public static final String TAG = "BaseActivity";
 
     private static final float MENU_FADE_DEGREE = 0.35f;
@@ -50,6 +52,7 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
     private TextView facebook_username;
     private LinearLayout facebook_container;
     private LeftMenuAdapter leftMenuAdapter;
+    protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
 
     private Session.StatusCallback statusCallback = new Session.StatusCallback() {
         @Override public void call(Session session, SessionState sessionState, Exception e) {
@@ -108,7 +111,8 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
         authDialog.show(fragmentManager, "Authenticate");
     }
 
-    @Override protected void onResume() {
+    @Override
+    protected void onResume() {
         super.onResume();
         Session session = Session.getActiveSession();
         if (session != null &&
@@ -116,6 +120,13 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
             onSessionStateChange(session, session.getState(), null);
         }
         uiLifecycleHelper.onResume();
+        spiceManager.start(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        spiceManager.shouldStop();
     }
 
     @Override
@@ -229,19 +240,21 @@ public class BaseActivity extends ActionBarActivity implements AuthResponseListe
             SellFlipSpiceService.getAuthHeaders().clearToken();
         } else {
             // perform AuthRequest to the back end
-            new AuthRequestTask().registerResponseListener(this).execute(session.getAccessToken());
-        }
-    }
+            AuthRequest request = new AuthRequest(session.getAccessToken());
+            spiceManager.execute(request, new RequestListener<AuthRequest.AccessToken>() {
+                @Override
+                public void onRequestSuccess(AuthRequest.AccessToken accessToken) {
+                    if (Session.getActiveSession().isOpened() && facebook_container.getVisibility() == View.GONE) {
+                        makeMeRequest(Session.getActiveSession());
+                    }
+                }
 
-    @Override public void onAuthSuccess() {
-        if (Session.getActiveSession().isOpened() &&
-                facebook_container.getVisibility() == View.GONE) {
-            makeMeRequest(Session.getActiveSession());
+                @Override
+                public void onRequestFailure(SpiceException spiceException) {
+                    spiceException.printStackTrace();
+                }
+            });
         }
-    }
-
-    @Override public void onAuthFailure() {
-        // authentication with back end failed
     }
 
     @Override

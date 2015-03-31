@@ -1,12 +1,10 @@
 package ru.toxuin.sellflip;
 
-import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -60,10 +58,9 @@ public class SearchResultFragment extends SpiceFragment {
         recyclerView.setLayoutManager(manager);
         searchAdapter.setLayoutManager(manager);
         recyclerView.setOnScrollListener(searchAdapter.searchResultsEndlessScrollListener);
-        searchAdapter.requestData(0);
+        // DATA IS FETCHED IN onStart
 
         // RIGHT MENU STUFF
-
         spiceManager.execute(new CategoryRequest(), CategoryRequest.getCacheKey(), DurationInMillis.ONE_WEEK, new RequestListener<Category.List>() {
             @Override
             public void onRequestSuccess(Category.List cats) {
@@ -113,13 +110,14 @@ public class SearchResultFragment extends SpiceFragment {
     };
 
     @Override
-    public void onResume() {
+    public void onStart() {
         super.onResume();
         getActivity().registerReceiver(totalItemsBroadcastReceiver, new IntentFilter(getActivity().getString(R.string.broadcast_intent_total_items)));
+        searchAdapter.requestData(0);
     }
 
     @Override
-    public void onPause() {
+    public void onStop() {
         super.onPause();
         getActivity().unregisterReceiver(totalItemsBroadcastReceiver);
     }
