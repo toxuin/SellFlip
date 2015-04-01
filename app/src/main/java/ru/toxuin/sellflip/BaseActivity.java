@@ -28,6 +28,7 @@ import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.entities.SideMenuItem;
 import ru.toxuin.sellflip.fragments.PrefsFragment;
+import ru.toxuin.sellflip.fragments.PrivacyPolicyDialogFragment;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
 import ru.toxuin.sellflip.library.OnBackPressedListener;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
@@ -110,6 +111,11 @@ public class BaseActivity extends ActionBarActivity {
     public static void showLogInDialog() {
         AuthDialog authDialog = new AuthDialog();
         authDialog.show(fragmentManager, "Authenticate");
+    }
+
+    public static void showPrivacyDialog() {
+        PrivacyPolicyDialogFragment privacyDialog = new PrivacyPolicyDialogFragment();
+        privacyDialog.show(fragmentManager, "Disclaimer");
     }
 
     @Override

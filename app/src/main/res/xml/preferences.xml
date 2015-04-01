@@ -1,41 +1,36 @@
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceCategory
-        android:key="pref_key_storage_settings"
-        android:title="Some title">
-        <CheckBoxPreference
-            android:defaultValue="false"
-            android:key="pref_key_auto_delete"
-            android:summary="This is a summary"
-            android:title="Title"/>
+        android:key="pref_key_general_settings"
+        android:title="General settings">
         <Preference
-            android:dependency="pref_key_auto_delete"
             android:icon="@android:drawable/btn_dialog"
-            android:key="pref_key_sms_delete_limit"
-            android:summary="Summary"
-            android:title="Another title"/>
+            android:key="pref_key_clear_cache"
+            android:summary="Will delete all the cached data like category list, saved images and videos, etc"
+            android:title="Empty cache"/>
         <Preference
-            android:dependency="pref_key_auto_delete"
-            android:key="pref_key_mms_delete_limit"
-            android:summary="Saddas"
-            android:title="Again title"/>
+            android:key="pref_key_logout"
+            android:summary="Logs you out of the app"
+            android:title="Log out"/>
     </PreferenceCategory>
     <PreferenceCategory
-        android:key="pref_key_storage_settings"
-        android:title="This is another one">
+        android:key="pref_key_display_settings"
+        android:title="Display settings">
+        <ListPreference
+            android:defaultValue="0"
+            android:key="pref_key_search_result_columns"
+            android:summary="Set to \'I don\'t care\' to let the app decide!"
+            android:title="Columns on page"
+            android:entries="@array/columns_on_page_preference_captions"
+            android:entryValues="@array/columns_on_page_preference"
+            android:dialogTitle="Columns on page"/>
         <CheckBoxPreference
             android:defaultValue="false"
-            android:key="pref_key_auto_delete"
-            android:summary="This is a summary"
-            android:title="Title"/>
+            android:key="pref_key_save_search"
+            android:summary="Your search history is only stored locally"
+            android:title="Save search history"/>
         <Preference
-            android:dependency="pref_key_auto_delete"
-            android:key="pref_key_sms_delete_limit"
-            android:summary="Summary"
-            android:title="Another title"/>
-        <Preference
-            android:dependency="pref_key_auto_delete"
-            android:key="pref_key_mms_delete_limit"
-            android:summary="Saddas"
-            android:title="Again title"/>
+            android:key="pref_key_privacy_policy"
+            android:summary="Application usage agreement"
+            android:title="Privacy policy"/>
     </PreferenceCategory>
 </PreferenceScreen>

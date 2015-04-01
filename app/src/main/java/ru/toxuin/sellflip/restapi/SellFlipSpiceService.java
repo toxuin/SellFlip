@@ -10,10 +10,15 @@ import retrofit.converter.GsonConverter;
 public class SellFlipSpiceService extends RetrofitGsonSpiceService {
     public static final String API_ENDPOINT_URL = "http://sellflip.me";
     private static ApiHeaders authHeaders = new ApiHeaders();
+    private static boolean wipeCache = true;
 
     @Override
     public void onCreate() {
         super.onCreate();
+        if (wipeCache) {
+            removeAllDataFromCache();
+            wipeCache = false;
+        }
         addRetrofitInterface(ApiService.class);
     }
 
@@ -41,5 +46,9 @@ public class SellFlipSpiceService extends RetrofitGsonSpiceService {
 
     public static ApiHeaders getAuthHeaders() {
         return authHeaders;
+    }
+
+    public static void clearCache() {
+        wipeCache = true;
     }
 }

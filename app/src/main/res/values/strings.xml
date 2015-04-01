@@ -70,4 +70,5 @@
     <string name="email_seller">Email Seller</string>
     <string name="fb_username">Firstname Last name</string>
     <string name="categories">Categories</string>
+    <string name="app_preference_key">sellflip_shared_preferences</string>
 </resources>

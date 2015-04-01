@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -14,6 +15,7 @@ import android.view.ViewGroup;
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import com.etsy.android.grid.StaggeredGridView;
+import com.etsy.android.grid.StaggeredGridViewSellFlip;
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
@@ -30,7 +32,7 @@ import java.util.List;
 public class SearchResultFragment extends SpiceFragment {
     private static final String TAG = "SEARCH_RESULT_UI";
     GridSearchAdapter searchAdapter;
-    private StaggeredGridView gridView;
+    private StaggeredGridViewSellFlip gridView;
     private View rootView;
 
     List<Category> categories;
@@ -46,12 +48,20 @@ public class SearchResultFragment extends SpiceFragment {
         rootView = inflater.inflate(R.layout.fragment_results, container, false);
         String title = getString(R.string.search_results);
         getActivity().setTitle(title);
-        gridView = (StaggeredGridView) rootView.findViewById(R.id.itemList);
+        gridView = (StaggeredGridViewSellFlip) rootView.findViewById(R.id.itemList);
 
         searchAdapter = new GridSearchAdapter(getActivity(), spiceManager);
         gridView.setAdapter(searchAdapter);
 
         gridView.setOnScrollListener(searchAdapter.searchResultsEndlessScrollListener);
+
+        SharedPreferences prefs = getActivity().getSharedPreferences(getActivity().getString(R.string.app_preference_key), Context.MODE_PRIVATE);
+        if (!prefs.getString("pref_key_search_result_columns", "0").equals("0")) {
+            gridView.setColumnCount(Integer.parseInt(prefs.getString("pref_key_search_result_columns", "0")), false);
+        }
+
+        Log.d(TAG, "COLUMNS: " + prefs.getString("pref_key_search_result_columns", "NOTHING"));
+
         // DATA IS FETCHED IN onStart
 
         // RIGHT MENU STUFF
