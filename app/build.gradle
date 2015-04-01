@@ -38,5 +38,6 @@ dependencies {
     compile 'com.facebook.android:facebook-android-sdk:3.21.1'
     compile group:'com.octo.android.robospice', name:'robospice', version:'1.4.9'
     compile group:'com.octo.android.robospice', name:'robospice-retrofit', version:'1.4.9'
+    compile 'com.etsy.android.grid:library:1.0.5'
     compile project(':android-support-v4-preferencefragment')
 }

@@ -10,7 +10,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.HttpGet;
 import ru.toxuin.sellflip.R;
-import ru.toxuin.sellflip.library.SearchResultAdapter.SearchResultViewHolder;
+import ru.toxuin.sellflip.library.GridSearchAdapter.SearchResultViewHolder;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -24,7 +24,7 @@ public class BitmapDownloader extends AsyncTask<SearchResultViewHolder, Void, Bi
         viewHolder = params[0];
         if (viewHolder.id == null) return null;
         BitmapCache cache = BitmapCache.getInstance();
-        String url = "http://lorempixel.com/600/200/technics/" + viewHolder.id + "/";
+        String url = "http://lorempixel.com/512/288/technics/" + viewHolder.id + "/";
         if (cache.getBitmapFromMemCache(url) == null) {
             final AndroidHttpClient client = AndroidHttpClient.newInstance("Android");
             final HttpGet getRequest = new HttpGet(url);

@@ -5,9 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.os.Bundle;
-import android.support.v7.widget.DefaultItemAnimator;
-import android.support.v7.widget.LinearLayoutManager;
-import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,13 +13,14 @@ import android.view.ViewGroup;
 
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import com.etsy.android.grid.StaggeredGridView;
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.entities.Category;
 import ru.toxuin.sellflip.library.CategoryListAdapter;
-import ru.toxuin.sellflip.library.SearchResultAdapter;
+import ru.toxuin.sellflip.library.GridSearchAdapter;
 import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.CategoryRequest;
@@ -30,8 +29,8 @@ import java.util.List;
 
 public class SearchResultFragment extends SpiceFragment {
     private static final String TAG = "SEARCH_RESULT_UI";
-    RecyclerView recyclerView;
-    SearchResultAdapter searchAdapter;
+    GridSearchAdapter searchAdapter;
+    private StaggeredGridView gridView;
     private View rootView;
 
     List<Category> categories;
@@ -47,17 +46,12 @@ public class SearchResultFragment extends SpiceFragment {
         rootView = inflater.inflate(R.layout.fragment_results, container, false);
         String title = getString(R.string.search_results);
         getActivity().setTitle(title);
-        recyclerView = (RecyclerView) rootView.findViewById(R.id.itemsList);
+        gridView = (StaggeredGridView) rootView.findViewById(R.id.itemList);
 
-        searchAdapter = new SearchResultAdapter(getActivity(), spiceManager);
-        LinearLayoutManager manager = new LinearLayoutManager(getActivity());
-        RecyclerView.ItemAnimator animator = new DefaultItemAnimator();
+        searchAdapter = new GridSearchAdapter(getActivity(), spiceManager);
+        gridView.setAdapter(searchAdapter);
 
-        recyclerView.setItemAnimator(animator);
-        recyclerView.setAdapter(searchAdapter);
-        recyclerView.setLayoutManager(manager);
-        searchAdapter.setLayoutManager(manager);
-        recyclerView.setOnScrollListener(searchAdapter.searchResultsEndlessScrollListener);
+        gridView.setOnScrollListener(searchAdapter.searchResultsEndlessScrollListener);
         // DATA IS FETCHED IN onStart
 
         // RIGHT MENU STUFF
@@ -73,6 +67,13 @@ public class SearchResultFragment extends SpiceFragment {
                 spiceException.printStackTrace();
             }
         });
+
+
+        DisplayMetrics displayMetrics = getActivity().getResources().getDisplayMetrics();
+        float dpHeight = displayMetrics.heightPixels / displayMetrics.density;
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+        Log.d(TAG, "!!!!! SCREEN WIDTH: " + dpWidth);
+
 
         return rootView;
     }
@@ -111,13 +112,13 @@ public class SearchResultFragment extends SpiceFragment {
 
     @Override
     public void onStart() {
-        super.onResume();
+        super.onStart();
         getActivity().registerReceiver(totalItemsBroadcastReceiver, new IntentFilter(getActivity().getString(R.string.broadcast_intent_total_items)));
         searchAdapter.requestData(0);
     }
 
     @Override
-    public void onStop() {
+    public void onPause() {
         super.onPause();
         getActivity().unregisterReceiver(totalItemsBroadcastReceiver);
     }

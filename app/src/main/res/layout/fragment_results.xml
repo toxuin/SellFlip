@@ -1,7 +1,9 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.v7.widget.RecyclerView
+<com.etsy.android.grid.StaggeredGridView
         xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
-        android:id="@+id/itemsList"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        android:id="@+id/itemList"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:layout_height="match_parent"
+        app:item_margin="8dp"
+        app:column_count="@integer/search_result_columns" />

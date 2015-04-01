@@ -8,7 +8,7 @@ import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
 
 public class SellFlipSpiceService extends RetrofitGsonSpiceService {
-    public static final String API_ENDPOINT_URL = "http://appfrontend-mavd.rhcloud.com";
+    public static final String API_ENDPOINT_URL = "http://sellflip.me";
     private static ApiHeaders authHeaders = new ApiHeaders();
 
     @Override
@@ -19,6 +19,10 @@ public class SellFlipSpiceService extends RetrofitGsonSpiceService {
 
     @Override
     protected String getServerUrl() {
+        return API_ENDPOINT_URL;
+    }
+
+    public static String getEndpointUrl() {
         return API_ENDPOINT_URL;
     }
 

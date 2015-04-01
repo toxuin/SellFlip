@@ -72,9 +72,10 @@ public class BaseActivity extends ActionBarActivity {
         if (self.rightMenu.isMenuShowing()) self.rightMenu.toggle();
         self.disableRightMenu();
         if (fragment instanceof SearchResultFragment) {
+            //((SearchResultFragment) fragment).setLayoutResource(R.layout.);
             self.enableRightMenu();
         }
-        self.fragmentManager.beginTransaction()
+        fragmentManager.beginTransaction()
                 .replace(R.id.content, fragment, fragment.getClass().getName())
                 .addToBackStack(fragName).commit(); // add frags with a tag will allow to pop them by tag
         self.activeFragment = fragment;

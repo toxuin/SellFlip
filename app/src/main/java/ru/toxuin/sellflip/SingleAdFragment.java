@@ -1,5 +1,6 @@
 package ru.toxuin.sellflip;
 
+import android.app.ProgressDialog;
 import android.content.Intent;
 import android.location.Address;
 import android.location.Geocoder;
@@ -32,6 +33,7 @@ import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
+import com.octo.android.robospice.retrofit.RetrofitGsonSpiceService;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.library.VideoControllerView;
@@ -42,7 +44,6 @@ public class SingleAdFragment extends SpiceFragment implements
         SurfaceHolder.Callback, MediaPlayer.OnPreparedListener,
         VideoControllerView.MediaPlayerControl {
     public static final String TAG = "SINGLE_AD_UI";
-    private static final String SERVER_URL = "http://appfrontend-mavd.rhcloud.com/api/v1/adsItems/";
     public static String videoUrl;
 
     private View rootView;
@@ -108,18 +109,25 @@ public class SingleAdFragment extends SpiceFragment implements
 
         try {
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            videoUrl = SERVER_URL + adId + "/video";
+            videoUrl = SellFlipSpiceService.getEndpointUrl() + "/api/v1/adsItems/" + adId + "/video";
             player.setDataSource(getActivity(), Uri.parse(videoUrl));
             player.setOnPreparedListener(this);
         } catch (Exception e) {
             e.printStackTrace();
         }
 
+        final ProgressDialog loading = new ProgressDialog(getActivity());
+        loading.setTitle("Loading");
+        loading.setIndeterminate(true);
+        loading.setMessage("Wait while loading...");
+        loading.show();
+
         SingleAdRequest request = new SingleAdRequest(adId);
         spiceManager.execute(request, request.getCacheKey(), DurationInMillis.ONE_MINUTE * 5, new RequestListener<SingleAd>() {
             @Override
             public void onRequestSuccess(final SingleAd ad) {
                 thisAd = ad;
+                loading.dismiss();
                 BaseActivity.setContentTitle(ad.getTitle());
 
                 adTitle.setText(ad.getTitle());
@@ -192,6 +200,7 @@ public class SingleAdFragment extends SpiceFragment implements
 
             @Override
             public void onRequestFailure(SpiceException spiceException) {
+                loading.dismiss();
                 Toast.makeText(getActivity(), "ERROR: " + spiceException.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
