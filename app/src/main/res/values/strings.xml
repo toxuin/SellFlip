@@ -71,4 +71,5 @@
     <string name="fb_username">Firstname Last name</string>
     <string name="categories">Categories</string>
     <string name="app_preference_key">sellflip_shared_preferences</string>
+    <string name="action_search">Search</string>
 </resources>

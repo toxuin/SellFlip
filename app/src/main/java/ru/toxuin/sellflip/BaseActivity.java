@@ -1,11 +1,18 @@
 package ru.toxuin.sellflip;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.SearchView;
+import android.util.Log;
 import android.view.KeyEvent;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -31,8 +38,14 @@ import ru.toxuin.sellflip.fragments.PrefsFragment;
 import ru.toxuin.sellflip.fragments.PrivacyPolicyDialogFragment;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
 import ru.toxuin.sellflip.library.OnBackPressedListener;
+import ru.toxuin.sellflip.library.SuggestionAdapter;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.AuthRequest;
+
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 
 public class BaseActivity extends ActionBarActivity {
@@ -54,6 +67,8 @@ public class BaseActivity extends ActionBarActivity {
     private LinearLayout facebook_container;
     private LeftMenuAdapter leftMenuAdapter;
     protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
+    private Menu menu;
+    SearchView searchView;
 
     private Session.StatusCallback statusCallback = new Session.StatusCallback() {
         @Override public void call(Session session, SessionState sessionState, Exception e) {
@@ -71,6 +86,13 @@ public class BaseActivity extends ActionBarActivity {
         if (self == null) return;
         if (self.leftMenu.isMenuShowing()) self.leftMenu.toggle();
         if (self.rightMenu.isMenuShowing()) self.rightMenu.toggle();
+        if (self.menu != null) {
+            MenuItem searchItem = self.menu.findItem(R.id.action_search);
+            if (searchItem != null) {
+                searchItem.getActionView().clearFocus();
+                searchItem.collapseActionView();
+            }
+        }
         self.disableRightMenu();
         if (fragment instanceof SearchResultFragment) {
             //((SearchResultFragment) fragment).setLayoutResource(R.layout.);
@@ -225,6 +247,14 @@ public class BaseActivity extends ActionBarActivity {
         facebook_profile_pic = (ProfilePictureView) findViewById(R.id.facebook_profile_pic);
         facebook_username = (TextView) findViewById(R.id.facebook_username);
 
+        // SET SAVE SEARCH BY DEFAULT TO TRUE
+        SharedPreferences pref = getSharedPreferences(getString(R.string.app_preference_key), Context.MODE_PRIVATE);
+        if (!pref.contains("pref_key_save_search")) {
+            SharedPreferences.Editor editor = pref.edit();
+            editor.putBoolean("pref_key_save_search", true);
+            editor.apply();
+        }
+
         uiLifecycleHelper = new UiLifecycleHelper(this, statusCallback);
         uiLifecycleHelper.onCreate(savedInstanceState);
     }
@@ -269,6 +299,9 @@ public class BaseActivity extends ActionBarActivity {
         switch (item.getItemId()) {
             case android.R.id.home:
                 leftMenu.toggle();
+                return true;
+            case R.id.action_search:
+                searchView.setIconified(false);
                 return true;
             default:
                 return super.onOptionsItemSelected(item);
@@ -326,5 +359,80 @@ public class BaseActivity extends ActionBarActivity {
     public void onBackPressed() {
         if (backPressedListener == null || !backPressedListener.onBackPressed())
             super.onBackPressed();
+    }
+
+
+    // SEARCH STUFF
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.base_activity_actions, menu);
+        this.menu = menu;
+        MenuItem searchItem = menu.findItem(R.id.action_search);
+        if (searchView == null) searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
+        searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
+            @Override
+            public boolean onSuggestionSelect(int i) {
+                return true;
+            }
+
+            @Override
+            public boolean onSuggestionClick(int i) {
+                SuggestionAdapter adapter = (SuggestionAdapter) searchView.getSuggestionsAdapter();
+                BaseActivity.setContent(new SearchResultFragment().setSearchQuery(adapter.getItemAt(i)));
+                return true;
+            }
+        });
+
+        final SharedPreferences pref = getApplicationContext().getSharedPreferences(getApplicationContext().getString(R.string.app_preference_key), Context.MODE_PRIVATE);
+        Set<String> suggestionItemSet = pref.getStringSet("pref_key_saved_searches", new HashSet<String>());
+        final List<String> suggestionItems = new ArrayList<>(suggestionItemSet.size());
+        suggestionItems.addAll(suggestionItemSet);
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String result) {
+                if (pref.getBoolean("pref_key_save_search", false)) {
+                    Set<String> savedSearches = pref.getStringSet("pref_key_saved_searches", new HashSet<String>());
+                    if (!savedSearches.contains(result)) {
+                        savedSearches.add(result);
+                        SharedPreferences.Editor editor = pref.edit();
+                        editor.putStringSet("pref_key_saved_searches", savedSearches);
+                        editor.apply();
+                        Log.d(TAG, "SAVED " + result + " AS SEARCH SUGGESTION");
+                    }
+                }
+
+                BaseActivity.setContent(new SearchResultFragment().setSearchQuery(result));
+                return true;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String s) {
+                SharedPreferences pref = getApplicationContext().getSharedPreferences(getApplicationContext().getString(R.string.app_preference_key), Context.MODE_PRIVATE);
+                if (!pref.getBoolean("pref_key_save_search", false)) return false;
+
+                String[] columns = new String[]{"_id", "text"};
+                Object[] temp = new Object[]{0, "default"};
+
+                List<String> strings = new ArrayList<>();
+                final MatrixCursor cursor = new MatrixCursor(columns);
+
+                for (int i = 0; i < suggestionItems.size(); i++) {
+                    if (suggestionItems.get(i).toLowerCase().startsWith(s.trim().toLowerCase()) && s.trim().length() > 0) {
+                        strings.add(suggestionItems.get(i));
+                        temp[0] = i;
+                        temp[1] = suggestionItems.get(i);
+                        cursor.addRow(temp);
+                    }
+                }
+
+                searchView.setSuggestionsAdapter(new SuggestionAdapter(self, cursor, strings));
+
+                return true;
+            }
+        });
+
+        return super.onCreateOptionsMenu(menu);
     }
 }

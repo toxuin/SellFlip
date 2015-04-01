@@ -19,7 +19,7 @@ public interface ApiService {
     String CATEGORIES = "/api/v1/categories";
     String AUTH = "/auth/facebook_token";
 
-    @GET(LIST_ADS) SingleAd.List listTopAds(@Query("category") String category, @Query("skip") int skip, @Query("limit") int limit);
+    @GET(LIST_ADS) SingleAd.List listTopAds(@Query("category") String category, @Query("search") String searchTerm, @Query("skip") int skip, @Query("limit") int limit);
     @GET(SINGLE_AD) SingleAd getSingleAd(@Path("id") String id);
     @POST(LIST_ADS) SingleAd createNewAd(@Body SingleAd ad);
     @GET(CATEGORIES) Category.List getCategories();

@@ -24,6 +24,7 @@ public class PrefsFragment extends PreferenceFragment {
         Preference logout = findPreference("pref_key_logout");
         Preference columns = findPreference("pref_key_search_result_columns");
         Preference privacy = findPreference("pref_key_privacy_policy");
+        Preference saveSearch = findPreference("pref_key_save_search");
 
         cacheReset.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -34,6 +35,8 @@ public class PrefsFragment extends PreferenceFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 SellFlipSpiceService.clearCache();
+                                SharedPreferences pref = getActivity().getSharedPreferences(getActivity().getString(R.string.app_preference_key), Context.MODE_PRIVATE);
+                                pref.edit().clear().commit();
                                 dialog.dismiss();
                             }
                         })
@@ -69,9 +72,22 @@ public class PrefsFragment extends PreferenceFragment {
             public boolean onPreferenceChange(Preference preference, Object newValue) {
                 if (!(newValue instanceof String)) return false;
                 String newString = (String) newValue;
-                SharedPreferences customSharedPreference = getActivity().getSharedPreferences(getActivity().getString(R.string.app_preference_key), Context.MODE_PRIVATE);
-                SharedPreferences.Editor editor = customSharedPreference.edit();
+                SharedPreferences pref = getActivity().getSharedPreferences(getActivity().getString(R.string.app_preference_key), Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = pref.edit();
                 editor.putString(preference.getKey(), newString);
+                editor.apply();
+                return true;
+            }
+        });
+
+        saveSearch.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+            @Override
+            public boolean onPreferenceChange(Preference preference, Object newValue) {
+                if (!(newValue instanceof Boolean)) return false;
+                Boolean boolValue = (Boolean) newValue;
+                SharedPreferences pref = getActivity().getSharedPreferences(getActivity().getString(R.string.app_preference_key), Context.MODE_PRIVATE);
+                SharedPreferences.Editor editor = pref.edit();
+                editor.putBoolean(preference.getKey(), boolValue);
                 editor.apply();
                 return true;
             }

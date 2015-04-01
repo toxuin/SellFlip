@@ -8,12 +8,14 @@ import ru.toxuin.sellflip.restapi.ApiService;
 public class ListAdsRequest extends RetrofitSpiceRequest<SingleAd.List, ApiService> {
     private static final String TAG = "LIST_ADS_REQUEST";
     private String category;
+    private String searchTerm;
     private int page;
 
     private static int itemsPerPage = 7;
 
-    public ListAdsRequest(String category, int page) {
+    public ListAdsRequest(String category, String searchTerm, int page) {
         super(SingleAd.List.class, ApiService.class);
+        this.searchTerm = searchTerm;
         this.category = category;
         this.page = page;
     }
@@ -23,7 +25,7 @@ public class ListAdsRequest extends RetrofitSpiceRequest<SingleAd.List, ApiServi
         int skip = itemsPerPage * page;
         int limit = itemsPerPage;
         Log.d(TAG, "REQUESTING TOP ADS FROM " + skip + " TO " + (skip + limit) + "(" + limit + " ITEMS)");
-        return getService().listTopAds(category, skip, limit);
+        return getService().listTopAds(category, searchTerm, skip, limit);
     }
 
     public String getCacheKey() {

@@ -1,11 +1,13 @@
 package ru.toxuin.sellflip.restapi;
 
+import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.octo.android.robospice.retrofit.RetrofitGsonSpiceService;
 import retrofit.InterceptingClient;
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
+import roboguice.util.temp.Ln;
 
 public class SellFlipSpiceService extends RetrofitGsonSpiceService {
     public static final String API_ENDPOINT_URL = "http://sellflip.me";
@@ -19,6 +21,7 @@ public class SellFlipSpiceService extends RetrofitGsonSpiceService {
             removeAllDataFromCache();
             wipeCache = false;
         }
+        Ln.getConfig().setLoggingLevel(Log.ERROR);
         addRetrofitInterface(ApiService.class);
     }
 

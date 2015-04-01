@@ -14,7 +14,6 @@ import android.view.ViewGroup;
 
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
-import com.etsy.android.grid.StaggeredGridView;
 import com.etsy.android.grid.StaggeredGridViewSellFlip;
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
@@ -38,6 +37,7 @@ public class SearchResultFragment extends SpiceFragment {
     List<Category> categories;
     CategoryListAdapter rightMenuAdapter;
     private static int totalServerItems = 0;
+    private String searchQuery;
 
     protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
 
@@ -51,6 +51,7 @@ public class SearchResultFragment extends SpiceFragment {
         gridView = (StaggeredGridViewSellFlip) rootView.findViewById(R.id.itemList);
 
         searchAdapter = new GridSearchAdapter(getActivity(), spiceManager);
+        if (searchQuery != null) searchAdapter.setSearchQuery(searchQuery);
         gridView.setAdapter(searchAdapter);
 
         gridView.setOnScrollListener(searchAdapter.searchResultsEndlessScrollListener);
@@ -60,7 +61,7 @@ public class SearchResultFragment extends SpiceFragment {
             gridView.setColumnCount(Integer.parseInt(prefs.getString("pref_key_search_result_columns", "0")), false);
         }
 
-        Log.d(TAG, "COLUMNS: " + prefs.getString("pref_key_search_result_columns", "NOTHING"));
+        Log.d(TAG, "SEATCHING FOR: " + searchQuery);
 
         // DATA IS FETCHED IN onStart
 
@@ -149,4 +150,9 @@ public class SearchResultFragment extends SpiceFragment {
             Log.d("TOTAL-BROADCAST", "GOT TOTAL ITEMS ON SERVER: " + totalServerItems);
         }
     };
+
+    public SearchResultFragment setSearchQuery(String searchQuery) {
+        this.searchQuery = searchQuery;
+        return this;
+    }
 }

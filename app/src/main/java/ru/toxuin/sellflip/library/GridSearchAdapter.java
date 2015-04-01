@@ -46,6 +46,7 @@ public class GridSearchAdapter extends BaseAdapter {
     private final List<SingleAd> itemsList;
     private int currentPage = 0;
     private String category;
+    private String searchQuery;
 
     private final LayoutInflater mLayoutInflater;
     private final Random mRandom;
@@ -145,7 +146,7 @@ public class GridSearchAdapter extends BaseAdapter {
     }
 
     public void requestData(final int page) {
-        ListAdsRequest request = new ListAdsRequest(category, page);
+        ListAdsRequest request = new ListAdsRequest(category, searchQuery,  page);
 
         final ProgressDialog loading = new ProgressDialog(context);
         loading.setTitle("Loading");
@@ -170,6 +171,10 @@ public class GridSearchAdapter extends BaseAdapter {
                 spiceException.printStackTrace();
             }
         });
+    }
+
+    public void setSearchQuery(String query) {
+        this.searchQuery = query;
     }
 
 
