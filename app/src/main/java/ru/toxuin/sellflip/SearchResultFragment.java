@@ -131,7 +131,7 @@ public class SearchResultFragment extends SpiceFragment {
     @Override
     public void onPause() {
         super.onPause();
-        getActivity().unregisterReceiver(totalItemsBroadcastReceiver);
+        //getActivity().unregisterReceiver(totalItemsBroadcastReceiver);
     }
 
     @Override

@@ -1,5 +1,6 @@
 package ru.toxuin.sellflip;
 
+import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -68,7 +69,7 @@ public class BaseActivity extends ActionBarActivity {
     private LeftMenuAdapter leftMenuAdapter;
     protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
     private Menu menu;
-    SearchView searchView;
+    private SearchView searchView;
 
     private Session.StatusCallback statusCallback = new Session.StatusCallback() {
         @Override public void call(Session session, SessionState sessionState, Exception e) {
@@ -156,6 +157,16 @@ public class BaseActivity extends ActionBarActivity {
     protected void onPause() {
         super.onPause();
         spiceManager.shouldStop();
+    }
+
+    @Override
+    protected void onNewIntent(Intent intent) {
+        super.onNewIntent(intent);
+        if (Intent.ACTION_SEARCH.equals(intent.getAction())) {
+            String query = intent.getStringExtra(SearchManager.QUERY);
+            Log.d(TAG, "GOT SEARCH QUERY : " + query);
+            searchView.setQuery(query, false);
+        }
     }
 
     @Override
@@ -369,6 +380,9 @@ public class BaseActivity extends ActionBarActivity {
         this.menu = menu;
         MenuItem searchItem = menu.findItem(R.id.action_search);
         if (searchView == null) searchView = (SearchView) MenuItemCompat.getActionView(searchItem);
+
+        SearchManager searchManager = (SearchManager) getSystemService(Context.SEARCH_SERVICE);
+        searchView.setSearchableInfo(searchManager.getSearchableInfo(getComponentName()));
 
         searchView.setOnSuggestionListener(new SearchView.OnSuggestionListener() {
             @Override
