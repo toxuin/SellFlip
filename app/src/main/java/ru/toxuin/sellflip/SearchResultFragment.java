@@ -61,8 +61,6 @@ public class SearchResultFragment extends SpiceFragment {
             gridView.setColumnCount(Integer.parseInt(prefs.getString("pref_key_search_result_columns", "0")), false);
         }
 
-        Log.d(TAG, "SEATCHING FOR: " + searchQuery);
-
         // DATA IS FETCHED IN onStart
 
         // RIGHT MENU STUFF
@@ -129,9 +127,9 @@ public class SearchResultFragment extends SpiceFragment {
     }
 
     @Override
-    public void onPause() {
-        super.onPause();
-        //getActivity().unregisterReceiver(totalItemsBroadcastReceiver);
+    public void onDestroy() {
+        super.onDestroy();
+        getActivity().unregisterReceiver(totalItemsBroadcastReceiver);
     }
 
     @Override

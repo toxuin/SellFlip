@@ -17,6 +17,7 @@ public class SingleAd {
     private String description;
     @SerializedName("coordinates")
     private Coordinates coords;
+    private int videoDimens[];
     private Date date;
 
     public SingleAd(String id, String title, float price, String email, String phone, String category, String description, Coordinates coord, Date date) {
@@ -121,6 +122,16 @@ public class SingleAd {
     // 'title' is stored as 'name' in the back end
     @Override public String toString() {
         return "Id: " + getId() + ", Title:" + getTitle() + ", Price:" + getPrice() + ", Date:" + getDate().toString();
+    }
+
+    public int getVideoWidth() {
+        if (videoDimens.length < 2) return 0;
+        return videoDimens[0];
+    }
+
+    public int getVideoHeight() {
+        if (videoDimens.length < 2) return 0;
+        return videoDimens[1];
     }
 
     public static class List extends ArrayList<SingleAd> {}

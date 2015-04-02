@@ -4,9 +4,12 @@ import android.content.Context;
 import android.content.Intent;
 
 import java.io.IOException;
+import java.util.concurrent.TimeUnit;
 
+import com.squareup.okhttp.OkHttpClient;
 import retrofit.client.Client;
 import retrofit.client.Header;
+import retrofit.client.OkClient;
 import retrofit.client.Request;
 import retrofit.client.Response;
 import ru.toxuin.sellflip.R;
@@ -18,7 +21,9 @@ public class InterceptingClient implements Client {
 
     public InterceptingClient(Context ctx) {
         this.context = ctx.getApplicationContext();
-        this.fallbackClient = Platform.get().defaultClient().get();
+        OkHttpClient okClient = new OkHttpClient();
+        okClient.setReadTimeout(60, TimeUnit.SECONDS);
+        this.fallbackClient = new OkClient(okClient);
     }
 
     public InterceptingClient(Context ctx, Client fallback) {

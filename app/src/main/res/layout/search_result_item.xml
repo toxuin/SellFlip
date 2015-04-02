@@ -23,12 +23,13 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <ImageView
+            <ru.toxuin.sellflip.library.PrescalableImageView
                 android:id="@+id/item_thumbnail"
-                android:layout_width="match_parent"
-                android:layout_height="@dimen/card_result_picture_height"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
                 android:layout_marginBottom="6dp"
-                android:scaleType="fitCenter"/>
+                android:scaleType="fitCenter"
+                android:minHeight="@dimen/card_result_picture_min_height"/>
 
             <TextView
                 android:id="@+id/item_title"
@@ -47,7 +48,7 @@
 
                 <TextView
                     android:id="@+id/item_price"
-                    android:layout_width="fill_parent"
+                    android:layout_width="0dp"
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:maxLines="1"

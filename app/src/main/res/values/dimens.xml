@@ -9,5 +9,5 @@
     <dimen name="min_ad_box_height">150dp</dimen>
     <dimen name="video_preview_height">300dp</dimen>
     <dimen name="ad_pic_preview_height">150dp</dimen>
-    <dimen name="card_result_picture_height">150dp</dimen>
+    <dimen name="card_result_picture_min_height">150dp</dimen>
 </resources>

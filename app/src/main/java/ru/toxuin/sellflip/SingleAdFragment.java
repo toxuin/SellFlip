@@ -58,6 +58,18 @@ public class SingleAdFragment extends SpiceFragment implements
     private boolean playerIsPreparing = false;
     protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
 
+    private TextView adTitle;
+    private TextView adDescription;
+    private TextView adPrice;
+    private TextView adDate;
+    private TextView adAddress;
+
+    private BootstrapButton contactEmailBtn;
+    private BootstrapButton contactPhoneBtn;
+    private BootstrapButton openMapBtn;
+
+    private SurfaceView videoSurface;
+
     public SingleAdFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
     /**
@@ -81,18 +93,23 @@ public class SingleAdFragment extends SpiceFragment implements
             throw new IllegalStateException("SingleAdFragment instantiated without id! Use .setAdId(\"lalal\")!");
         }
 
-        final TextView adTitle = (TextView) rootView.findViewById(R.id.adTitle);
-        final TextView adDescription = (TextView) rootView.findViewById(R.id.adDescription);
-        final TextView adPrice = (TextView) rootView.findViewById(R.id.adPrice);
-        final TextView adDate = (TextView) rootView.findViewById(R.id.adDate);
-        final TextView adAddress = (TextView) rootView.findViewById(R.id.adAddress);
+        adTitle = (TextView) rootView.findViewById(R.id.adTitle);
+        adDescription = (TextView) rootView.findViewById(R.id.adDescription);
+        adPrice = (TextView) rootView.findViewById(R.id.adPrice);
+        adDate = (TextView) rootView.findViewById(R.id.adDate);
+        adAddress = (TextView) rootView.findViewById(R.id.adAddress);
 
-        final BootstrapButton contactEmailBtn = (BootstrapButton) rootView.findViewById(R.id.contact_mail_btn);
-        final BootstrapButton contactPhoneBtn = (BootstrapButton) rootView.findViewById(R.id.contact_phone_btn);
-        final BootstrapButton openMapBtn = (BootstrapButton) rootView.findViewById(R.id.mapButton);
+        contactEmailBtn = (BootstrapButton) rootView.findViewById(R.id.contact_mail_btn);
+        contactPhoneBtn = (BootstrapButton) rootView.findViewById(R.id.contact_phone_btn);
+        openMapBtn = (BootstrapButton) rootView.findViewById(R.id.mapButton);
 
-        final SurfaceView videoSurface = (SurfaceView) rootView.findViewById(R.id.videoSurface);
+        videoSurface = (SurfaceView) rootView.findViewById(R.id.videoSurface);
 
+        return rootView;
+    }
+
+    @Override
+    public void onStart() {
         // SET UP VIDEO
         videoSurface.setOnTouchListener(new View.OnTouchListener() {
             @Override
@@ -205,7 +222,7 @@ public class SingleAdFragment extends SpiceFragment implements
             }
         });
 
-        return rootView;
+        super.onStart();
     }
 
     private void openMap() {
@@ -257,11 +274,13 @@ public class SingleAdFragment extends SpiceFragment implements
     }
 
     @Override public int getDuration() {
-        return player.getDuration();
+        if (playerReady && !playerIsPreparing) return player.getDuration();
+        return 0;
     }
 
     @Override public int getCurrentPosition() {
-        return player.getCurrentPosition();
+        if (playerReady && !playerIsPreparing) return player.getCurrentPosition();
+        return 0;
     }
 
     @Override public void seekTo(int pos) {
@@ -269,7 +288,8 @@ public class SingleAdFragment extends SpiceFragment implements
     }
 
     @Override public boolean isPlaying() {
-        return player.isPlaying();
+        if (playerReady && !playerIsPreparing) return player.isPlaying();
+        return false;
     }
 
     @Override public int getBufferPercentage() {
@@ -307,10 +327,11 @@ public class SingleAdFragment extends SpiceFragment implements
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
+    public void onPause() {
+        super.onPause();
         if (player != null && playerReady) {
             player.stop();
+            player.reset();
             player.release();
             playerReady = false;
             playerIsPreparing = false;

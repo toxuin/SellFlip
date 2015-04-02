@@ -1,7 +1,9 @@
 package ru.toxuin.sellflip.library;
 
+import android.app.ActionBar;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.AsyncTask;
@@ -24,6 +26,7 @@ import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
+import com.octo.android.robospice.request.simple.BitmapRequest;
 import ru.toxuin.sellflip.BaseActivity;
 import ru.toxuin.sellflip.R;
 import ru.toxuin.sellflip.SearchResultFragment;
@@ -31,6 +34,7 @@ import ru.toxuin.sellflip.SingleAdFragment;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.ListAdsRequest;
+import ru.toxuin.sellflip.restapi.spicerequests.SingleAdThumbRequest;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -81,7 +85,15 @@ public class GridSearchAdapter extends BaseAdapter {
         if (convertView == null) {
             convertView = mLayoutInflater.inflate(R.layout.search_result_item, parent, false);
             vh = new SearchResultViewHolder(context, convertView);
+            vh.setSpiceManager(spiceManager);
             vh.bind(ad);
+
+            // THUMBNAIL
+            if (ad.getVideoWidth() > 0 && ad.getVideoHeight() > 0) {
+                float ratio = (float) ad.getVideoWidth() / ad.getVideoHeight();
+                vh.thumbnail.setRatio(ratio);
+            }
+
             convertView.setTag(vh);
         }
         else {
@@ -121,24 +133,6 @@ public class GridSearchAdapter extends BaseAdapter {
     @Override
     public long getItemId(int position) {
         return position;
-    }
-
-    private double getRandomHeightRatio() {
-        return (mRandom.nextDouble() / 2.0) + 1.0; // height will be 1.0 - 1.5 the width
-    }
-
-    private double getPositionRatio(final int position) {
-        double ratio = sPositionHeightRatios.get(position, 0.0);
-        // if not yet done generate and stash the columns height
-        // in our real world scenario this will be determined by
-        // some match based on the known height and width of the image
-        // and maybe a helpful way to get the column height!
-        if (ratio == 0) {
-            ratio = getRandomHeightRatio();
-            sPositionHeightRatios.append(position, ratio);
-            Log.d(TAG, "getPositionRatio: " + position + ", ratio: " + ratio);
-        }
-        return ratio;
     }
 
     public void setCategory(String category) {
@@ -215,8 +209,9 @@ public class GridSearchAdapter extends BaseAdapter {
         TextView title;
         TextView price;
         TextView date;
-        ImageView thumbnail;
+        PrescalableImageView thumbnail;
         String id;
+        SpiceManager spiceManager;
 
         public SearchResultViewHolder(Context cntx, View itemView) {
             this.context = cntx;
@@ -224,8 +219,12 @@ public class GridSearchAdapter extends BaseAdapter {
             this.title = (TextView) itemView.findViewById(R.id.item_title);
             this.price = (TextView) itemView.findViewById(R.id.item_price);
             this.date = (TextView) itemView.findViewById(R.id.item_date);
-            this.thumbnail = (ImageView) itemView.findViewById(R.id.item_thumbnail);
+            this.thumbnail = (PrescalableImageView) itemView.findViewById(R.id.item_thumbnail);
             cardContainer.setOnClickListener(this);
+        }
+
+        public void setSpiceManager(SpiceManager manager) {
+            this.spiceManager = manager;
         }
 
         public void bind(SingleAd ad) {
@@ -261,7 +260,6 @@ public class GridSearchAdapter extends BaseAdapter {
                 price.setText(formatter.format(ad.getPrice()));
             }
 
-            // THUMBNAIL
             // LOADING:
             thumbnail.setImageResource(R.drawable.loading);
             LayerDrawable progressAnimation = (LayerDrawable) thumbnail.getDrawable();
@@ -269,7 +267,19 @@ public class GridSearchAdapter extends BaseAdapter {
             ((Animatable) progressAnimation.getDrawable(1)).start();
 
             // GET ACTUAL THUMBNAIL:
-            new BitmapDownloader().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, this);  // ANDROID 3.0+ ONLY
+            final SingleAdThumbRequest thumbRequest = new SingleAdThumbRequest(context, ad.getId());
+            spiceManager.execute(thumbRequest, new RequestListener<Bitmap>() {
+                @Override
+                public void onRequestSuccess(Bitmap bitmap) {
+                    thumbnail.setImageBitmap(bitmap);
+                }
+
+                @Override
+                public void onRequestFailure(SpiceException spiceException) {
+                    thumbnail.setImageDrawable(thumbnail.getContext().getResources().getDrawable(R.drawable.no_image));
+                    spiceException.printStackTrace();
+                }
+            });
         }
 
         @Override

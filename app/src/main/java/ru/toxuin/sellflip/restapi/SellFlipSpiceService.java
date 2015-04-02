@@ -17,11 +17,11 @@ public class SellFlipSpiceService extends RetrofitGsonSpiceService {
     @Override
     public void onCreate() {
         super.onCreate();
-        if (wipeCache) {
-            removeAllDataFromCache();
-            wipeCache = false;
-        }
-        Ln.getConfig().setLoggingLevel(Log.ERROR);
+//        if (wipeCache) {
+//            removeAllDataFromCache();
+//            wipeCache = false;
+//        }
+        //Ln.getConfig().setLoggingLevel(Log.ERROR);
         addRetrofitInterface(ApiService.class);
     }
 
@@ -45,6 +45,11 @@ public class SellFlipSpiceService extends RetrofitGsonSpiceService {
                 .setConverter(new GsonConverter(gson))
                 .setClient(new InterceptingClient(getApplicationContext()))
                 .setRequestInterceptor(authHeaders);
+    }
+
+    @Override
+    public int getThreadCount() {
+        return 5;
     }
 
     public static ApiHeaders getAuthHeaders() {
