@@ -271,7 +271,9 @@ public class GridSearchAdapter extends BaseAdapter {
             spiceManager.execute(thumbRequest, new RequestListener<Bitmap>() {
                 @Override
                 public void onRequestSuccess(Bitmap bitmap) {
-                    thumbnail.setImageBitmap(bitmap);
+                    if (bitmap == null) { // TODO: THROW IN REQUEST?
+                        thumbnail.setImageDrawable(thumbnail.getContext().getResources().getDrawable(R.drawable.no_image));
+                    } else thumbnail.setImageBitmap(bitmap);
                 }
 
                 @Override

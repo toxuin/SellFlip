@@ -9,6 +9,7 @@ import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 
 import java.io.EOFException;
 import java.io.File;
+import java.io.FileNotFoundException;
 import java.util.UUID;
 
 public class SingleAdThumbRequest extends SpiceRequest<Bitmap> {
@@ -37,7 +38,7 @@ public class SingleAdThumbRequest extends SpiceRequest<Bitmap> {
             Bitmap bmp;
             try {
                 bmp = request.loadDataFromNetwork();
-            } catch (EOFException exception) {
+            } catch (EOFException | FileNotFoundException exception) {
                 bmp = null;
                 //exception.printStackTrace();
             }

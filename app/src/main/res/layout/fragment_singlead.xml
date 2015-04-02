@@ -109,11 +109,11 @@
                     android:textStyle="italic"/>
 
 
-                <TableRow
+                <org.apmem.tools.layouts.FlowLayout
                     android:layout_width="fill_parent"
-                    android:layout_height="fill_parent"
-                    android:layout_margin="10dp"
-                    android:gravity="bottom">
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:layout_margin="10dp">
 
                     <com.beardedhen.androidbootstrap.BootstrapButton
                         android:id="@+id/contact_mail_btn"
@@ -124,8 +124,7 @@
                         android:textSize="16sp"
                         bootstrap:bb_icon_left="fa-envelope"
                         bootstrap:bb_roundedCorners="true"
-                        bootstrap:bb_type="warning"
-                        />
+                        bootstrap:bb_type="warning"/>
 
                     <com.beardedhen.androidbootstrap.BootstrapButton
                         android:id="@+id/contact_phone_btn"
@@ -137,8 +136,7 @@
                         android:visibility="gone"
                         bootstrap:bb_icon_left="fa-phone"
                         bootstrap:bb_roundedCorners="true"
-                        bootstrap:bb_type="success"
-                        />
+                        bootstrap:bb_type="success"/>
 
                     <com.beardedhen.androidbootstrap.BootstrapButton
                         android:id="@+id/mapButton"
@@ -150,10 +148,9 @@
                         android:visibility="gone"
                         bootstrap:bb_icon_left="fa-map-marker"
                         bootstrap:bb_roundedCorners="true"
-                        bootstrap:bb_type="primary"
-                        />
+                        bootstrap:bb_type="primary"/>
 
-                </TableRow>
+                </org.apmem.tools.layouts.FlowLayout>
 
             </LinearLayout>
         </ScrollView>

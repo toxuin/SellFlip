@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.List;
 
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
@@ -166,12 +167,15 @@ public class SingleAdFragment extends SpiceFragment implements
                 String addr = "Show me the map!";
                 Geocoder geo = new Geocoder(getActivity());
                 try {
-                    Address address = geo.getFromLocation(ad.getCoords().getLat(), ad.getCoords().getLng(), 1).get(0);
-                    ArrayList<String> addressFragments = new ArrayList<>();
-                    for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
-                        addressFragments.add(address.getAddressLine(i));
+                    List<Address> addresses = geo.getFromLocation(ad.getCoords().getLat(), ad.getCoords().getLng(), 1);
+                    if (addresses.size() > 0) {
+                        Address address = addresses.get(0);
+                        ArrayList<String> addressFragments = new ArrayList<>();
+                        for (int i = 0; i < address.getMaxAddressLineIndex(); i++) {
+                            addressFragments.add(address.getAddressLine(i));
+                        }
+                        addr = TextUtils.join(", ", addressFragments).trim();
                     }
-                    addr = TextUtils.join(", ", addressFragments).trim();
                 } catch (IOException e) {
                     e.printStackTrace();
                 }

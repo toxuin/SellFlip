@@ -53,6 +53,7 @@ public class BaseActivity extends ActionBarActivity {
     public static final String TAG = "BaseActivity";
 
     private static final float MENU_FADE_DEGREE = 0.35f;
+    private static final String ACTIVE_FRAGMENT_TAG = "activeFragmentTag";
     private static BaseActivity self;
     private static FragmentManager fragmentManager;
     private SlidingMenu leftMenu;
@@ -100,7 +101,7 @@ public class BaseActivity extends ActionBarActivity {
             self.enableRightMenu();
         }
         fragmentManager.beginTransaction()
-                .replace(R.id.content, fragment, fragment.getClass().getName())
+                .replace(R.id.content, fragment, ACTIVE_FRAGMENT_TAG)
                 .addToBackStack(fragName).commit(); // add frags with a tag will allow to pop them by tag
         self.activeFragment = fragment;
         self.backPressedListener = null;
@@ -216,7 +217,12 @@ public class BaseActivity extends ActionBarActivity {
                 else disableRightMenu();
             }
         });
-        setContent(new SearchResultFragment());
+
+        if (savedInstanceState == null) {
+            setContent(new SearchResultFragment());
+        } else {
+            activeFragment = fragmentManager.findFragmentByTag(ACTIVE_FRAGMENT_TAG);
+        }
 
         // ADD ITEMS TO LEFT MENU
         ListView leftMenuList = (ListView) leftMenu.getMenu().findViewById(R.id.left_menu_list);
