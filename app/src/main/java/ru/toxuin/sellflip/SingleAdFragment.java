@@ -2,13 +2,16 @@ package ru.toxuin.sellflip;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
+import android.content.res.Configuration;
+import android.graphics.Point;
 import android.location.Address;
 import android.location.Geocoder;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
+import android.os.Handler;
+import android.os.Message;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -18,6 +21,8 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -33,7 +38,6 @@ import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
-import com.octo.android.robospice.retrofit.RetrofitGsonSpiceService;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.library.VideoControllerView;
@@ -44,6 +48,7 @@ public class SingleAdFragment extends SpiceFragment implements
         SurfaceHolder.Callback, MediaPlayer.OnPreparedListener,
         VideoControllerView.MediaPlayerControl {
     public static final String TAG = "SINGLE_AD_UI";
+    private static final int VIDEO_RESIZE = 666;
     public static String videoUrl;
 
     private View rootView;
@@ -69,6 +74,7 @@ public class SingleAdFragment extends SpiceFragment implements
     private BootstrapButton openMapBtn;
 
     private SurfaceView videoSurface;
+    private float ratio = 1;
 
     public SingleAdFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -118,7 +124,7 @@ public class SingleAdFragment extends SpiceFragment implements
                 return false;
             }
         });
-        SurfaceHolder videoHolder = videoSurface.getHolder();
+        final SurfaceHolder videoHolder = videoSurface.getHolder();
         videoHolder.addCallback(this);
 
         player = new MediaPlayer();
@@ -144,6 +150,13 @@ public class SingleAdFragment extends SpiceFragment implements
             @Override
             public void onRequestSuccess(final SingleAd ad) {
                 thisAd = ad;
+
+                // VIDEO SIZE ADJUST
+                if (ad.getVideoWidth() > 0 && ad.getVideoHeight() > 0) {
+                    ratio = (float) ad.getVideoWidth() / ad.getVideoHeight();
+                    videoResizeHandler.sendEmptyMessage(VIDEO_RESIZE);
+                }
+
                 loading.dismiss();
                 BaseActivity.setContentTitle(ad.getTitle());
 
@@ -341,5 +354,27 @@ public class SingleAdFragment extends SpiceFragment implements
     @Override
     public SpiceManager getSpiceManager() {
         return spiceManager;
+    }
+
+    Handler videoResizeHandler = new Handler(new Handler.Callback() {
+
+        @Override
+        public boolean handleMessage(Message msg) {
+            switch(msg.what) {
+                case VIDEO_RESIZE:
+                    surfaceResize();
+                    break;
+            }
+            return false;
+        }
+    });
+
+    public void surfaceResize() {
+        if (videoSurface == null || videoSurface.getLayoutParams() == null || ratio == 0) return;
+        android.view.ViewGroup.LayoutParams surfaceParams = videoSurface.getLayoutParams();
+        Point size = new Point();
+        getActivity().getWindowManager().getDefaultDisplay().getSize(size); // TODO: THIS IS NAUGHTY
+        surfaceParams.height = (int) ((1 / ratio) * (float) size.x);
+        videoSurface.setLayoutParams(surfaceParams);
     }
 }

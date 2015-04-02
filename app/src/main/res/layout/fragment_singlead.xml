@@ -16,7 +16,8 @@
         <FrameLayout
             android:id="@+id/videoSurfaceContainer"
             android:layout_width="match_parent"
-            android:layout_height="@dimen/video_preview_height">
+            android:layout_height="wrap_content"
+            android:minHeight="@dimen/video_preview_min_height">
 
             <SurfaceView
                 android:id="@+id/videoSurface"
