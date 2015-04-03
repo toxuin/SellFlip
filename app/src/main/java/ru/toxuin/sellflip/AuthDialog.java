@@ -63,7 +63,7 @@ public class AuthDialog extends DialogFragment {
                 })
                 .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        AuthDialog.this.getDialog().cancel();
+                        dismiss();
                     }
                 });
 
@@ -135,5 +135,6 @@ public class AuthDialog extends DialogFragment {
         } else {
             Session.openActiveSession(getActivity(), this, true, statusCallback);
         }
+
     }
 }

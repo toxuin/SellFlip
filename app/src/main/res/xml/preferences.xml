@@ -28,9 +28,17 @@
             android:key="pref_key_save_search"
             android:summary="Your search history is only stored locally"
             android:title="Save search history"/>
+    </PreferenceCategory>
+    <PreferenceCategory
+        android:key="pref_key_other"
+        android:title="Other">
         <Preference
             android:key="pref_key_privacy_policy"
             android:summary="Application usage agreement"
             android:title="Privacy policy"/>
+        <Preference
+            android:key="pref_key_contact"
+            android:summary="Found a bug or have some suggestions?"
+            android:title="Contact us"/>
     </PreferenceCategory>
 </PreferenceScreen>

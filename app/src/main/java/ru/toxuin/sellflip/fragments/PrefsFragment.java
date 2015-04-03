@@ -1,6 +1,5 @@
 package ru.toxuin.sellflip.fragments;
 
-import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
@@ -8,6 +7,7 @@ import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.Preference;
 import android.support.v4.preference.PreferenceFragment;
+import android.view.Window;
 
 import ru.toxuin.sellflip.BaseActivity;
 import ru.toxuin.sellflip.R;
@@ -24,6 +24,7 @@ public class PrefsFragment extends PreferenceFragment {
         Preference logout = findPreference("pref_key_logout");
         Preference columns = findPreference("pref_key_search_result_columns");
         Preference privacy = findPreference("pref_key_privacy_policy");
+        Preference contact = findPreference("pref_key_contact");
         Preference saveSearch = findPreference("pref_key_save_search");
 
         cacheReset.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
@@ -62,7 +63,8 @@ public class PrefsFragment extends PreferenceFragment {
         privacy.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                BaseActivity.showPrivacyDialog();
+                BaseActivity.setContent(new PrivacyPolicyFragment());
+                BaseActivity.setContentTitle("Privacy Policy");
                 return true;
             }
         });
@@ -76,6 +78,12 @@ public class PrefsFragment extends PreferenceFragment {
                 SharedPreferences.Editor editor = pref.edit();
                 editor.putString(preference.getKey(), newString);
                 editor.apply();
+                return true;
+            }
+        });
+
+        contact.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
+            @Override public boolean onPreferenceClick(Preference preference) {
                 return true;
             }
         });

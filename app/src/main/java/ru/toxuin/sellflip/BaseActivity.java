@@ -30,23 +30,22 @@ import com.facebook.UiLifecycleHelper;
 import com.facebook.model.GraphUser;
 import com.facebook.widget.ProfilePictureView;
 import com.jeremyfeinstein.slidingmenu.lib.SlidingMenu;
-
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
-import ru.toxuin.sellflip.entities.SideMenuItem;
-import ru.toxuin.sellflip.fragments.PrefsFragment;
-import ru.toxuin.sellflip.fragments.PrivacyPolicyDialogFragment;
-import ru.toxuin.sellflip.library.LeftMenuAdapter;
-import ru.toxuin.sellflip.library.OnBackPressedListener;
-import ru.toxuin.sellflip.library.SuggestionAdapter;
-import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
-import ru.toxuin.sellflip.restapi.spicerequests.AuthRequest;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import ru.toxuin.sellflip.entities.SideMenuItem;
+import ru.toxuin.sellflip.fragments.PrefsFragment;
+import ru.toxuin.sellflip.library.LeftMenuAdapter;
+import ru.toxuin.sellflip.library.OnBackPressedListener;
+import ru.toxuin.sellflip.library.SuggestionAdapter;
+import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
+import ru.toxuin.sellflip.restapi.spicerequests.AuthRequest;
 
 
 public class BaseActivity extends ActionBarActivity {
@@ -57,19 +56,17 @@ public class BaseActivity extends ActionBarActivity {
     private static BaseActivity self;
     private static FragmentManager fragmentManager;
     private static AuthDialog authDialog;
+    protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
     private SlidingMenu leftMenu;
     private SlidingMenu rightMenu;
     private ListView rightMenuList;
     private Fragment activeFragment;
     private UiLifecycleHelper uiLifecycleHelper;
-
     private OnBackPressedListener backPressedListener;
-
     private ProfilePictureView facebook_profile_pic;
     private TextView facebook_username;
     private LinearLayout facebook_container;
     private LeftMenuAdapter leftMenuAdapter;
-    protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
     private Menu menu;
     private SearchView searchView;
 
@@ -143,13 +140,9 @@ public class BaseActivity extends ActionBarActivity {
         if (authDialog == null) return;
         try {
             authDialog.dismiss();
-        } catch (Exception ignored){}
+        } catch (Exception ignored) {
+        }
         authDialog = null;
-    }
-
-    public static void showPrivacyDialog() {
-        PrivacyPolicyDialogFragment privacyDialog = new PrivacyPolicyDialogFragment();
-        privacyDialog.show(fragmentManager, "Disclaimer");
     }
 
     @Override
