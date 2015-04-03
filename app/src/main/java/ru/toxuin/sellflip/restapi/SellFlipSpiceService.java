@@ -17,10 +17,10 @@ public class SellFlipSpiceService extends RetrofitGsonSpiceService {
     @Override
     public void onCreate() {
         super.onCreate();
-//        if (wipeCache) {
-//            removeAllDataFromCache();
-//            wipeCache = false;
-//        }
+        if (wipeCache) {
+            removeAllDataFromCache();
+            wipeCache = false;
+        }
         //Ln.getConfig().setLoggingLevel(Log.ERROR);
         addRetrofitInterface(ApiService.class);
     }

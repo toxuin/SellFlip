@@ -248,6 +248,14 @@ public class BaseActivity extends ActionBarActivity {
             }
         }));
 
+        leftMenuAdapter.add(new SideMenuItem("Test", "fa-plus", new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                Intent intent = new Intent(self, VideoCameraActivity.class);
+                startActivity(intent);
+                //BaseActivity.setContent(new NativeCameraFragment());
+            }
+        }));
+
         leftMenuAdapter.add(new SideMenuItem("My Favourites", "fa-heart", null));
         leftMenuAdapter.add(new SideMenuItem("Settings", "fa-cogs", new View.OnClickListener() {
             @Override public void onClick(View v) {
@@ -298,7 +306,8 @@ public class BaseActivity extends ActionBarActivity {
             spiceManager.execute(request, new RequestListener<AuthRequest.AccessToken>() {
                 @Override
                 public void onRequestSuccess(AuthRequest.AccessToken accessToken) {
-                    if (Session.getActiveSession().isOpened() && facebook_container.getVisibility() == View.GONE) {
+                    if (!accessToken.token.isEmpty() && Session.getActiveSession().isOpened() && facebook_container.getVisibility() == View.GONE) {
+                        SellFlipSpiceService.getAuthHeaders().setAccessToken(accessToken.token);
                         makeMeRequest(Session.getActiveSession());
                     }
                 }

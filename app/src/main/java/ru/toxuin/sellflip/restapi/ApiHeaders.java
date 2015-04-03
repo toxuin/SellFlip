@@ -19,4 +19,8 @@ public class ApiHeaders implements RequestInterceptor {
             request.addHeader("Authorization", "Bearer " + authValue);
         }
     }
+
+    public String getAccessToken() {
+        return accessToken;
+    }
 }

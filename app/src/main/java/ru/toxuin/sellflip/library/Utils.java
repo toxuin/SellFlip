@@ -35,9 +35,11 @@ import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 
+import ru.toxuin.sellflip.CaptureVideoFragment;
 import ru.toxuin.sellflip.R;
 import ru.toxuin.sellflip.entities.Coordinates;
 
@@ -66,7 +68,24 @@ public class Utils {
         Camera c = null;
 
         try {
-            c = Camera.open(); // attempt to get a Camera instance
+            int numberOfCameras = Camera.getNumberOfCameras();
+            Camera.CameraInfo cameraInfo = new Camera.CameraInfo();
+            for (int i = 0; i < numberOfCameras; i++) {
+                Camera.getCameraInfo(i, cameraInfo);
+                if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
+                    c = Camera.open(i);
+                    CaptureVideoFragment.setCameraId(i);
+                }
+            }
+            if (c == null) {
+                for (int i = 0; i < numberOfCameras; i++) {
+                    Camera.getCameraInfo(i, cameraInfo);
+                    if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
+                        c = Camera.open(i);
+                        CaptureVideoFragment.setCameraId(i);
+                    }
+                }
+            }
         } catch (Exception e) {
             // Camera is not available (in use or does not exist)
         }
@@ -91,7 +110,7 @@ public class Utils {
             }
 
             // Create a media file name
-            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+            String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(new Date());
             return new File(mediaStorageDir.getPath() + File.separator +
                     "VID_" + timeStamp + ".mp4");
 
@@ -109,7 +128,7 @@ public class Utils {
             tempDir = new File(tempDir.getAbsolutePath() + "/.temp/");
             if (!tempDir.exists()) {
                 if (!tempDir.mkdir()) {
-                    Log.e("MyCameraApp", "failed to create directory");
+                    Log.e(TAG, "failed to create directory");
                     return null;
                 }
 

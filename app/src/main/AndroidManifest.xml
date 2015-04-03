@@ -32,8 +32,9 @@
             <meta-data android:name="android.app.searchable"
                        android:resource="@xml/searchable" />
         </activity>
-        <activity android:name=".MapPopupActivity">
-        </activity>
+        <activity android:name=".MapPopupActivity"/>
+
+        <activity android:name=".VideoCameraActivity"/>
 
         <receiver android:name=".AuthBroadcastReceiver">
             <intent-filter>
