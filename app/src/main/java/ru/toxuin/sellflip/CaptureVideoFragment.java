@@ -21,6 +21,7 @@ import android.widget.Button;
 import android.widget.ProgressBar;
 
 import com.beardedhen.androidbootstrap.FontAwesomeText;
+import com.facebook.Session;
 import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.Style;
 
@@ -33,6 +34,7 @@ import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.library.MagneticOrientationChangeListener;
 import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.library.Utils;
+import ru.toxuin.sellflip.restapi.ApiHeaders;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.AuthRequest;
 
@@ -77,7 +79,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
         progressBar.setProgress(0);
 
         // CHECK AUTH
-        AuthRequest authRequest = new AuthRequest(SellFlipSpiceService.getAuthHeaders().getAccessToken());
+        AuthRequest authRequest = new AuthRequest(Session.getActiveSession().getAccessToken()); // need to pass FB token
         spiceManager.execute(authRequest, new RequestListener<AuthRequest.AccessToken>() {
             // WE DO NOTHING SINCE THERE WILL BE A BROADCAST IF UNAUTHORIZED
             @Override

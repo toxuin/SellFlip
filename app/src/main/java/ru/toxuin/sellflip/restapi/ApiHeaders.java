@@ -3,24 +3,29 @@ package ru.toxuin.sellflip.restapi;
 import retrofit.RequestInterceptor;
 
 public class ApiHeaders implements RequestInterceptor {
-    private String accessToken;
+    private static String backEndAccessToken;
 
-    public void clearToken() {
-        this.accessToken = null;
+    private ApiHeaders(){}
+
+    public static ApiHeaders getInstance(){
+        return new ApiHeaders();
     }
 
-    public void setAccessToken(String token) {
-        this.accessToken = token;
+    public static void clearToken() {
+        backEndAccessToken = null;
+    }
+
+    public static void setAccessToken(String token) {
+        backEndAccessToken = token;
     }
 
     @Override public void intercept(RequestFacade request) {
-        String authValue = this.accessToken;
-        if (authValue != null) {
-            request.addHeader("Authorization", "Bearer " + authValue);
+        if (backEndAccessToken != null) {
+            request.addHeader("Authorization", "Bearer " + backEndAccessToken);
         }
     }
 
-    public String getAccessToken() {
-        return accessToken;
+    public static String getAccessToken() {
+        return backEndAccessToken;
     }
 }

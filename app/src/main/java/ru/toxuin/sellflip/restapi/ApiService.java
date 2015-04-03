@@ -23,7 +23,7 @@ public interface ApiService {
     @GET(SINGLE_AD) SingleAd getSingleAd(@Path("id") String id);
     @POST(LIST_ADS) SingleAd createNewAd(@Body SingleAd ad);
     @GET(CATEGORIES) Category.List getCategories();
-    @POST(AUTH) AuthRequest.AccessToken getAuthToken(@Body AuthRequest.AccessToken accessToken);
+    @POST(AUTH) AuthRequest.AccessToken getAuthToken(@Body AuthRequest.AccessToken access_token);
 
     @Multipart
     @POST(VIDEO_UPLOAD) Void uploadVideo(@Part("file") TypedFile file, @Path("id") String id);

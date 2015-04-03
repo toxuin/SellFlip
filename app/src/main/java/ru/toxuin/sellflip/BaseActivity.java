@@ -44,6 +44,7 @@ import ru.toxuin.sellflip.fragments.PrefsFragment;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
 import ru.toxuin.sellflip.library.OnBackPressedListener;
 import ru.toxuin.sellflip.library.SuggestionAdapter;
+import ru.toxuin.sellflip.restapi.ApiHeaders;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.AuthRequest;
 
@@ -247,9 +248,8 @@ public class BaseActivity extends ActionBarActivity {
 
         leftMenuAdapter.add(new SideMenuItem("Add ad", "fa-plus", new View.OnClickListener() {
             @Override public void onClick(View v) {
-                if (SellFlipSpiceService.getAuthHeaders() != null
-                        && SellFlipSpiceService.getAuthHeaders().getAccessToken() != null
-                        && SellFlipSpiceService.getAuthHeaders().getAccessToken().isEmpty()) {
+                if (ApiHeaders.getAccessToken() != null
+                        && ApiHeaders.getAccessToken().isEmpty()) {
                     showLogInDialog();
                     return;
                 }
@@ -308,15 +308,15 @@ public class BaseActivity extends ActionBarActivity {
             facebook_container.setVisibility(View.GONE);
             facebook_profile_pic.setProfileId(null);
             facebook_username.setText("");
-            SellFlipSpiceService.getAuthHeaders().clearToken();
+            ApiHeaders.clearToken();
         } else {
             // perform AuthRequest to the back end
             AuthRequest request = new AuthRequest(session.getAccessToken());
             spiceManager.execute(request, new RequestListener<AuthRequest.AccessToken>() {
                 @Override
                 public void onRequestSuccess(AuthRequest.AccessToken accessToken) {
+                    ApiHeaders.setAccessToken(accessToken.token);
                     if (!accessToken.token.isEmpty() && Session.getActiveSession().isOpened() && facebook_container.getVisibility() == View.GONE) {
-                        SellFlipSpiceService.getAuthHeaders().setAccessToken(accessToken.token);
                         makeMeRequest(Session.getActiveSession());
                     }
                 }
