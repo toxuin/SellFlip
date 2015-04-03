@@ -31,7 +31,7 @@ public class AuthDialog extends DialogFragment {
     private Session.StatusCallback statusCallback = new Session.StatusCallback() {
         @Override public void call(Session session, SessionState sessionState, Exception e) {
             if (session.isOpened()) {
-                dismiss();
+                BaseActivity.hideLogInDialog();
             }
         }
     };
@@ -117,6 +117,7 @@ public class AuthDialog extends DialogFragment {
 
     @Override public void onDestroy() {
         super.onDestroy();
+        BaseActivity.hideLogInDialog();
         uiLifecycleHelper.onDestroy();
     }
 

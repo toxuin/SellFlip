@@ -2,20 +2,14 @@ package ru.toxuin.sellflip;
 
 
 import android.app.AlertDialog;
-import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.media.CamcorderProfile;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
-import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Surface;
@@ -69,20 +63,6 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
         super.onCreate(savedInstanceState);
         rootView = inflater.inflate(R.layout.fragment_capture_video, container, false);
 
-        // CHECK AUTH
-        AuthRequest authRequest = new AuthRequest(SellFlipSpiceService.getAuthHeaders().getAccessToken());
-        spiceManager.execute(authRequest, new RequestListener<AuthRequest.AccessToken>() {
-            // WE DO NOTHING SINCE THERE WILL BE A BROADCAST IF UNAUTHORIZED
-            @Override
-            public void onRequestSuccess(AuthRequest.AccessToken accessToken) {
-                Log.d(TAG, "*** AUTH SUCCESS ***");
-            }
-            @Override
-            public void onRequestFailure(SpiceException spiceException) {
-                Log.d(TAG, "*** AUTH FAILED ***");
-            }
-        });
-
         final FontAwesomeText nextArrowBtn = (FontAwesomeText) rootView.findViewById(R.id.nextArrowBtn);
         final FontAwesomeText closeXBtn = (FontAwesomeText) rootView.findViewById(R.id.closeXBtn);
         final FontAwesomeText recordIndicator = (FontAwesomeText) rootView.findViewById(R.id.recordIndicator);
@@ -90,17 +70,38 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
         capture = (Button) rootView.findViewById(R.id.button_capture);
 
         capture.setEnabled(false);
+        nextArrowBtn.setEnabled(false);
         progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
         mPreview = (SurfaceView) rootView.findViewById(R.id.surface_preview);
         mHolder = mPreview.getHolder();
-        mHolder.addCallback(this);
         progressBar.setProgress(0);
+
+        // CHECK AUTH
+        AuthRequest authRequest = new AuthRequest(SellFlipSpiceService.getAuthHeaders().getAccessToken());
+        spiceManager.execute(authRequest, new RequestListener<AuthRequest.AccessToken>() {
+            // WE DO NOTHING SINCE THERE WILL BE A BROADCAST IF UNAUTHORIZED
+            @Override
+            public void onRequestSuccess(AuthRequest.AccessToken accessToken) {
+                Log.d(TAG, "*** AUTH SUCCESS ***");
+                mHolder.addCallback(CaptureVideoFragment.this);
+            }
+
+            @Override
+            public void onRequestFailure(SpiceException spiceException) {
+                getActivity().getSupportFragmentManager().popBackStackImmediate();
+                Log.d(TAG, "*** AUTH FAILED ***");
+            }
+        });
 
         final Handler progressHandler = new Handler();
         final Runnable progressRunnable = new Runnable() {
             @Override
             public void run() {
                 progressBar.setProgress(progressBar.getProgress() + 1);
+
+                if (progressBar.getProgress() >= VIDEO_MINIMUM_LENGTH) {
+                    nextArrowBtn.setEnabled(true);
+                }
 
                 if (progressBar.getProgress() >= progressBar.getMax() && isRecording) {  // user has reached the limit
                     /*

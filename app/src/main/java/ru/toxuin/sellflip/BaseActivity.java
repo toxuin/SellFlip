@@ -56,6 +56,7 @@ public class BaseActivity extends ActionBarActivity {
     private static final String ACTIVE_FRAGMENT_TAG = "activeFragmentTag";
     private static BaseActivity self;
     private static FragmentManager fragmentManager;
+    private static AuthDialog authDialog;
     private SlidingMenu leftMenu;
     private SlidingMenu rightMenu;
     private ListView rightMenuList;
@@ -133,8 +134,17 @@ public class BaseActivity extends ActionBarActivity {
     }
 
     public static void showLogInDialog() {
-        AuthDialog authDialog = new AuthDialog();
+        if (authDialog != null) return;
+        authDialog = new AuthDialog();
         authDialog.show(fragmentManager, "Authenticate");
+    }
+
+    public static void hideLogInDialog() {
+        if (authDialog == null) return;
+        try {
+            authDialog.dismiss();
+        } catch (Exception ignored){}
+        authDialog = null;
     }
 
     public static void showPrivacyDialog() {
@@ -244,6 +254,12 @@ public class BaseActivity extends ActionBarActivity {
 
         leftMenuAdapter.add(new SideMenuItem("Add ad", "fa-plus", new View.OnClickListener() {
             @Override public void onClick(View v) {
+                if (SellFlipSpiceService.getAuthHeaders() != null
+                        && SellFlipSpiceService.getAuthHeaders().getAccessToken() != null
+                        && SellFlipSpiceService.getAuthHeaders().getAccessToken().isEmpty()) {
+                    showLogInDialog();
+                    return;
+                }
                 BaseActivity.setContent(new CaptureVideoFragment());
             }
         }));
