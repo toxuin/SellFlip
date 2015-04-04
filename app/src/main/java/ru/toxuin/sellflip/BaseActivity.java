@@ -228,6 +228,9 @@ public class BaseActivity extends ActionBarActivity {
             setContent(new SearchResultFragment());
         } else {
             activeFragment = fragmentManager.findFragmentByTag(ACTIVE_FRAGMENT_TAG);
+            if (activeFragment instanceof SearchResultFragment) {
+                enableRightMenu(); // TODO: SAME IS DONE IN setContent()
+            }
         }
 
         // ADD ITEMS TO LEFT MENU

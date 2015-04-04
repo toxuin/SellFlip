@@ -51,7 +51,23 @@ public class SearchResultFragment extends SpiceFragment {
         gridView = (StaggeredGridViewSellFlip) rootView.findViewById(R.id.itemList);
 
         searchAdapter = new GridSearchAdapter(getActivity(), spiceManager);
-        if (searchQuery != null) searchAdapter.setSearchQuery(searchQuery);
+
+        String savedSearchQuery = null;
+        String savedCategory = null;
+        if (savedInstanceState != null) {
+            savedCategory = savedInstanceState.getString("category", null);
+            savedSearchQuery = savedInstanceState.getString("searchQuery", null);
+        }
+        if (searchQuery != null) {
+            searchAdapter.setSearchQuery(searchQuery);
+        } else if (savedSearchQuery != null) {
+            searchAdapter.setSearchQuery(savedSearchQuery);
+        }
+
+        if (savedCategory != null) {
+            searchAdapter.setCategory(savedCategory);
+        }
+
         gridView.setAdapter(searchAdapter);
 
         gridView.setOnScrollListener(searchAdapter.searchResultsEndlessScrollListener);
@@ -133,6 +149,18 @@ public class SearchResultFragment extends SpiceFragment {
             getActivity().unregisterReceiver(totalItemsBroadcastReceiver);
         } catch (Exception e) {
             // ignore, just not registered.
+        }
+    }
+
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (searchAdapter == null) return;
+        if (searchAdapter.getCategory() != null && !searchAdapter.getCategory().isEmpty()) {
+            outState.putString("category", searchAdapter.getCategory());
+        }
+        if (searchQuery != null && !searchQuery.isEmpty()) {
+            outState.putString("searchQuery", searchQuery);
         }
     }
 

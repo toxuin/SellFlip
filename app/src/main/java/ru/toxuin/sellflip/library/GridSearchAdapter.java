@@ -192,8 +192,9 @@ public class GridSearchAdapter extends BaseAdapter {
         public void onScrollStateChanged(AbsListView view, int scrollState) {}
     };
 
-
-
+    public String getCategory() {
+        return category;
+    }
 
 
     public static class SearchResultViewHolder implements View.OnClickListener {
