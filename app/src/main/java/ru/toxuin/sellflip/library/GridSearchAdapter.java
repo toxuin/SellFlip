@@ -2,13 +2,13 @@ package ru.toxuin.sellflip.library;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.LayerDrawable;
 import android.text.format.DateFormat;
 import android.util.Log;
-import android.util.SparseArray;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -40,7 +40,6 @@ import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -151,35 +150,47 @@ public class GridSearchAdapter extends BaseAdapter {
         if (favsMode) {
             SharedPreferences spref = context.getSharedPreferences(context.getString(R.string.app_preference_key), Context.MODE_PRIVATE);
             Set<String> favs = spref.getStringSet("favoriteAds", new HashSet<String>());
-            final boolean[] firstAd = {true};
-            for (String id : favs) {
-                SingleAdRequest favAdRequest = new SingleAdRequest(id);
-                Object favCacheKey = favAdRequest.getCacheKey();
-                PendingRequestListener<SingleAd> favRequestListener = new PendingRequestListener<SingleAd>() {
-                    @Override public void onRequestSuccess(SingleAd ad) {
-                        if (firstAd[0]) {
-                            itemsList.clear();
-                            firstAd[0] = false;
+            if (favs.isEmpty()) {
+                Intent intent = new Intent(context.getString(R.string.broadcast_intent_empty_result));
+                intent.putExtra("message", "No favorites found!");
+                context.sendBroadcast(intent);
+            } else {
+                final boolean[] firstAd = {true};
+                for (String id : favs) {
+                    SingleAdRequest favAdRequest = new SingleAdRequest(id);
+                    Object favCacheKey = favAdRequest.getCacheKey();
+                    PendingRequestListener<SingleAd> favRequestListener = new PendingRequestListener<SingleAd>() {
+                        @Override
+                        public void onRequestSuccess(SingleAd ad) {
+                            if (firstAd[0]) {
+                                itemsList.clear();
+                                firstAd[0] = false;
+                            }
+                            if (!itemsList.contains(ad)) {
+                                itemsList.add(ad);
+                                notifyDataSetChanged();
+                                Log.d(TAG, "FAV: ADDED " + ad.getTitle());
+                            }
                         }
-                        if (!itemsList.contains(ad)) {
-                            itemsList.add(ad);
-                            notifyDataSetChanged();
-                            Log.d(TAG, "FAV: ADDED " + ad.getTitle());
-                        }
-                    }
-                    @Override public void onRequestNotFound() {}
-                    @Override public void onRequestFailure(SpiceException spiceException) {
-                        spiceException.printStackTrace();
-                    }
-                };
-                spiceManager.execute(favAdRequest, favCacheKey, DurationInMillis.ONE_HOUR, favRequestListener);
-                favAdsRequests.put(favCacheKey, favRequestListener);
-            }
 
+                        @Override
+                        public void onRequestNotFound() {
+                        }
+
+                        @Override
+                        public void onRequestFailure(SpiceException spiceException) {
+                            spiceException.printStackTrace();
+                        }
+                    };
+                    spiceManager.execute(favAdRequest, favCacheKey, DurationInMillis.ONE_HOUR, favRequestListener);
+                    favAdsRequests.put(favCacheKey, favRequestListener);
+                }
+            }
 
         } else {
             // NOT FAV MODE
 
+            if (loading != null) loading.dismiss();
             loading = new ProgressDialog(context);
             loading.setTitle("Loading");
             loading.setIndeterminate(true);
@@ -206,6 +217,14 @@ public class GridSearchAdapter extends BaseAdapter {
                     } catch (Exception e) {
                         // INGORE
                     }
+                    if (allAds == null || allAds.isEmpty()) {
+                        Intent intent = new Intent(context.getString(R.string.broadcast_intent_empty_result));
+                        intent.putExtra("message", "No results!");
+                        context.sendBroadcast(intent);
+                        itemsList.clear();
+                        notifyDataSetChanged();
+                        return;
+                    }
                     if (page == 0) itemsList.clear();
                     itemsList.addAll(allAds);
                     notifyDataSetChanged();
@@ -216,6 +235,11 @@ public class GridSearchAdapter extends BaseAdapter {
                 public void onRequestFailure(SpiceException spiceException) {
                     try {
                         loading.dismiss();
+                        Intent intent = new Intent(context.getString(R.string.broadcast_intent_empty_result));
+                        intent.putExtra("message", "Error: " + spiceException.getMessage());
+                        context.sendBroadcast(intent);
+                        itemsList.clear();
+                        notifyDataSetChanged();
                     } catch (Exception e) {
                         // INGORE
                     }

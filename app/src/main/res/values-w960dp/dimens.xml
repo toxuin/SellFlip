@@ -4,4 +4,5 @@
     <dimen name="min_ad_box_height">400dp</dimen>
     <dimen name="ad_pic_preview_height">300dp</dimen>
     <dimen name="video_preview_min_height">500dp</dimen>
+    <dimen name="search_results_cards_margin">10dp</dimen>
 </resources>

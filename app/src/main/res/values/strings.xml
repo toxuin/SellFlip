@@ -59,6 +59,7 @@
     <string name="use_back_btn_to_nav">Use device back button to navigate in category tree!</string>
     <string name="broadcast_intent_auth">ru.toxuin.sellflip.intent.action.AUTH_REQUESTED</string>
     <string name="broadcast_intent_total_items">ru.toxuin.sellflip.intent.info.BROADCAST_TOTAL_ITEMS</string>
+    <string name="broadcast_intent_empty_result">ru.toxuin.sellflip.intent.info.BROADCAST_EMPTY_SEARCH_RESULT</string>
     <string name="contact_seller">Contact Seller</string>
     <string name="open_map">Open map</string>
     <string name="forgot_password"><u>Forgot your password?</u></string>

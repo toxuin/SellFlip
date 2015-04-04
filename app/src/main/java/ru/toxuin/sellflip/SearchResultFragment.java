@@ -14,6 +14,8 @@ import android.view.ViewGroup;
 
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
+import android.widget.LinearLayout;
+import android.widget.TextView;
 import com.etsy.android.grid.StaggeredGridViewSellFlip;
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
@@ -45,6 +47,8 @@ public class SearchResultFragment extends SpiceFragment {
     private PendingRequestListener<Category.List> rightMenuSpiceListener;
     private boolean favsMode = false;
     private boolean trending = false;
+    private LinearLayout emptyPanel;
+    private TextView emptyText;
 
     public SearchResultFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -54,6 +58,8 @@ public class SearchResultFragment extends SpiceFragment {
         String title = getString(R.string.search_results);
         getActivity().setTitle(title);
         gridView = (StaggeredGridViewSellFlip) rootView.findViewById(R.id.itemList);
+        emptyPanel = (LinearLayout) rootView.findViewById(R.id.nothing_panel);
+        emptyText = (TextView) rootView.findViewById(R.id.nothing_to_show);
 
         searchAdapter = new GridSearchAdapter(getActivity(), spiceManager);
         if (favsMode) {
@@ -153,6 +159,7 @@ public class SearchResultFragment extends SpiceFragment {
     public void onStart() {
         super.onStart();
         getActivity().registerReceiver(totalItemsBroadcastReceiver, new IntentFilter(getActivity().getString(R.string.broadcast_intent_total_items)));
+        getActivity().registerReceiver(emptyReciever, new IntentFilter(getActivity().getString(R.string.broadcast_intent_empty_result)));
         searchAdapter.requestData(0);
     }
 
@@ -161,6 +168,7 @@ public class SearchResultFragment extends SpiceFragment {
         super.onPause();
         try {
             getActivity().unregisterReceiver(totalItemsBroadcastReceiver);
+            getActivity().unregisterReceiver(emptyReciever);
         } catch (Exception e) {
             // ignore, just not registered.
         }
@@ -192,6 +200,15 @@ public class SearchResultFragment extends SpiceFragment {
         public void onReceive(Context context, Intent intent) {
             totalServerItems = intent.getIntExtra("X-Total-Items", 0);
             Log.d("TOTAL-BROADCAST", "GOT TOTAL ITEMS ON SERVER: " + totalServerItems);
+        }
+    };
+
+    private BroadcastReceiver emptyReciever = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            String message = intent.getStringExtra("message");
+            emptyPanel.setVisibility(View.VISIBLE);
+            emptyText.setText(message);
         }
     };
 
