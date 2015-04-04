@@ -24,6 +24,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.facebook.AppEventsLogger;
 import com.facebook.Request;
 import com.facebook.Response;
 import com.facebook.Session;
@@ -41,6 +42,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.UpdateManager;
 import ru.toxuin.sellflip.entities.SideMenuItem;
 import ru.toxuin.sellflip.fragments.PrefsFragment;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
@@ -152,6 +155,10 @@ public class BaseActivity extends ActionBarActivity {
     @Override
     protected void onResume() {
         super.onResume();
+        CrashManager.register(this, "775e53fa038441cc6ee48a8c1091c69d");
+        // TODO: REMOVE THIS BEFORE PUBLISHING TO STORE!!!
+        UpdateManager.register(this, "775e53fa038441cc6ee48a8c1091c69d");
+        AppEventsLogger.activateApp(this);
         Session session = Session.getActiveSession();
         if (session != null &&
                 (session.isOpened() || session.isClosed())) {
@@ -164,6 +171,7 @@ public class BaseActivity extends ActionBarActivity {
     @Override
     protected void onPause() {
         super.onPause();
+        AppEventsLogger.deactivateApp(this);
         spiceManager.shouldStop();
     }
 

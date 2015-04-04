@@ -67,6 +67,8 @@
         <service android:name=".restapi.AppygramSpiceServices"
                  android:exported="false" />
 
+        <activity android:name="net.hockeyapp.android.UpdateActivity" />
+
     </application>
 
 </manifest>

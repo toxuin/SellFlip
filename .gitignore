@@ -249,3 +249,5 @@ libs/android-support-v4-preferencefragment-master/maven-repository/
 .gradle
 gradle/wrapper
 /local.properties
+
+app/manifest-merger-release-report.txt
