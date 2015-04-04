@@ -4,6 +4,7 @@ import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -96,8 +97,9 @@ public class BaseActivity extends ActionBarActivity {
         }
         self.disableRightMenu();
         if (fragment instanceof SearchResultFragment) {
-            //((SearchResultFragment) fragment).setLayoutResource(R.layout.);
             self.enableRightMenu();
+        } else if (fragment instanceof CaptureVideoFragment) {
+            self.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
         fragmentManager.beginTransaction()
                 .replace(R.id.content, fragment, ACTIVE_FRAGMENT_TAG)
@@ -254,14 +256,6 @@ public class BaseActivity extends ActionBarActivity {
                     return;
                 }
                 BaseActivity.setContent(new CaptureVideoFragment());
-            }
-        }));
-
-        leftMenuAdapter.add(new SideMenuItem("Test", "fa-plus", new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                Intent intent = new Intent(self, VideoCameraActivity.class);
-                startActivity(intent);
-                //BaseActivity.setContent(new NativeCameraFragment());
             }
         }));
 
@@ -472,5 +466,13 @@ public class BaseActivity extends ActionBarActivity {
         });
 
         return super.onCreateOptionsMenu(menu);
+    }
+
+    public static void hideActionBar() {
+        self.getSupportActionBar().hide();
+    }
+
+    public static void showActionBar() {
+        self.getSupportActionBar().show();
     }
 }

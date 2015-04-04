@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<TextView xmlns:android="http://schemas.android.com/apk/res/android"
-          android:id="@android:id/text1"
-          style="?android:attr/spinnerItemStyle"
-          android:singleLine="true"
-          android:layout_margin="21dp"
-          android:layout_width="match_parent"
-          android:layout_height="wrap_content"
-          android:ellipsize="marquee"/>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="10dp">
+
+    <TextView android:id="@android:id/text1"
+              style="?android:attr/spinnerItemStyle"
+              android:singleLine="true"
+              android:text="LALALALA"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content"
+              android:ellipsize="marquee"/>
+
+</LinearLayout>

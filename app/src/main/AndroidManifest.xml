@@ -34,8 +34,6 @@
         </activity>
         <activity android:name=".MapPopupActivity"/>
 
-        <activity android:name=".VideoCameraActivity"/>
-
         <receiver android:name=".AuthBroadcastReceiver">
             <intent-filter>
                 <action android:name="ru.toxuin.sellflip.intent.action.AUTH_REQUESTED" />

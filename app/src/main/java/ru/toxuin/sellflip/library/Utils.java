@@ -47,7 +47,6 @@ import ru.toxuin.sellflip.entities.Coordinates;
 
 public class Utils {
     public static final String TAG = "Utils";
-    public static boolean isFullScreen = false;
     public static List<String> fileNames = new ArrayList<>();
     public static Handler saveFileHandler;
 
@@ -75,7 +74,6 @@ public class Utils {
                 Camera.getCameraInfo(i, cameraInfo);
                 if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_BACK) {
                     c = Camera.open(i);
-                    CaptureVideoFragment.setCameraId(i);
                 }
             }
             if (c == null) {
@@ -83,7 +81,6 @@ public class Utils {
                     Camera.getCameraInfo(i, cameraInfo);
                     if (cameraInfo.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
                         c = Camera.open(i);
-                        CaptureVideoFragment.setCameraId(i);
                     }
                 }
             }
@@ -295,15 +292,13 @@ public class Utils {
         return gson.fromJson(json, Coordinates.class);
     }
 
-    public static void toggleFullScreen(Activity activity) {
-        if (!isFullScreen) {
+    public static void setFullScreen(Activity activity, boolean maximize) {
+        if (maximize) {
             activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
             activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
-            isFullScreen = true;
         } else {
             activity.getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
             activity.getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
-            isFullScreen = false;
         }
     }
 

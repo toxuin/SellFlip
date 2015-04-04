@@ -12,12 +12,16 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
-import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
+import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
 import com.beardedhen.androidbootstrap.FontAwesomeText;
@@ -43,20 +47,23 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
     public static int VIDEO_MINIMUM_LENGTH = 1; // easier debugging
     public static int VIDEO_MAXIMUM_LENGTH = 15;
     private static int lookingDegrees = 90;
-    private static boolean shouldReorientCamera = true;
 
     private Camera mCamera;
-    private static int cameraId;
+    private static int finalDegree = -1;
     private MediaRecorder mMediaRecorder;
     private boolean isRecording = false;
     private SurfaceView mPreview;
     private SurfaceHolder mHolder;
     private ProgressBar progressBar;
+    private ProgressBar progressBarSecond;
 
     private View rootView;
     private Button capture;
     private MagneticOrientationChangeListener rotationSensorListener;
     private SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
+
+    LinearLayout rightPanel;
+    LinearLayout leftPanel;
 
     public CaptureVideoFragment() {
     }
@@ -66,17 +73,23 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
         rootView = inflater.inflate(R.layout.fragment_capture_video, container, false);
 
         final FontAwesomeText nextArrowBtn = (FontAwesomeText) rootView.findViewById(R.id.nextArrowBtn);
+        final FontAwesomeText nextArrowBtnSecond = (FontAwesomeText) rootView.findViewById(R.id.nextArrowBtn_second);
         final FontAwesomeText closeXBtn = (FontAwesomeText) rootView.findViewById(R.id.closeXBtn);
-        final FontAwesomeText recordIndicator = (FontAwesomeText) rootView.findViewById(R.id.recordIndicator);
+        final FontAwesomeText closeXBtnSecond = (FontAwesomeText) rootView.findViewById(R.id.closeXBtn_second);
+        //final FontAwesomeText recordIndicator = (FontAwesomeText) rootView.findViewById(R.id.recordIndicator);
 
         capture = (Button) rootView.findViewById(R.id.button_capture);
 
         capture.setEnabled(false);
         nextArrowBtn.setEnabled(false);
         progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
+        progressBarSecond = (ProgressBar) rootView.findViewById(R.id.progressBar_second);
         mPreview = (SurfaceView) rootView.findViewById(R.id.surface_preview);
         mHolder = mPreview.getHolder();
         progressBar.setProgress(0);
+
+        rightPanel = (LinearLayout) rootView.findViewById(R.id.camera_right_panel);
+        leftPanel = (LinearLayout) rootView.findViewById(R.id.camera_left_panel);
 
         // CHECK AUTH
         AuthRequest authRequest = new AuthRequest(Session.getActiveSession().getAccessToken()); // need to pass FB token
@@ -85,7 +98,6 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
             @Override
             public void onRequestSuccess(AuthRequest.AccessToken accessToken) {
                 Log.d(TAG, "*** AUTH SUCCESS ***");
-                mHolder.addCallback(CaptureVideoFragment.this);
             }
 
             @Override
@@ -94,15 +106,18 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                 Log.d(TAG, "*** AUTH FAILED ***");
             }
         });
+        mHolder.addCallback(this);
 
         final Handler progressHandler = new Handler();
         final Runnable progressRunnable = new Runnable() {
             @Override
             public void run() {
                 progressBar.setProgress(progressBar.getProgress() + 1);
+                progressBarSecond.setProgress(progressBarSecond.getProgress() + 1);
 
                 if (progressBar.getProgress() >= VIDEO_MINIMUM_LENGTH) {
                     nextArrowBtn.setEnabled(true);
+                    nextArrowBtnSecond.setEnabled(true);
                 }
 
                 if (progressBar.getProgress() >= progressBar.getMax() && isRecording) {  // user has reached the limit
@@ -154,7 +169,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                 }
         );
 
-        nextArrowBtn.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener nextListener = new View.OnClickListener() {
             @Override public void onClick(View v) {
                 if (progressBar.getProgress() > VIDEO_MINIMUM_LENGTH) { // user has minimum length
                     releaseMediaRecorder();
@@ -176,9 +191,10 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                 }
 
             }
-        });
+        };
+        nextArrowBtn.setOnClickListener(nextListener);
 
-        closeXBtn.setOnClickListener(new View.OnClickListener() {
+        View.OnClickListener closeListener = new View.OnClickListener() {
             @Override public void onClick(View v) {
                 if (progressBar.getProgress() > 0) {
                     new AlertDialog.Builder(getActivity())
@@ -201,13 +217,15 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                 }
 
             }
-        });
+        };
+        closeXBtn.setOnClickListener(closeListener);
+        closeXBtnSecond.setOnClickListener(closeListener);
 
         // ORIENTATION STUFF
         rotationSensorListener = new MagneticOrientationChangeListener(getActivity().getApplicationContext()) {
             @Override
             public void onOrientationChanged(int orientation) {
-                Log.d(TAG, "ORIENTATION " + orientation);
+                setCameraDisplayOrientation(orientation);
             }
         };
         rotationSensorListener.enable();
@@ -244,9 +262,14 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
         if (tempFile == null) return false;
         mMediaRecorder.setOutputFile(tempFile.getAbsolutePath());
         // Step 5: Set the preview output
-        mMediaRecorder.setPreviewDisplay(mHolder.getSurface());
 
-        mMediaRecorder.setOrientationHint(lookingDegrees);
+        if (finalDegree == -1) finalDegree = lookingDegrees;
+        if (finalDegree == -1) finalDegree = 90; // if still -1
+        rotationSensorListener.disable();
+        mMediaRecorder.setOrientationHint(finalDegree);
+
+        //mMediaRecorder.setPreviewDisplay(mHolder.getSurface());
+
         // mMediaRecorder.setVideoEncodingBitRate();
 
         // Step 6: Prepare configured MediaRecorder
@@ -264,36 +287,32 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
         return true;
     }
 
-    public void setCameraDisplayOrientation() {
+    public void setCameraDisplayOrientation(int degrees) {
         if (mCamera == null) return;
-        android.hardware.Camera.CameraInfo info = new android.hardware.Camera.CameraInfo();
-        android.hardware.Camera.getCameraInfo(cameraId, info);
-        int rotation = getActivity().getWindowManager().getDefaultDisplay().getRotation();
-        int degrees = 0;
-        switch (rotation) {
-            case Surface.ROTATION_0: degrees = 0; break;
-            case Surface.ROTATION_90: degrees = 90; break;
-            case Surface.ROTATION_180: degrees = 180; break;
-            case Surface.ROTATION_270: degrees = 270; break;
-        }
-
+        if (degrees < 0) return;
         int result;
-        if (info.facing == Camera.CameraInfo.CAMERA_FACING_FRONT) {
-            result = (info.orientation + degrees) % 360;
-            result = (360 - result) % 360;  // compensate the mirror
-        } else {  // back-facing
-            result = (info.orientation - degrees + 360) % 360;
-        }
+        if (degrees >= 0 && degrees < 45) {
+            result = 0;
+        } else if (degrees >= 45 && degrees < 135) {
+            //result = 90;
+            result = 270;
+        } else if (degrees >= 135 && degrees < 225) {
+            result = 180;
+        } else if (degrees >= 225 && degrees < 315) {
+            //result = 270;
+            result = 90;
+        } else result = 0;
+        if (lookingDegrees != result) changeLayout(result);
+
         lookingDegrees = result;
-        shouldReorientCamera = false;
-        //mCamera.setDisplayOrientation(lookingDegrees);
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        //getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
+        getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
         releaseMediaRecorder();
+        BaseActivity.showActionBar();
         if (rotationSensorListener != null) rotationSensorListener.disable();
         releaseCamera();
     }
@@ -301,8 +320,8 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
     @Override
     public void onResume() {
         super.onResume();
-        //getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_NOSENSOR);
-        Utils.toggleFullScreen(getActivity());
+        Utils.setFullScreen(getActivity(), true);
+        BaseActivity.hideActionBar();
         if (rotationSensorListener != null) rotationSensorListener.enable();
     }
 
@@ -325,9 +344,17 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
 
     @Override public void surfaceCreated(SurfaceHolder holder) {
         mCamera = Utils.getCameraInstance();
+
+        int offset = rightPanel.getHeight();
+        TranslateAnimation anim = new TranslateAnimation(0, 0, 0, -offset);
+        anim.setInterpolator(new LinearInterpolator());
+        anim.setDuration(0);
+        anim.setFillEnabled(true);
+        anim.setFillAfter(true);
+        rightPanel.startAnimation(anim);
         capture.setEnabled(true);
         try {
-            mCamera.setPreviewDisplay(mHolder);
+            mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
         } catch (IOException e) {
             Log.d(TAG, "Error setting camera preview: " + e.getMessage());
@@ -344,15 +371,14 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
             // ignore: tried to stop a non-existent preview
         }
 
-        if (shouldReorientCamera) setCameraDisplayOrientation();
         // start preview with new settings
         try {
-            mCamera.setDisplayOrientation(90);
-            mCamera.setPreviewDisplay(mHolder);
+            mCamera.setPreviewDisplay(holder);
             mCamera.startPreview();
 
         } catch (Exception e) {
             Log.d(TAG, "Error starting camera preview: " + e.getMessage());
+            e.printStackTrace();
         }
     }
 
@@ -364,16 +390,146 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
     @Override public void onDestroy() {
         super.onDestroy();
         Utils.removeTempFiles();
-        Utils.toggleFullScreen(getActivity());
+        Utils.setFullScreen(getActivity(), false);
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
-    }
-
-    public static void setCameraId(int cameraId) {
-        CaptureVideoFragment.cameraId = cameraId;
     }
 
     @Override
     public SpiceManager getSpiceManager() {
         return spiceManager;
+    }
+
+    int wasAngle = 0;
+    int sidePanelHeight = 0;
+    boolean isRightPanelVisible = false;
+    boolean isLeftPanelVisible = true;
+    private void changeLayout(final int angle) {
+    /*           270 (-90)
+               |------------|
+           180 |            | 0
+         (-180)|____________|
+                  90 (-270)            */
+
+        //Log.d(TAG, "WAS ANGLE: " + wasAngle + ", NOW ANGLE: " + angle);
+
+        if (capture != null) {
+            boolean clockWise = true;
+            if (wasAngle < angle) clockWise = false;
+            if (wasAngle == 270 && angle == 0) clockWise = false;
+            if (wasAngle == 0 && angle == 270) clockWise = true;
+
+            int toAngle = angle - 90;
+            int fromAngle = wasAngle -90;
+
+            if (fromAngle == toAngle && fromAngle == -90) fromAngle = 0; // INITIAL CONDITION, ROTATED CW
+            if (fromAngle == -90 && toAngle == 90) fromAngle = 0;  // INITIAL CONDITION, ROTATED CCW
+            if (clockWise && fromAngle == -90 && toAngle == 180) {
+                fromAngle = 270;
+            } else if (!clockWise && fromAngle == 180 && toAngle == -90) {
+                toAngle = 270;
+            }
+            RotateAnimation anim = new RotateAnimation(fromAngle, toAngle,
+                    Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
+            anim.setInterpolator(new LinearInterpolator());
+            anim.setDuration(300);
+            anim.setFillEnabled(true);
+            anim.setFillAfter(true);
+            capture.startAnimation(anim);
+        }
+
+
+
+
+
+
+
+        if (rightPanel != null) {
+            sidePanelHeight = rightPanel.getHeight();
+            Animation anim = null;
+            if (angle == 270 && !isRightPanelVisible) {
+                anim = new TranslateAnimation(0, 0, -sidePanelHeight, 0);
+                anim.setInterpolator(new LinearInterpolator());
+                anim.setDuration(300);
+                anim.setFillEnabled(true);
+                anim.setFillAfter(true);
+                anim.setAnimationListener(new Animation.AnimationListener() {
+                    @Override public void onAnimationStart(Animation animation) {
+                        rightPanel.setVisibility(View.VISIBLE);
+                        isRightPanelVisible = true;
+                    }
+                    @Override public void onAnimationEnd(Animation animation) {}
+                    @Override public void onAnimationRepeat(Animation animation) {}
+                });
+            } else if (isRightPanelVisible) {
+                anim = new TranslateAnimation(0, 0, 0, -sidePanelHeight);
+                anim.setInterpolator(new LinearInterpolator());
+                anim.setDuration(300);
+                anim.setFillEnabled(true);
+                anim.setFillAfter(true);
+                anim.setAnimationListener(new Animation.AnimationListener() {
+                    @Override public void onAnimationStart(Animation animation) {}
+                    @Override public void onAnimationEnd(Animation animation) {
+                        rightPanel.setVisibility(View.INVISIBLE);
+                    }
+                    @Override public void onAnimationRepeat(Animation animation) {}
+                });
+                isRightPanelVisible = false;
+            }
+            if (anim != null) rightPanel.startAnimation(anim);
+        }
+
+
+
+
+
+
+
+        if (leftPanel != null) {
+            Animation anim = null;
+            if (angle == 270 && isLeftPanelVisible) {
+                anim = new TranslateAnimation(0, 0, 0, sidePanelHeight);
+                //anim = new TranslateAnimation(0, 0, sidePanelHeight, 0);
+                anim.setInterpolator(new LinearInterpolator());
+                anim.setDuration(300);
+                anim.setFillEnabled(true);
+                anim.setFillAfter(true);
+                anim.setAnimationListener(new Animation.AnimationListener() {
+                    @Override public void onAnimationStart(Animation animation) {
+                        leftPanel.setVisibility(View.INVISIBLE);
+                        isLeftPanelVisible = false;
+                    }
+                    @Override public void onAnimationEnd(Animation animation) {}
+                    @Override public void onAnimationRepeat(Animation animation) {}
+                });
+            } else if (!isLeftPanelVisible) {
+                //anim = new TranslateAnimation(0, 0, 0, sidePanelHeight);
+                anim = new TranslateAnimation(0, 0, sidePanelHeight, 0);
+                anim.setInterpolator(new LinearInterpolator());
+                anim.setDuration(300);
+                anim.setFillEnabled(true);
+                anim.setFillAfter(true);
+                anim.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+                        leftPanel.setVisibility(View.VISIBLE);
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+                    }
+                });
+                isLeftPanelVisible = true;
+            }
+            if (anim != null) leftPanel.startAnimation(anim);
+        }
+
+
+
+
+        wasAngle = angle;
     }
 }

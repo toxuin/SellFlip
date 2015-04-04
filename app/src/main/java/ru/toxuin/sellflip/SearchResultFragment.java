@@ -127,9 +127,13 @@ public class SearchResultFragment extends SpiceFragment {
     }
 
     @Override
-    public void onDestroy() {
-        super.onDestroy();
-        getActivity().unregisterReceiver(totalItemsBroadcastReceiver);
+    public void onPause() {
+        super.onPause();
+        try {
+            getActivity().unregisterReceiver(totalItemsBroadcastReceiver);
+        } catch (Exception e) {
+            // ignore, just not registered.
+        }
     }
 
     @Override

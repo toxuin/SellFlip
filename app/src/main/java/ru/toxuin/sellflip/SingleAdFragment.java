@@ -2,7 +2,6 @@ package ru.toxuin.sellflip;
 
 import android.app.ProgressDialog;
 import android.content.Intent;
-import android.content.res.Configuration;
 import android.graphics.Point;
 import android.location.Address;
 import android.location.Geocoder;
@@ -21,8 +20,6 @@ import android.view.SurfaceView;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.Transformation;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -41,7 +38,7 @@ import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.SpiceFragment;
-import ru.toxuin.sellflip.library.VideoControllerView;
+import ru.toxuin.sellflip.library.layout.VideoControllerView;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.SingleAdRequest;
 

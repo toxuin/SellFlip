@@ -130,9 +130,11 @@ public abstract class MagneticOrientationChangeListener {
                     orientation += 360;
                 }
             }
-            if ((orientation - mOrientation) > 45) {
-                mOrientation = orientation;
-                onOrientationChanged(orientation);
+            if (orientation != mOrientation) {
+                if (Math.abs(orientation - mOrientation) > 20) {
+                    mOrientation = orientation;
+                    onOrientationChanged(orientation);
+                }
             }
         }
 
