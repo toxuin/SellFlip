@@ -203,4 +203,11 @@ public class SearchResultFragment extends SpiceFragment {
         if (searchAdapter == null) return;
         spiceManager.addListenerIfPending(SingleAd.List.class, searchAdapter.getCacheKey(), searchAdapter.getSpiceListener());
     }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (searchAdapter == null) return;
+        searchAdapter.hideLoading();
+    }
 }

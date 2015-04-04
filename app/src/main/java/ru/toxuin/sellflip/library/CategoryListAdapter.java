@@ -37,6 +37,7 @@ public class CategoryListAdapter extends BaseAdapter {
     }
     
     public void addAll(Collection<Category> that) {
+        if (that == null) return;
         content.addAll(that);
     }
 

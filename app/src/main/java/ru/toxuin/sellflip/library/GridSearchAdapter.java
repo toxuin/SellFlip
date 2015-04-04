@@ -149,12 +149,20 @@ public class GridSearchAdapter extends BaseAdapter {
         requestListener = new PendingRequestListener<SingleAd.List>() {
             @Override
             public void onRequestNotFound() {
-                loading.dismiss();
+                try {
+                    loading.dismiss();
+                } catch (Exception e) {
+                    // INGORE
+                }
             }
 
             @Override
             public void onRequestSuccess(SingleAd.List allAds) {
-                loading.dismiss();
+                try {
+                    loading.dismiss();
+                } catch (Exception e) {
+                    // INGORE
+                }
                 if (page == 0) itemsList.clear();
                 itemsList.addAll(allAds);
                 notifyDataSetChanged();
@@ -163,7 +171,11 @@ public class GridSearchAdapter extends BaseAdapter {
 
             @Override
             public void onRequestFailure(SpiceException spiceException) {
-                loading.dismiss();
+                try {
+                    loading.dismiss();
+                } catch (Exception e) {
+                    // INGORE
+                }
                 Toast.makeText(context, "ERROR: " + spiceException.getMessage(), Toast.LENGTH_SHORT).show();
                 spiceException.printStackTrace();
             }
@@ -304,6 +316,11 @@ public class GridSearchAdapter extends BaseAdapter {
             adFragment.setAdId(id);
             BaseActivity.setContent(adFragment);
         }
+    }
+
+    public void hideLoading() {
+        if (loading == null) return;
+        if (loading.isShowing()) loading.dismiss();
     }
 
 
