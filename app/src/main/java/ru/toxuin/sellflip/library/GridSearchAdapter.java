@@ -2,6 +2,7 @@ package ru.toxuin.sellflip.library;
 
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.LayerDrawable;
@@ -28,14 +29,20 @@ import ru.toxuin.sellflip.SingleAdFragment;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.layout.PrescalableImageView;
 import ru.toxuin.sellflip.restapi.spicerequests.ListAdsRequest;
+import ru.toxuin.sellflip.restapi.spicerequests.SingleAdRequest;
 import ru.toxuin.sellflip.restapi.spicerequests.SingleAdThumbRequest;
 
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class GridSearchAdapter extends BaseAdapter {
@@ -53,7 +60,12 @@ public class GridSearchAdapter extends BaseAdapter {
     protected SpiceManager spiceManager;
     private ProgressDialog loading;
     private PendingRequestListener<SingleAd.List> requestListener;
+
+            // CACHE KEY - LISTENER
+    private Map<Object, PendingRequestListener<SingleAd>> favAdsRequests = new HashMap<>();
     private Object cacheKey;
+    private boolean favsMode = false;
+    private boolean trending = false;
 
     public GridSearchAdapter(Context context, SpiceManager manager) {
         this.spiceManager = manager;
@@ -136,51 +148,83 @@ public class GridSearchAdapter extends BaseAdapter {
     }
 
     public void requestData(final int page) {
-
-        loading = new ProgressDialog(context);
-        loading.setTitle("Loading");
-        loading.setIndeterminate(true);
-        loading.setMessage("Wait while loading...");
-        loading.show();
-
-
-        ListAdsRequest request = new ListAdsRequest(category, searchQuery,  page);
-        cacheKey = request.getCacheKey();
-        requestListener = new PendingRequestListener<SingleAd.List>() {
-            @Override
-            public void onRequestNotFound() {
-                try {
-                    loading.dismiss();
-                } catch (Exception e) {
-                    // INGORE
-                }
+        if (favsMode) {
+            SharedPreferences spref = context.getSharedPreferences(context.getString(R.string.app_preference_key), Context.MODE_PRIVATE);
+            Set<String> favs = spref.getStringSet("favoriteAds", new HashSet<String>());
+            final boolean[] firstAd = {true};
+            for (String id : favs) {
+                SingleAdRequest favAdRequest = new SingleAdRequest(id);
+                Object favCacheKey = favAdRequest.getCacheKey();
+                PendingRequestListener<SingleAd> favRequestListener = new PendingRequestListener<SingleAd>() {
+                    @Override public void onRequestSuccess(SingleAd ad) {
+                        if (firstAd[0]) {
+                            itemsList.clear();
+                            firstAd[0] = false;
+                        }
+                        if (!itemsList.contains(ad)) {
+                            itemsList.add(ad);
+                            notifyDataSetChanged();
+                            Log.d(TAG, "FAV: ADDED " + ad.getTitle());
+                        }
+                    }
+                    @Override public void onRequestNotFound() {}
+                    @Override public void onRequestFailure(SpiceException spiceException) {
+                        spiceException.printStackTrace();
+                    }
+                };
+                spiceManager.execute(favAdRequest, favCacheKey, DurationInMillis.ONE_HOUR, favRequestListener);
+                favAdsRequests.put(favCacheKey, favRequestListener);
             }
 
-            @Override
-            public void onRequestSuccess(SingleAd.List allAds) {
-                try {
-                    loading.dismiss();
-                } catch (Exception e) {
-                    // INGORE
-                }
-                if (page == 0) itemsList.clear();
-                itemsList.addAll(allAds);
-                notifyDataSetChanged();
-                Log.d(TAG, "GOT " + allAds.size() + " ITEMS!");
-            }
 
-            @Override
-            public void onRequestFailure(SpiceException spiceException) {
-                try {
-                    loading.dismiss();
-                } catch (Exception e) {
-                    // INGORE
+        } else {
+            // NOT FAV MODE
+
+            loading = new ProgressDialog(context);
+            loading.setTitle("Loading");
+            loading.setIndeterminate(true);
+            loading.setMessage("Wait while loading...");
+            loading.show();
+            Boolean trend = null;
+            if (trending) trend = Boolean.TRUE;
+            ListAdsRequest request = new ListAdsRequest(category, searchQuery, trend, page);
+            cacheKey = request.getCacheKey();
+            requestListener = new PendingRequestListener<SingleAd.List>() {
+                @Override
+                public void onRequestNotFound() {
+                    try {
+                        loading.dismiss();
+                    } catch (Exception e) {
+                        // INGORE
+                    }
                 }
-                Toast.makeText(context, "ERROR: " + spiceException.getMessage(), Toast.LENGTH_SHORT).show();
-                spiceException.printStackTrace();
-            }
-        };
-        spiceManager.execute(request, request.getCacheKey(), DurationInMillis.ONE_MINUTE, requestListener);
+
+                @Override
+                public void onRequestSuccess(SingleAd.List allAds) {
+                    try {
+                        loading.dismiss();
+                    } catch (Exception e) {
+                        // INGORE
+                    }
+                    if (page == 0) itemsList.clear();
+                    itemsList.addAll(allAds);
+                    notifyDataSetChanged();
+                    Log.d(TAG, "GOT " + allAds.size() + " ITEMS!");
+                }
+
+                @Override
+                public void onRequestFailure(SpiceException spiceException) {
+                    try {
+                        loading.dismiss();
+                    } catch (Exception e) {
+                        // INGORE
+                    }
+                    Toast.makeText(context, "ERROR: " + spiceException.getMessage(), Toast.LENGTH_SHORT).show();
+                    spiceException.printStackTrace();
+                }
+            };
+            spiceManager.execute(request, request.getCacheKey(), DurationInMillis.ONE_MINUTE, requestListener);
+        }
     }
 
     public void setSearchQuery(String query) {
@@ -225,6 +269,18 @@ public class GridSearchAdapter extends BaseAdapter {
 
     public PendingRequestListener<SingleAd.List> getSpiceListener() {
         return requestListener;
+    }
+
+    public void favsMode() {
+        this.favsMode = true;
+    }
+
+    public Map<Object, PendingRequestListener<SingleAd>> getFavListeners() {
+        return favAdsRequests;
+    }
+
+    public void setTrending(boolean trending) {
+        this.trending = trending;
     }
 
 

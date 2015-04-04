@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.KeyEvent;
 import android.view.Menu;
@@ -238,10 +239,17 @@ public class BaseActivity extends ActionBarActivity {
 
         leftMenuAdapter = new LeftMenuAdapter(this);
 
-        leftMenuAdapter.add(new SideMenuItem("Top ads", "fa-line-chart", new View.OnClickListener() {
+        leftMenuAdapter.add(new SideMenuItem("Recent ads", "fa-random", new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 BaseActivity.setContent(new SearchResultFragment());
+            }
+        }));
+
+        leftMenuAdapter.add(new SideMenuItem("Trending", "fa-line-chart", new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                BaseActivity.setContent(new SearchResultFragment().trending());
             }
         }));
 
@@ -251,7 +259,7 @@ public class BaseActivity extends ActionBarActivity {
             }
         }));
 
-        leftMenuAdapter.add(new SideMenuItem("Add ad", "fa-plus", new View.OnClickListener() {
+        leftMenuAdapter.add(new SideMenuItem("Create ad", "fa-plus", new View.OnClickListener() {
             @Override public void onClick(View v) {
                 if (ApiHeaders.getAccessToken() != null
                         && ApiHeaders.getAccessToken().isEmpty()) {
@@ -262,7 +270,13 @@ public class BaseActivity extends ActionBarActivity {
             }
         }));
 
-        leftMenuAdapter.add(new SideMenuItem("My Favourites", "fa-heart", null));
+        leftMenuAdapter.add(new SideMenuItem("My Favorites", "fa-star", new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                BaseActivity.setContent(new SearchResultFragment().favsMode());
+            }
+        }));
+
         leftMenuAdapter.add(new SideMenuItem("Settings", "fa-cogs", new View.OnClickListener() {
             @Override public void onClick(View v) {
                 BaseActivity.setContent(new PrefsFragment());
@@ -285,6 +299,11 @@ public class BaseActivity extends ActionBarActivity {
             editor.putBoolean("pref_key_save_search", true);
             editor.apply();
         }
+
+        DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+        float dpHeight = displayMetrics.heightPixels / displayMetrics.density;
+        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
+        Log.d(TAG, "!!!!! SCREEN WIDTH: " + dpWidth);
 
         uiLifecycleHelper = new UiLifecycleHelper(this, statusCallback);
         uiLifecycleHelper.onCreate(savedInstanceState);

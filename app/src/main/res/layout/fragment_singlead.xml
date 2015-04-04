@@ -1,11 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView
-    xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:bootstrap="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:overScrollMode="never">
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:bootstrap="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:fillViewport="true"
+        android:overScrollMode="never">
 
     <LinearLayout
         android:layout_width="fill_parent"
@@ -84,12 +84,39 @@
                 android:layout_height="wrap_content"
                 android:orientation="vertical">
 
+                <org.apmem.tools.layouts.FlowLayout android:layout_width="match_parent"
+                                                    android:layout_height="wrap_content"
+                                                    android:layout_margin="10dp">
+
+                    <com.beardedhen.androidbootstrap.BootstrapButton
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginRight="5dp"
+                            android:layout_marginEnd="5dp"
+                            android:text="Like"
+                            android:id="@+id/singlead_action_like"
+                            bootstrap:bb_icon_left="fa-thumbs-o-up"
+                            bootstrap:bb_type="primary"/>
+
+                    <com.beardedhen.androidbootstrap.BootstrapButton
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="5dp"
+                            android:layout_marginStart="5dp"
+                            android:text="Share"
+                            android:id="@+id/singlead_action_share"
+                            bootstrap:bb_icon_left="fa-share-alt"
+                            bootstrap:bb_type="success"/>
+
+                </org.apmem.tools.layouts.FlowLayout>
 
                 <LinearLayout
                     android:layout_width="fill_parent"
                     android:layout_height="wrap_content"
-                    android:layout_margin="10dp"
-                    android:background="@android:drawable/dialog_holo_light_frame">
+                    android:background="@android:drawable/dialog_holo_light_frame"
+                    android:layout_marginLeft="10dp"
+                    android:layout_marginRight="10dp"
+                    android:layout_marginBottom="10dp">
 
                     <include layout="@layout/single_ad_details_partial"/>
 
@@ -149,6 +176,18 @@
                         bootstrap:bb_icon_left="fa-map-marker"
                         bootstrap:bb_roundedCorners="true"
                         bootstrap:bb_type="primary"/>
+
+
+                    <com.beardedhen.androidbootstrap.BootstrapButton
+                            android:id="@+id/singlead_action_favorite"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_margin="8dp"
+                            android:text="Add to favorites"
+                            android:textSize="16sp"
+                            bootstrap:bb_icon_left="fa-star-o"
+                            bootstrap:bb_roundedCorners="true"
+                            bootstrap:bb_type="info"/>
 
                 </org.apmem.tools.layouts.FlowLayout>
 

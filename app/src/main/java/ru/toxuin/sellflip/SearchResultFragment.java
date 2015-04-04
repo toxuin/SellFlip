@@ -7,7 +7,6 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +28,7 @@ import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.CategoryRequest;
 
 import java.util.List;
+import java.util.Map;
 
 public class SearchResultFragment extends SpiceFragment {
     private static final String TAG = "SEARCH_RESULT_UI";
@@ -43,6 +43,8 @@ public class SearchResultFragment extends SpiceFragment {
 
     protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
     private PendingRequestListener<Category.List> rightMenuSpiceListener;
+    private boolean favsMode = false;
+    private boolean trending = false;
 
     public SearchResultFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -54,12 +56,18 @@ public class SearchResultFragment extends SpiceFragment {
         gridView = (StaggeredGridViewSellFlip) rootView.findViewById(R.id.itemList);
 
         searchAdapter = new GridSearchAdapter(getActivity(), spiceManager);
+        if (favsMode) {
+            BaseActivity.setContentTitle("My favorites");
+            searchAdapter.favsMode();
+        }
 
         String savedSearchQuery = null;
         String savedCategory = null;
+        boolean savedTrending = false;
         if (savedInstanceState != null) {
             savedCategory = savedInstanceState.getString("category", null);
             savedSearchQuery = savedInstanceState.getString("searchQuery", null);
+            savedTrending = savedInstanceState.getBoolean("trending", false);
         }
         if (searchQuery != null) {
             searchAdapter.setSearchQuery(searchQuery);
@@ -70,10 +78,14 @@ public class SearchResultFragment extends SpiceFragment {
         if (savedCategory != null) {
             searchAdapter.setCategory(savedCategory);
         }
+        if (savedTrending || trending) {
+            BaseActivity.setContentTitle("Trending");
+            searchAdapter.setTrending(true);
+        }
 
         gridView.setAdapter(searchAdapter);
 
-        gridView.setOnScrollListener(searchAdapter.searchResultsEndlessScrollListener);
+        if (!favsMode) gridView.setOnScrollListener(searchAdapter.searchResultsEndlessScrollListener);
 
         SharedPreferences prefs = getActivity().getSharedPreferences(getActivity().getString(R.string.app_preference_key), Context.MODE_PRIVATE);
         if (!prefs.getString("pref_key_search_result_columns", "0").equals("0")) {
@@ -101,13 +113,6 @@ public class SearchResultFragment extends SpiceFragment {
         };
 
         spiceManager.execute(new CategoryRequest(), CategoryRequest.getCacheKey(), DurationInMillis.ONE_WEEK, rightMenuSpiceListener);
-
-
-        DisplayMetrics displayMetrics = getActivity().getResources().getDisplayMetrics();
-        float dpHeight = displayMetrics.heightPixels / displayMetrics.density;
-        float dpWidth = displayMetrics.widthPixels / displayMetrics.density;
-        Log.d(TAG, "!!!!! SCREEN WIDTH: " + dpWidth);
-
 
         return rootView;
     }
@@ -202,6 +207,10 @@ public class SearchResultFragment extends SpiceFragment {
         spiceManager.addListenerIfPending(Category.List.class, CategoryRequest.getCacheKey(), rightMenuSpiceListener);
         if (searchAdapter == null) return;
         spiceManager.addListenerIfPending(SingleAd.List.class, searchAdapter.getCacheKey(), searchAdapter.getSpiceListener());
+        Map<Object, PendingRequestListener<SingleAd>> favListeners = searchAdapter.getFavListeners();
+        for (Object favCacheKey : favListeners.keySet()) {
+            spiceManager.addListenerIfPending(SingleAd.class, favCacheKey, favListeners.get(favCacheKey));
+        }
     }
 
     @Override
@@ -209,5 +218,15 @@ public class SearchResultFragment extends SpiceFragment {
         super.onDetach();
         if (searchAdapter == null) return;
         searchAdapter.hideLoading();
+    }
+
+    public SearchResultFragment favsMode() {
+        this.favsMode = true;
+        return this;
+    }
+
+    public SearchResultFragment trending() {
+        this.trending = true;
+        return this;
     }
 }

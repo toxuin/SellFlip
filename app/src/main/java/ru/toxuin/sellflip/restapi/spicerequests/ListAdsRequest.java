@@ -10,13 +10,15 @@ public class ListAdsRequest extends RetrofitSpiceRequest<SingleAd.List, ApiServi
     private String category;
     private String searchTerm;
     private int page;
+    private Boolean trendingOrder;
 
     private static int itemsPerPage = 7;
 
-    public ListAdsRequest(String category, String searchTerm, int page) {
+    public ListAdsRequest(String category, String searchTerm, Boolean trendingOrder, int page) {
         super(SingleAd.List.class, ApiService.class);
         this.searchTerm = searchTerm;
         this.category = category;
+        this.trendingOrder = trendingOrder;
         this.page = page;
     }
 
@@ -25,11 +27,13 @@ public class ListAdsRequest extends RetrofitSpiceRequest<SingleAd.List, ApiServi
         int skip = itemsPerPage * page;
         int limit = itemsPerPage;
         Log.d(TAG, "REQUESTING TOP ADS FROM " + skip + " TO " + (skip + limit) + "(" + limit + " ITEMS)");
-        return getService().listTopAds(category, searchTerm, skip, limit);
+        return getService().listTopAds(category, searchTerm, trendingOrder, skip, limit);
     }
 
     public String getCacheKey() {
-        return "getTopAds." + category + "." + page;
+        String trend = ".trendy";
+        if (trendingOrder == null || trendingOrder.equals(Boolean.FALSE)) trend = "";
+        return "getTopAds." + category + "." + page + trend;
     }
 
     public static void setItemsPerPage(int perPage) {

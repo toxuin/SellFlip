@@ -1,7 +1,8 @@
 package ru.toxuin.sellflip;
 
-import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Point;
 import android.location.Address;
 import android.location.Geocoder;
@@ -30,16 +31,20 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
+import com.octo.android.robospice.request.listener.PendingRequestListener;
 import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.library.layout.VideoControllerView;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
+import ru.toxuin.sellflip.restapi.spicerequests.LikeRequest;
 import ru.toxuin.sellflip.restapi.spicerequests.SingleAdRequest;
 
 public class SingleAdFragment extends SpiceFragment implements
@@ -70,9 +75,13 @@ public class SingleAdFragment extends SpiceFragment implements
     private BootstrapButton contactEmailBtn;
     private BootstrapButton contactPhoneBtn;
     private BootstrapButton openMapBtn;
+    private BootstrapButton likeBtn;
+    private BootstrapButton shareBtn;
+    private BootstrapButton favBtn;
 
     private SurfaceView videoSurface;
     private float ratio = 1;
+    PendingRequestListener<String> likeRequestListener;
 
     public SingleAdFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -106,6 +115,9 @@ public class SingleAdFragment extends SpiceFragment implements
         contactEmailBtn = (BootstrapButton) rootView.findViewById(R.id.contact_mail_btn);
         contactPhoneBtn = (BootstrapButton) rootView.findViewById(R.id.contact_phone_btn);
         openMapBtn = (BootstrapButton) rootView.findViewById(R.id.mapButton);
+        likeBtn = (BootstrapButton) rootView.findViewById(R.id.singlead_action_like);
+        shareBtn = (BootstrapButton) rootView.findViewById(R.id.singlead_action_share);
+        favBtn = (BootstrapButton) rootView.findViewById(R.id.singlead_action_favorite);
 
         videoSurface = (SurfaceView) rootView.findViewById(R.id.videoSurface);
 
@@ -137,13 +149,7 @@ public class SingleAdFragment extends SpiceFragment implements
             e.printStackTrace();
         }
 
-        final ProgressDialog loading = new ProgressDialog(getActivity());
-        loading.setTitle("Loading");
-        loading.setIndeterminate(true);
-        loading.setMessage("Wait while loading...");
-        loading.show();
-
-        SingleAdRequest request = new SingleAdRequest(adId);
+        final SingleAdRequest request = new SingleAdRequest(adId);
         spiceManager.execute(request, request.getCacheKey(), DurationInMillis.ONE_MINUTE * 5, new RequestListener<SingleAd>() {
             @Override
             public void onRequestSuccess(final SingleAd ad) {
@@ -155,7 +161,6 @@ public class SingleAdFragment extends SpiceFragment implements
                     videoResizeHandler.sendEmptyMessage(VIDEO_RESIZE);
                 }
 
-                loading.dismiss();
                 BaseActivity.setContentTitle(ad.getTitle());
 
                 adTitle.setText(ad.getTitle());
@@ -227,11 +232,79 @@ public class SingleAdFragment extends SpiceFragment implements
                         startActivity(Intent.createChooser(emailIntent, "Send email"));
                     }
                 });
+
+                final SharedPreferences spref = getActivity().getSharedPreferences(getActivity().getResources().getString(R.string.app_preference_key), Context.MODE_PRIVATE);
+                final Set<String> favs = spref.getStringSet("favoriteAds", new HashSet<String>());
+                if (favs.contains(ad.getId())) {
+                    // ALREADY A FAV
+                    favBtn.setLeftIcon("fa-star");
+                    favBtn.setBootstrapType("success");
+                    favBtn.setText(getActivity().getString(R.string.remove_from_favs));
+                }
+                favBtn.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        SharedPreferences.Editor editor = spref.edit();
+                        if (!favs.contains(ad.getId())) {
+                            favs.add(ad.getId());
+                            favBtn.setLeftIcon("fa-star");
+                            favBtn.setBootstrapType("success");
+                            favBtn.setText(getActivity().getString(R.string.remove_from_favs));
+                        } else {
+                            favs.remove(ad.getId());
+                            favBtn.setBootstrapType("info");
+                            favBtn.setLeftIcon("fa-star-o");
+                            favBtn.setText(getActivity().getString(R.string.add_to_favs));
+                        }
+                        editor.putStringSet("favoriteAds", favs);
+                        editor.apply();
+                    }
+                });
+
+
+                Set<String> likedAds = spref.getStringSet("likedAds", new HashSet<String>());
+                boolean liked = false;
+                if (likedAds.contains(ad.getId())) {
+                    likeBtn.setBootstrapType("success");
+                    likeBtn.setLeftIcon("fa-thumbs-up");
+                    likeBtn.setText("Unlike");
+                    liked = true;
+                }
+                final boolean likeAction = !liked;
+                likeBtn.setOnClickListener(new OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        LikeRequest likeRequest = new LikeRequest(ad.getId(), likeAction);
+                        likeRequestListener = new PendingRequestListener<String>() {
+                            @Override
+                            public void onRequestSuccess(String s) {
+                                int likes;
+                                try {
+                                    likes = Integer.parseInt(s);
+                                    likeBtn.setBootstrapType("success");
+                                    likeBtn.setLeftIcon("fa-thumbs-up");
+                                    likeBtn.setText(likes);
+                                } catch (NumberFormatException e) {
+                                    likeBtn.setBootstrapType("primary");
+                                    likeBtn.setLeftIcon("fa-thumbs-o-up");
+                                    likeBtn.setText("Like");
+                                }
+                            }
+                            @Override
+                            public void onRequestFailure(SpiceException spiceException) {
+                                Toast.makeText(getActivity(), "ERROR: " + spiceException.getMessage(), Toast.LENGTH_SHORT).show();
+                                spiceException.printStackTrace();
+                            }
+                            @Override
+                            public void onRequestNotFound() {}
+                        };
+                        spiceManager.execute(likeRequest, likeRequest.getCacheKey(), DurationInMillis.ONE_HOUR, likeRequestListener);
+                    }
+                });
             }
 
             @Override
             public void onRequestFailure(SpiceException spiceException) {
-                loading.dismiss();
                 Toast.makeText(getActivity(), "ERROR: " + spiceException.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
