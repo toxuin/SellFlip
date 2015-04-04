@@ -1,5 +1,6 @@
 package ru.toxuin.sellflip;
 
+import android.app.Activity;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -18,8 +19,9 @@ import com.etsy.android.grid.StaggeredGridViewSellFlip;
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
-import com.octo.android.robospice.request.listener.RequestListener;
+import com.octo.android.robospice.request.listener.PendingRequestListener;
 import ru.toxuin.sellflip.entities.Category;
+import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.CategoryListAdapter;
 import ru.toxuin.sellflip.library.GridSearchAdapter;
 import ru.toxuin.sellflip.library.SpiceFragment;
@@ -40,6 +42,7 @@ public class SearchResultFragment extends SpiceFragment {
     private String searchQuery;
 
     protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
+    private PendingRequestListener<Category.List> rightMenuSpiceListener;
 
     public SearchResultFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -80,7 +83,11 @@ public class SearchResultFragment extends SpiceFragment {
         // DATA IS FETCHED IN onStart
 
         // RIGHT MENU STUFF
-        spiceManager.execute(new CategoryRequest(), CategoryRequest.getCacheKey(), DurationInMillis.ONE_WEEK, new RequestListener<Category.List>() {
+
+        rightMenuSpiceListener = new PendingRequestListener<Category.List>() {
+            @Override
+            public void onRequestNotFound() {}
+
             @Override
             public void onRequestSuccess(Category.List cats) {
                 categories = cats;
@@ -91,7 +98,9 @@ public class SearchResultFragment extends SpiceFragment {
             public void onRequestFailure(SpiceException spiceException) {
                 spiceException.printStackTrace();
             }
-        });
+        };
+
+        spiceManager.execute(new CategoryRequest(), CategoryRequest.getCacheKey(), DurationInMillis.ONE_WEEK, rightMenuSpiceListener);
 
 
         DisplayMetrics displayMetrics = getActivity().getResources().getDisplayMetrics();
@@ -184,5 +193,14 @@ public class SearchResultFragment extends SpiceFragment {
     public SearchResultFragment setSearchQuery(String searchQuery) {
         this.searchQuery = searchQuery;
         return this;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (spiceManager == null) return;
+        spiceManager.addListenerIfPending(Category.List.class, CategoryRequest.getCacheKey(), rightMenuSpiceListener);
+        if (searchAdapter == null) return;
+        spiceManager.addListenerIfPending(SingleAd.List.class, searchAdapter.getCacheKey(), searchAdapter.getSpiceListener());
     }
 }

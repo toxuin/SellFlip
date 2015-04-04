@@ -19,6 +19,7 @@ import android.widget.Toast;
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
+import com.octo.android.robospice.request.listener.PendingRequestListener;
 import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.BaseActivity;
 import ru.toxuin.sellflip.R;
@@ -48,9 +49,11 @@ public class GridSearchAdapter extends BaseAdapter {
     private final LayoutInflater mLayoutInflater;
     private final Random mRandom;
     private final ArrayList<Integer> mBackgroundColors;
-    private static final SparseArray<Double> sPositionHeightRatios = new SparseArray<>();
 
     protected SpiceManager spiceManager;
+    private ProgressDialog loading;
+    private PendingRequestListener<SingleAd.List> requestListener;
+    private Object cacheKey;
 
     public GridSearchAdapter(Context context, SpiceManager manager) {
         this.spiceManager = manager;
@@ -133,15 +136,22 @@ public class GridSearchAdapter extends BaseAdapter {
     }
 
     public void requestData(final int page) {
-        ListAdsRequest request = new ListAdsRequest(category, searchQuery,  page);
 
-        final ProgressDialog loading = new ProgressDialog(context);
+        loading = new ProgressDialog(context);
         loading.setTitle("Loading");
         loading.setIndeterminate(true);
         loading.setMessage("Wait while loading...");
         loading.show();
 
-        spiceManager.execute(request, request.getCacheKey(), DurationInMillis.ONE_MINUTE, new RequestListener<SingleAd.List>() {
+
+        ListAdsRequest request = new ListAdsRequest(category, searchQuery,  page);
+        cacheKey = request.getCacheKey();
+        requestListener = new PendingRequestListener<SingleAd.List>() {
+            @Override
+            public void onRequestNotFound() {
+                loading.dismiss();
+            }
+
             @Override
             public void onRequestSuccess(SingleAd.List allAds) {
                 loading.dismiss();
@@ -157,7 +167,8 @@ public class GridSearchAdapter extends BaseAdapter {
                 Toast.makeText(context, "ERROR: " + spiceException.getMessage(), Toast.LENGTH_SHORT).show();
                 spiceException.printStackTrace();
             }
-        });
+        };
+        spiceManager.execute(request, request.getCacheKey(), DurationInMillis.ONE_MINUTE, requestListener);
     }
 
     public void setSearchQuery(String query) {
@@ -194,6 +205,14 @@ public class GridSearchAdapter extends BaseAdapter {
 
     public String getCategory() {
         return category;
+    }
+
+    public Object getCacheKey() {
+        return cacheKey;
+    }
+
+    public PendingRequestListener<SingleAd.List> getSpiceListener() {
+        return requestListener;
     }
 
 
