@@ -11,6 +11,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.util.Log;
 import android.view.WindowManager;
+import android.view.inputmethod.InputMethodManager;
 
 import com.coremedia.iso.boxes.Container;
 import com.github.johnpersano.supertoasts.SuperToast;
@@ -322,5 +323,10 @@ public class Utils {
             sb.append(c);
         }
         return sb.toString();
+    }
+
+    public static void hideKeyboard(Activity activity) {
+        InputMethodManager inputManager = (InputMethodManager) activity.getSystemService(Context.INPUT_METHOD_SERVICE);
+        inputManager.hideSoftInputFromWindow((null == activity.getCurrentFocus()) ? null : activity.getCurrentFocus().getWindowToken(), InputMethodManager.HIDE_NOT_ALWAYS);
     }
 }

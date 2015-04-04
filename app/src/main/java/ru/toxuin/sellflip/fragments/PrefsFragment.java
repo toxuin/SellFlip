@@ -84,6 +84,8 @@ public class PrefsFragment extends PreferenceFragment {
 
         contact.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override public boolean onPreferenceClick(Preference preference) {
+                BaseActivity.setContent(new SendFeedbackFragment());
+                BaseActivity.setContentTitle("Contact Us");
                 return true;
             }
         });

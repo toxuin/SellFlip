@@ -66,6 +66,9 @@
         <service android:name=".restapi.SellFlipSpiceService"
                  android:exported="false" />
 
+        <service android:name=".restapi.AppygramSpiceServices"
+                 android:exported="false" />
+
     </application>
 
 </manifest>

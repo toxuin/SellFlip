@@ -72,4 +72,11 @@
     <string name="categories">Categories</string>
     <string name="app_preference_key">sellflip_shared_preferences</string>
     <string name="action_search">Search</string>
+    <string name="send">Send the Message</string>
+    <string name="message">Message</string>
+    <string name="your_message">Your message</string>
+    <string name="email">Email</string>
+    <string name="subject_line">Subject Line</string>
+    <string name="subject">Subject</string>
+    <string name="email_hint">Email we can reach you at</string>
 </resources>
