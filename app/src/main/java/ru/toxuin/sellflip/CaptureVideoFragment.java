@@ -124,6 +124,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                     /*
                     * Stop recording, release resources and write to the file
                     * */
+                    if (mMediaRecorder == null) return;
                     mMediaRecorder.stop();
                     releaseMediaRecorder();
                     capture.setText("Capture");
