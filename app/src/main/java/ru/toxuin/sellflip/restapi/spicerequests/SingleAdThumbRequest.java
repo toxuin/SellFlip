@@ -16,9 +16,15 @@ public class SingleAdThumbRequest extends SpiceRequest<Bitmap> {
     BitmapCache cache;
     Context context;
     String adId;
+    int width = -1;
 
     public SingleAdThumbRequest(Context context, String id) {
+        this(context, id, -1);
+    }
+
+    public SingleAdThumbRequest(Context context, String id, int width) {
         super(Bitmap.class);
+        this.width = width;
         cache = BitmapCache.getInstance();
         this.context = context;
         adId = id;
@@ -26,7 +32,8 @@ public class SingleAdThumbRequest extends SpiceRequest<Bitmap> {
 
     @Override
     public Bitmap loadDataFromNetwork() throws Exception {
-        String url = SellFlipSpiceService.getEndpointUrl() + "/api/v1/adsItems/"+ adId + "/thumb";;
+        String url = SellFlipSpiceService.getEndpointUrl() + "/api/v1/adsItems/"+ adId + "/thumb";
+        if (width > 0) url += "/w"+width;
         if (cache.getBitmapFromMemCache(url) == null) {
 
             File parentDir = new File(context.getCacheDir() + File.pathSeparator + "tmp_item_bitmaps");

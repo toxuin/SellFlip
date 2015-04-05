@@ -3,13 +3,16 @@ package ru.toxuin.sellflip.library;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
+import android.graphics.Point;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.LayerDrawable;
 import android.text.format.DateFormat;
 import android.util.Log;
+import android.view.Display;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
@@ -60,7 +63,6 @@ public class GridSearchAdapter extends BaseAdapter {
 
         if (convertView == null || (vh != null && !vh.id.equals(ad.getId()))) {
             convertView = mLayoutInflater.inflate(R.layout.search_result_item, parent, false);
-            Log.d(TAG, "FAIL " + position + ": NEED TITLE " + (vh==null?"NULL":vh.title.getText().toString()) + " FOUND TITLE " + ad.getTitle());
             vh = new SearchResultViewHolder(context, convertView);
             vh.setSpiceManager(spiceManager);
             vh.bind(ad);
@@ -183,7 +185,13 @@ public class GridSearchAdapter extends BaseAdapter {
             ((Animatable) progressAnimation.getDrawable(1)).start();
 
             // GET ACTUAL THUMBNAIL:
-            final SingleAdThumbRequest thumbRequest = new SingleAdThumbRequest(context, ad.getId());
+            WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
+            Display display = wm.getDefaultDisplay();
+            Point size = new Point();
+            display.getSize(size);
+
+            int thumbWidth = size.x / context.getResources().getInteger(R.integer.search_result_columns);
+            final SingleAdThumbRequest thumbRequest = new SingleAdThumbRequest(context, ad.getId(), thumbWidth);
             spiceManager.execute(thumbRequest, new RequestListener<Bitmap>() {
                 @Override
                 public void onRequestSuccess(Bitmap bitmap) {

@@ -310,7 +310,7 @@ public class MapPopupActivity extends ActionBarActivity implements OnMapReadyCal
                     .title("Your location")
                     .flat(true)
                     .anchor(0.5f, 0.5f)
-                    .icon(BitmapDescriptorFactory.fromResource(R.drawable.ic_launcher)));
+                    .icon(BitmapDescriptorFactory.fromResource(R.mipmap.ic_launcher)));
             coords = new Coordinates((float) latlng.latitude, (float) latlng.longitude, coords == null?0:coords.getRadius());
         }
         return marker;
