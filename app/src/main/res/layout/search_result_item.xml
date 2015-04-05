@@ -22,7 +22,7 @@
             android:orientation="vertical"
             android:padding="16dp">
 
-            <ru.toxuin.sellflip.library.layout.PrescalableImageView
+            <ru.toxuin.sellflip.library.views.PrescalableImageView
                 android:id="@+id/item_thumbnail"
                 android:layout_width="fill_parent"
                 android:layout_height="wrap_content"

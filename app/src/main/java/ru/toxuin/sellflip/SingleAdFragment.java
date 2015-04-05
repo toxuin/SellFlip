@@ -42,7 +42,7 @@ import com.octo.android.robospice.request.listener.PendingRequestListener;
 import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.SpiceFragment;
-import ru.toxuin.sellflip.library.layout.VideoControllerView;
+import ru.toxuin.sellflip.library.views.VideoControllerView;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.LikeRequest;
 import ru.toxuin.sellflip.restapi.spicerequests.SingleAdRequest;
@@ -262,7 +262,7 @@ public class SingleAdFragment extends SpiceFragment implements
                 });
 
 
-                Set<String> likedAds = spref.getStringSet("likedAds", new HashSet<String>());
+                final Set<String> likedAds = spref.getStringSet("likedAds", new HashSet<String>());
                 boolean liked = false;
                 if (likedAds.contains(ad.getId())) {
                     likeBtn.setBootstrapType("success");
@@ -284,10 +284,22 @@ public class SingleAdFragment extends SpiceFragment implements
                                     likeBtn.setBootstrapType("success");
                                     likeBtn.setLeftIcon("fa-thumbs-up");
                                     likeBtn.setText(likes);
+                                    if (!likedAds.contains(ad.getId())) {
+                                        likedAds.add(ad.getId());
+                                        SharedPreferences.Editor edit = spref.edit();
+                                        edit.putStringSet("likedAds", likedAds);
+                                        edit.apply();
+                                    }
                                 } catch (NumberFormatException e) {
                                     likeBtn.setBootstrapType("primary");
                                     likeBtn.setLeftIcon("fa-thumbs-o-up");
                                     likeBtn.setText("Like");
+                                    if (likedAds.contains(ad.getId())) {
+                                        likedAds.remove(ad.getId());
+                                        SharedPreferences.Editor edit = spref.edit();
+                                        edit.putStringSet("likedAds", likedAds);
+                                        edit.apply();
+                                    }
                                 }
                             }
                             @Override

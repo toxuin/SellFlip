@@ -1,4 +1,4 @@
-package ru.toxuin.sellflip.library.layout;
+package ru.toxuin.sellflip.library.views;
 
 import android.content.Context;
 import android.util.AttributeSet;

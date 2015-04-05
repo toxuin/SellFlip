@@ -23,24 +23,23 @@ import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.PendingRequestListener;
 import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.BaseActivity;
+import ru.toxuin.sellflip.BuildConfig;
 import ru.toxuin.sellflip.R;
 import ru.toxuin.sellflip.SearchResultFragment;
 import ru.toxuin.sellflip.SingleAdFragment;
 import ru.toxuin.sellflip.entities.SingleAd;
-import ru.toxuin.sellflip.library.layout.PrescalableImageView;
+import ru.toxuin.sellflip.library.views.PrescalableImageView;
 import ru.toxuin.sellflip.restapi.spicerequests.ListAdsRequest;
 import ru.toxuin.sellflip.restapi.spicerequests.SingleAdRequest;
 import ru.toxuin.sellflip.restapi.spicerequests.SingleAdThumbRequest;
 
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
@@ -53,8 +52,6 @@ public class GridSearchAdapter extends BaseAdapter {
     private String searchQuery;
 
     private final LayoutInflater mLayoutInflater;
-    private final Random mRandom;
-    private final ArrayList<Integer> mBackgroundColors;
 
     protected SpiceManager spiceManager;
     private ProgressDialog loading;
@@ -69,21 +66,9 @@ public class GridSearchAdapter extends BaseAdapter {
     public GridSearchAdapter(Context context, SpiceManager manager) {
         this.spiceManager = manager;
         mLayoutInflater = LayoutInflater.from(context);
-        mRandom = new Random();
-        mBackgroundColors = new ArrayList<>();
-        mBackgroundColors.add(android.R.color.holo_purple);
-        mBackgroundColors.add(android.R.color.holo_orange_light);
-
-        //mBackgroundColors.add(R.color.orange);
-        //mBackgroundColors.add(R.color.green);
-        //mBackgroundColors.add(R.color.blue);
-        //mBackgroundColors.add(R.color.yellow);
-        //mBackgroundColors.add(R.color.grey);
-
         this.context = context;
         this.itemsList = new LinkedList<>();
     }
-
 
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent) {
@@ -376,15 +361,14 @@ public class GridSearchAdapter extends BaseAdapter {
             spiceManager.execute(thumbRequest, new RequestListener<Bitmap>() {
                 @Override
                 public void onRequestSuccess(Bitmap bitmap) {
-                    if (bitmap == null) { // TODO: THROW IN REQUEST?
-                        thumbnail.setImageDrawable(thumbnail.getContext().getResources().getDrawable(R.drawable.no_image));
-                    } else thumbnail.setImageBitmap(bitmap);
+                    if (bitmap != null) thumbnail.setImageBitmap(bitmap);
+                    else Log.e(TAG, "ERROR: IMAGE = NULL");
                 }
 
                 @Override
                 public void onRequestFailure(SpiceException spiceException) {
-                    thumbnail.setImageDrawable(thumbnail.getContext().getResources().getDrawable(R.drawable.no_image));
-                    spiceException.printStackTrace();
+                    thumbnail.setImageResource(R.drawable.no_image);
+                    if (BuildConfig.DEBUG) spiceException.printStackTrace();
                 }
             });
         }
@@ -402,6 +386,4 @@ public class GridSearchAdapter extends BaseAdapter {
         if (loading == null) return;
         if (loading.isShowing()) loading.dismiss();
     }
-
-
 }

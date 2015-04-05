@@ -1,13 +1,12 @@
 package ru.toxuin.sellflip.restapi;
 
-import android.util.Log;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.octo.android.robospice.retrofit.RetrofitGsonSpiceService;
 import retrofit.InterceptingClient;
 import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
-import roboguice.util.temp.Ln;
+import ru.toxuin.sellflip.entities.Category;
 
 public class SellFlipSpiceService extends RetrofitGsonSpiceService {
     public static final String API_ENDPOINT_URL = "http://sellflip.me";
@@ -41,6 +40,7 @@ public class SellFlipSpiceService extends RetrofitGsonSpiceService {
     protected RestAdapter.Builder createRestAdapterBuilder() {
         Gson gson = new GsonBuilder()
                 .setDateFormat("yyyy-MM-dd") // Will complain about default JS format without it
+                .registerTypeAdapter(Category.List.class, new CategoryDeserializer())
                 .create();
 
         return new RestAdapter.Builder()

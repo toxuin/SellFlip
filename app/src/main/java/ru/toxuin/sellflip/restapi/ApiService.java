@@ -25,8 +25,8 @@ public interface ApiService {
     @GET(CATEGORIES) Category.List getCategories();
     @POST(AUTH) AuthRequest.AccessToken getAuthToken(@Body AuthRequest.AccessToken access_token);
 
-    @POST(SINGLE_AD + "?like") String likeAd(@Path("id") String id);
-    @POST(SINGLE_AD + "?unlike") String unlikeAd(@Path("id") String adId);
+    @POST(SINGLE_AD + "/like") String likeAd(@Path("id") String id);
+    @POST(SINGLE_AD + "/unlike") String unlikeAd(@Path("id") String adId);
 
     @Multipart
     @POST(VIDEO_UPLOAD) Void uploadVideo(@Part("file") TypedFile file, @Path("id") String id);

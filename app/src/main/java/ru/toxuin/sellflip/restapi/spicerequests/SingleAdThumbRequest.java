@@ -36,12 +36,7 @@ public class SingleAdThumbRequest extends SpiceRequest<Bitmap> {
             cacheFile.createNewFile();
             BitmapRequest request = new BitmapRequest(url, cacheFile);
             Bitmap bmp;
-            try {
-                bmp = request.loadDataFromNetwork();
-            } catch (EOFException | FileNotFoundException exception) {
-                bmp = null;
-                //exception.printStackTrace();
-            }
+            bmp = request.loadDataFromNetwork();
             if (bmp != null) cache.addBitmapToMemoryCache(url, bmp);
             return bmp;
         } else return cache.getBitmapFromMemCache(url);

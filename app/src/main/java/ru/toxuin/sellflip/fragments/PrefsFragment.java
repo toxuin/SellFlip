@@ -11,6 +11,7 @@ import android.view.Window;
 
 import ru.toxuin.sellflip.BaseActivity;
 import ru.toxuin.sellflip.R;
+import ru.toxuin.sellflip.library.BitmapCache;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 
 public class PrefsFragment extends PreferenceFragment {
@@ -36,6 +37,7 @@ public class PrefsFragment extends PreferenceFragment {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
                                 SellFlipSpiceService.clearCache();
+                                BitmapCache.getInstance().clear();
                                 SharedPreferences pref = getActivity().getSharedPreferences(getActivity().getString(R.string.app_preference_key), Context.MODE_PRIVATE);
                                 pref.edit().clear().commit();
                                 dialog.dismiss();
