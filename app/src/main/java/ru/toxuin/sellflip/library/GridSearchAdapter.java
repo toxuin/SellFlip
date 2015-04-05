@@ -1,6 +1,7 @@
 package ru.toxuin.sellflip.library;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.LayerDrawable;
@@ -12,6 +13,8 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+import com.github.johnpersano.supertoasts.SuperToast;
+import com.github.johnpersano.supertoasts.util.Style;
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
@@ -25,8 +28,10 @@ import ru.toxuin.sellflip.restapi.spicerequests.SingleAdThumbRequest;
 
 import java.text.NumberFormat;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class GridSearchAdapter extends BaseAdapter {
@@ -113,7 +118,7 @@ public class GridSearchAdapter extends BaseAdapter {
         }
     }
 
-    public static class SearchResultViewHolder implements View.OnClickListener {
+    public static class SearchResultViewHolder implements View.OnClickListener, View.OnLongClickListener {
         Context context;
         LinearLayout cardContainer;
         TextView title;
@@ -131,6 +136,7 @@ public class GridSearchAdapter extends BaseAdapter {
             this.date = (TextView) itemView.findViewById(R.id.item_date);
             this.thumbnail = (PrescalableImageView) itemView.findViewById(R.id.item_thumbnail);
             cardContainer.setOnClickListener(this);
+            cardContainer.setOnLongClickListener(this);
         }
 
         public void setSpiceManager(SpiceManager manager) {
@@ -199,6 +205,32 @@ public class GridSearchAdapter extends BaseAdapter {
             SingleAdFragment adFragment = new SingleAdFragment();
             adFragment.setAdId(id);
             BaseActivity.setContent(adFragment);
+        }
+
+        @Override
+        public boolean onLongClick(View v) {
+            if (id == null) return false;
+            SharedPreferences spref = context.getSharedPreferences(context.getString(R.string.app_preference_key), Context.MODE_PRIVATE);
+            Set<String> favs = spref.getStringSet("favoriteAds", new HashSet<String>());
+            SharedPreferences.Editor edit = spref.edit();
+            if (favs.contains(id)) {
+                favs.remove(id);
+                SuperToast superToast = new SuperToast(context, Style.getStyle(Style.ORANGE, SuperToast.Animations.POPUP));
+                superToast.setDuration(SuperToast.Duration.VERY_SHORT);
+                superToast.setText("Removed from favorites!");
+                superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
+                superToast.show();
+            } else {
+                favs.add(id);
+                SuperToast superToast = new SuperToast(context, Style.getStyle(Style.PURPLE, SuperToast.Animations.POPUP));
+                superToast.setDuration(SuperToast.Duration.VERY_SHORT);
+                superToast.setText("Added to favorites!");
+                superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
+                superToast.show();
+            }
+            edit.putStringSet("favoriteAds", favs);
+            edit.apply();
+            return true;
         }
     }
 }

@@ -271,15 +271,18 @@ public class SearchResultFragment extends SpiceFragment {
             // NOT FAV MODE
 
             if (loading != null) loading.dismiss();
-            loading = new ProgressDialog(getActivity());
-            loading.setTitle("Loading");
-            loading.setIndeterminate(true);
-            loading.setCancelable(false);
-            loading.setMessage("Wait while loading...");
-            loading.show();
-            Boolean trend = null;
-            if (trending) trend = Boolean.TRUE;
-            ListAdsRequest listAdsRequest = new ListAdsRequest(category, searchQuery, trend, page);
+            if (page == 0) {
+                loading = new ProgressDialog(getActivity());
+
+                loading.setTitle("Loading");
+                loading.setIndeterminate(true);
+                loading.setCancelable(false);
+                loading.setMessage("Wait while loading...");
+                loading.show();
+            }
+            String order = null;
+            if (trending) order = "likes";
+            ListAdsRequest listAdsRequest = new ListAdsRequest(category, searchQuery, order, page);
             listCacheKey = listAdsRequest.getCacheKey();
             listRequestListener = new PendingRequestListener<SingleAd.List>() {
                 @Override
