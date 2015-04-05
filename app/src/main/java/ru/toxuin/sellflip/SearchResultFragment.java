@@ -159,7 +159,7 @@ public class SearchResultFragment extends SpiceFragment {
     public void onStart() {
         super.onStart();
         getActivity().registerReceiver(totalItemsBroadcastReceiver, new IntentFilter(getActivity().getString(R.string.broadcast_intent_total_items)));
-        getActivity().registerReceiver(emptyReciever, new IntentFilter(getActivity().getString(R.string.broadcast_intent_empty_result)));
+        getActivity().registerReceiver(emptyReceiver, new IntentFilter(getActivity().getString(R.string.broadcast_intent_empty_result)));
         searchAdapter.requestData(0);
     }
 
@@ -168,7 +168,7 @@ public class SearchResultFragment extends SpiceFragment {
         super.onPause();
         try {
             getActivity().unregisterReceiver(totalItemsBroadcastReceiver);
-            getActivity().unregisterReceiver(emptyReciever);
+            getActivity().unregisterReceiver(emptyReceiver);
         } catch (Exception e) {
             // ignore, just not registered.
         }
@@ -200,10 +200,11 @@ public class SearchResultFragment extends SpiceFragment {
         public void onReceive(Context context, Intent intent) {
             totalServerItems = intent.getIntExtra("X-Total-Items", 0);
             Log.d("TOTAL-BROADCAST", "GOT TOTAL ITEMS ON SERVER: " + totalServerItems);
+            emptyPanel.setVisibility(View.GONE);
         }
     };
 
-    private BroadcastReceiver emptyReciever = new BroadcastReceiver() {
+    private BroadcastReceiver emptyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             String message = intent.getStringExtra("message");

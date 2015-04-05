@@ -40,6 +40,7 @@ import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.PendingRequestListener;
 import com.octo.android.robospice.request.listener.RequestListener;
+import ru.toxuin.sellflip.entities.Like;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.library.views.VideoControllerView;
@@ -81,7 +82,7 @@ public class SingleAdFragment extends SpiceFragment implements
 
     private SurfaceView videoSurface;
     private float ratio = 1;
-    PendingRequestListener<String> likeRequestListener;
+    PendingRequestListener<Like> likeRequestListener;
 
     public SingleAdFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -261,44 +262,38 @@ public class SingleAdFragment extends SpiceFragment implements
                     }
                 });
 
-
-                final Set<String> likedAds = spref.getStringSet("likedAds", new HashSet<String>());
-                boolean liked = false;
-                if (likedAds.contains(ad.getId())) {
-                    likeBtn.setBootstrapType("success");
-                    likeBtn.setLeftIcon("fa-thumbs-up");
-                    likeBtn.setText("Unlike");
-                    liked = true;
-                }
-                final boolean likeAction = !liked;
                 likeBtn.setOnClickListener(new OnClickListener() {
                     @Override
                     public void onClick(View v) {
+                        boolean liked = false;
+                        final Set<String> likedAds = spref.getStringSet("likedAds", new HashSet<String>());
+                        if (likedAds.contains(ad.getId())) liked = true;
+                        final boolean likeAction = !liked;
                         LikeRequest likeRequest = new LikeRequest(ad.getId(), likeAction);
-                        likeRequestListener = new PendingRequestListener<String>() {
+                        likeRequestListener = new PendingRequestListener<Like>() {
                             @Override
-                            public void onRequestSuccess(String s) {
-                                int likes;
-                                try {
-                                    likes = Integer.parseInt(s);
-                                    likeBtn.setBootstrapType("success");
-                                    likeBtn.setLeftIcon("fa-thumbs-up");
-                                    likeBtn.setText(likes);
-                                    if (!likedAds.contains(ad.getId())) {
-                                        likedAds.add(ad.getId());
-                                        SharedPreferences.Editor edit = spref.edit();
-                                        edit.putStringSet("likedAds", likedAds);
-                                        edit.apply();
-                                    }
-                                } catch (NumberFormatException e) {
-                                    likeBtn.setBootstrapType("primary");
-                                    likeBtn.setLeftIcon("fa-thumbs-o-up");
-                                    likeBtn.setText("Like");
-                                    if (likedAds.contains(ad.getId())) {
-                                        likedAds.remove(ad.getId());
-                                        SharedPreferences.Editor edit = spref.edit();
-                                        edit.putStringSet("likedAds", likedAds);
-                                        edit.apply();
+                            public void onRequestSuccess(Like like) {
+                                if (like.getLikes() != -1) {
+                                    if (likeAction) {
+                                        likeBtn.setBootstrapType("success");
+                                        likeBtn.setLeftIcon("fa-thumbs-up");
+                                        likeBtn.setText("" + like.getLikes());
+                                        if (!likedAds.contains(ad.getId())) {
+                                            likedAds.add(ad.getId());
+                                            SharedPreferences.Editor edit = spref.edit();
+                                            edit.putStringSet("likedAds", likedAds);
+                                            edit.apply();
+                                        }
+                                    } else {
+                                        likeBtn.setBootstrapType("primary");
+                                        likeBtn.setLeftIcon("fa-thumbs-o-up");
+                                        likeBtn.setText("Like");
+                                        if (likedAds.contains(ad.getId())) {
+                                            likedAds.remove(ad.getId());
+                                            SharedPreferences.Editor edit = spref.edit();
+                                            edit.putStringSet("likedAds", likedAds);
+                                            edit.apply();
+                                        }
                                     }
                                 }
                             }
@@ -310,7 +305,7 @@ public class SingleAdFragment extends SpiceFragment implements
                             @Override
                             public void onRequestNotFound() {}
                         };
-                        spiceManager.execute(likeRequest, likeRequest.getCacheKey(), DurationInMillis.ONE_HOUR, likeRequestListener);
+                        spiceManager.execute(likeRequest, likeRequestListener);
                     }
                 });
             }

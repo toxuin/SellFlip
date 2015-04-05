@@ -73,8 +73,12 @@ public class GridSearchAdapter extends BaseAdapter {
     @Override
     public View getView(final int position, View convertView, final ViewGroup parent) {
         SingleAd ad = itemsList.get(position);
-        SearchResultViewHolder vh;
-        if (convertView == null) {
+        SearchResultViewHolder vh = null;
+        if (convertView != null) {
+            vh = (SearchResultViewHolder) convertView.getTag();
+        }
+
+        if (convertView == null || (vh != null && !vh.id.equals(ad.getId()))) {
             convertView = mLayoutInflater.inflate(R.layout.search_result_item, parent, false);
             vh = new SearchResultViewHolder(context, convertView);
             vh.setSpiceManager(spiceManager);
@@ -88,15 +92,6 @@ public class GridSearchAdapter extends BaseAdapter {
 
             convertView.setTag(vh);
         }
-        else {
-            vh = (SearchResultViewHolder) convertView.getTag();
-        }
-
-        //double positionHeight = getPositionRatio(position);
-        //int backgroundIndex = position >= mBackgroundColors.size() ?
-        //        position % mBackgroundColors.size() : position;
-
-        //convertView.setBackgroundResource(mBackgroundColors.get(backgroundIndex));
 
         return convertView;
     }
@@ -120,6 +115,11 @@ public class GridSearchAdapter extends BaseAdapter {
     @Override
     public SingleAd getItem(int position) {
         return itemsList.get(position);
+    }
+
+    @Override
+    public boolean hasStableIds() {
+        return true;
     }
 
     @Override
@@ -211,8 +211,12 @@ public class GridSearchAdapter extends BaseAdapter {
                         return;
                     }
                     if (page == 0) itemsList.clear();
-                    itemsList.addAll(allAds);
-                    notifyDataSetChanged();
+                    for (SingleAd a : allAds) {
+                        if (!itemsList.contains(a)) {
+                            itemsList.add(a);
+                            notifyDataSetChanged();
+                        }
+                    }
                     Log.d(TAG, "GOT " + allAds.size() + " ITEMS!");
                 }
 

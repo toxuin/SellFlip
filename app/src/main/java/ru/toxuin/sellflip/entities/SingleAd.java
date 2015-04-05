@@ -1,6 +1,7 @@
 package ru.toxuin.sellflip.entities;
 
 import com.google.gson.annotations.SerializedName;
+import org.apache.commons.lang3.builder.HashCodeBuilder;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,6 +49,16 @@ public class SingleAd {
                 this.getDescription().equals(that.getDescription()) &&
                 this.getCoords().equals(that.getCoords()) &&
                 this.getDate().equals(that.getDate());
+    }
+
+    @Override
+    public int hashCode() {
+        HashCodeBuilder builder = new HashCodeBuilder();
+        builder.append(id);
+        builder.append(title);
+        builder.append(price);
+        builder.append(email);
+        return builder.toHashCode();
     }
 
     public String getTitle() {
