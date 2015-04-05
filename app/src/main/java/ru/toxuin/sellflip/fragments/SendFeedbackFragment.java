@@ -38,7 +38,7 @@ public class SendFeedbackFragment extends SpiceFragment {
         final EditText email = (EditText) rootView.findViewById(R.id.emailAddr);
         final BootstrapEditText messageText = (BootstrapEditText) rootView.findViewById(R.id.messageText);
         final BootstrapButton sendBtn = (BootstrapButton) rootView.findViewById(R.id.sendBtn);
-
+        // TODO: spinner with topic choices
 
         sendBtn.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View v) {
