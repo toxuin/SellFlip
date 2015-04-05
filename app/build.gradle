@@ -39,7 +39,6 @@ dependencies {
     compile "com.squareup.okhttp:okhttp:1.5.4"
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
     compile group:'com.octo.android.robospice', name:'robospice-retrofit', version:'1.4.9'
-    compile 'com.etsy.android.grid:library:1.0.5'
     compile 'org.apmem.tools:layouts:1.8@aar'
     compile project(':android-support-v4-preferencefragment')
 }

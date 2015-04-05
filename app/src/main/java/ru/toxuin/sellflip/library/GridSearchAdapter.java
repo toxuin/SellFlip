@@ -1,9 +1,6 @@
 package ru.toxuin.sellflip.library;
 
-import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Animatable;
 import android.graphics.drawable.LayerDrawable;
@@ -12,56 +9,34 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AbsListView;
 import android.widget.BaseAdapter;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import com.octo.android.robospice.SpiceManager;
-import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
-import com.octo.android.robospice.request.listener.PendingRequestListener;
 import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.BaseActivity;
 import ru.toxuin.sellflip.BuildConfig;
 import ru.toxuin.sellflip.R;
-import ru.toxuin.sellflip.SearchResultFragment;
 import ru.toxuin.sellflip.SingleAdFragment;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.views.PrescalableImageView;
-import ru.toxuin.sellflip.restapi.spicerequests.ListAdsRequest;
-import ru.toxuin.sellflip.restapi.spicerequests.SingleAdRequest;
 import ru.toxuin.sellflip.restapi.spicerequests.SingleAdThumbRequest;
 
 import java.text.NumberFormat;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.LinkedList;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 public class GridSearchAdapter extends BaseAdapter {
     private static final String TAG = "SEARCH_GRID_ADAPTER";
     private Context context;
     private final List<SingleAd> itemsList;
-    private int currentPage = 0;
-    private String category;
-    private String searchQuery;
 
     private final LayoutInflater mLayoutInflater;
 
     protected SpiceManager spiceManager;
-    private ProgressDialog loading;
-    private PendingRequestListener<SingleAd.List> requestListener;
-
-            // CACHE KEY - LISTENER
-    private Map<Object, PendingRequestListener<SingleAd>> favAdsRequests = new HashMap<>();
-    private Object cacheKey;
-    private boolean favsMode = false;
-    private boolean trending = false;
 
     public GridSearchAdapter(Context context, SpiceManager manager) {
         this.spiceManager = manager;
@@ -80,6 +55,7 @@ public class GridSearchAdapter extends BaseAdapter {
 
         if (convertView == null || (vh != null && !vh.id.equals(ad.getId()))) {
             convertView = mLayoutInflater.inflate(R.layout.search_result_item, parent, false);
+            Log.d(TAG, "FAIL " + position + ": NEED TITLE " + (vh==null?"NULL":vh.title.getText().toString()) + " FOUND TITLE " + ad.getTitle());
             vh = new SearchResultViewHolder(context, convertView);
             vh.setSpiceManager(spiceManager);
             vh.bind(ad);
@@ -103,7 +79,6 @@ public class GridSearchAdapter extends BaseAdapter {
 
     public void clear() {
         itemsList.clear();
-        currentPage = 0;
         notifyDataSetChanged();
     }
 
@@ -127,175 +102,16 @@ public class GridSearchAdapter extends BaseAdapter {
         return position;
     }
 
-    public void setCategory(String category) {
-        this.category = category;
+    public void add(SingleAd ad) {
+        if (!itemsList.contains(ad)) itemsList.add(ad);
+        notifyDataSetChanged();
     }
 
-    public void requestData(final int page) {
-        if (favsMode) {
-            SharedPreferences spref = context.getSharedPreferences(context.getString(R.string.app_preference_key), Context.MODE_PRIVATE);
-            Set<String> favs = spref.getStringSet("favoriteAds", new HashSet<String>());
-            if (favs.isEmpty()) {
-                Intent intent = new Intent(context.getString(R.string.broadcast_intent_empty_result));
-                intent.putExtra("message", "No favorites found!");
-                context.sendBroadcast(intent);
-            } else {
-                final boolean[] firstAd = {true};
-                for (String id : favs) {
-                    SingleAdRequest favAdRequest = new SingleAdRequest(id);
-                    Object favCacheKey = favAdRequest.getCacheKey();
-                    PendingRequestListener<SingleAd> favRequestListener = new PendingRequestListener<SingleAd>() {
-                        @Override
-                        public void onRequestSuccess(SingleAd ad) {
-                            if (firstAd[0]) {
-                                itemsList.clear();
-                                firstAd[0] = false;
-                            }
-                            if (!itemsList.contains(ad)) {
-                                itemsList.add(ad);
-                                notifyDataSetChanged();
-                                Log.d(TAG, "FAV: ADDED " + ad.getTitle());
-                            }
-                        }
-
-                        @Override
-                        public void onRequestNotFound() {
-                        }
-
-                        @Override
-                        public void onRequestFailure(SpiceException spiceException) {
-                            spiceException.printStackTrace();
-                        }
-                    };
-                    spiceManager.execute(favAdRequest, favCacheKey, DurationInMillis.ONE_HOUR, favRequestListener);
-                    favAdsRequests.put(favCacheKey, favRequestListener);
-                }
-            }
-
-        } else {
-            // NOT FAV MODE
-
-            if (loading != null) loading.dismiss();
-            loading = new ProgressDialog(context);
-            loading.setTitle("Loading");
-            loading.setIndeterminate(true);
-            loading.setMessage("Wait while loading...");
-            loading.show();
-            Boolean trend = null;
-            if (trending) trend = Boolean.TRUE;
-            ListAdsRequest request = new ListAdsRequest(category, searchQuery, trend, page);
-            cacheKey = request.getCacheKey();
-            requestListener = new PendingRequestListener<SingleAd.List>() {
-                @Override
-                public void onRequestNotFound() {
-                    try {
-                        loading.dismiss();
-                    } catch (Exception e) {
-                        // INGORE
-                    }
-                }
-
-                @Override
-                public void onRequestSuccess(SingleAd.List allAds) {
-                    try {
-                        loading.dismiss();
-                    } catch (Exception e) {
-                        // INGORE
-                    }
-                    if (allAds == null || allAds.isEmpty()) {
-                        Intent intent = new Intent(context.getString(R.string.broadcast_intent_empty_result));
-                        intent.putExtra("message", "No results!");
-                        context.sendBroadcast(intent);
-                        itemsList.clear();
-                        notifyDataSetChanged();
-                        return;
-                    }
-                    if (page == 0) itemsList.clear();
-                    for (SingleAd a : allAds) {
-                        if (!itemsList.contains(a)) {
-                            itemsList.add(a);
-                            notifyDataSetChanged();
-                        }
-                    }
-                    Log.d(TAG, "GOT " + allAds.size() + " ITEMS!");
-                }
-
-                @Override
-                public void onRequestFailure(SpiceException spiceException) {
-                    try {
-                        loading.dismiss();
-                        Intent intent = new Intent(context.getString(R.string.broadcast_intent_empty_result));
-                        intent.putExtra("message", "Error: " + spiceException.getMessage());
-                        context.sendBroadcast(intent);
-                        itemsList.clear();
-                        notifyDataSetChanged();
-                    } catch (Exception e) {
-                        // INGORE
-                    }
-                    Toast.makeText(context, "ERROR: " + spiceException.getMessage(), Toast.LENGTH_SHORT).show();
-                    spiceException.printStackTrace();
-                }
-            };
-            spiceManager.execute(request, request.getCacheKey(), DurationInMillis.ONE_MINUTE, requestListener);
+    public void addAll(SingleAd.List ads) {
+        for (SingleAd ad : ads) {
+            add(ad);
         }
     }
-
-    public void setSearchQuery(String query) {
-        this.searchQuery = query;
-    }
-
-
-
-
-    public AbsListView.OnScrollListener searchResultsEndlessScrollListener = new AbsListView.OnScrollListener() {
-        private int previousTotal = 0;
-        private boolean loading = true;
-
-        @Override
-        public void onScroll(AbsListView listView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-            if (loading) {
-                if (totalItemCount > previousTotal) {
-                    loading = false;
-                    previousTotal = totalItemCount;
-                    currentPage++;
-                }
-            }
-            if (!loading && (totalItemCount - visibleItemCount) <= (firstVisibleItem + ListAdsRequest.getItemsPerPage())) {
-                if (currentPage * ListAdsRequest.getItemsPerPage() < SearchResultFragment.getTotalServerItems()) {
-                    requestData(currentPage);
-                    loading = true;
-                }
-            }
-        }
-
-        @Override
-        public void onScrollStateChanged(AbsListView view, int scrollState) {}
-    };
-
-    public String getCategory() {
-        return category;
-    }
-
-    public Object getCacheKey() {
-        return cacheKey;
-    }
-
-    public PendingRequestListener<SingleAd.List> getSpiceListener() {
-        return requestListener;
-    }
-
-    public void favsMode() {
-        this.favsMode = true;
-    }
-
-    public Map<Object, PendingRequestListener<SingleAd>> getFavListeners() {
-        return favAdsRequests;
-    }
-
-    public void setTrending(boolean trending) {
-        this.trending = trending;
-    }
-
 
     public static class SearchResultViewHolder implements View.OnClickListener {
         Context context;
@@ -384,10 +200,5 @@ public class GridSearchAdapter extends BaseAdapter {
             adFragment.setAdId(id);
             BaseActivity.setContent(adFragment);
         }
-    }
-
-    public void hideLoading() {
-        if (loading == null) return;
-        if (loading.isShowing()) loading.dismiss();
     }
 }

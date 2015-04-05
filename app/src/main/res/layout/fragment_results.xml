@@ -19,11 +19,11 @@
 
         </LinearLayout>
 
-        <com.etsy.android.grid.StaggeredGridViewSellFlip
+        <com.bulletnoid.android.widget.StaggeredGridView.StaggeredGridView
                 android:id="@+id/itemList"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:item_margin="@dimen/search_results_cards_margin"
-                app:column_count="@integer/search_result_columns" android:smoothScrollbar="true"/>
+                app:numColumns="@integer/search_result_columns"
+                android:smoothScrollbar="true"/>
 
 </LinearLayout>

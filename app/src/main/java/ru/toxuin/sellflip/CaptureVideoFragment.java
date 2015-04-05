@@ -253,7 +253,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
         mMediaRecorder.setVideoFrameRate(30);
         mMediaRecorder.setVideoEncodingBitRate(15000000);
 
-        mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+        //mMediaRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
 //        mMediaRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
 //        mMediaRecorder.setVideoEncodingBitRate(512 * 1000);
 //        mMediaRecorder.setVideoFrameRate(25);
@@ -267,7 +267,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
         if (finalDegree == -1) finalDegree = lookingDegrees;
         if (finalDegree == -1) finalDegree = 90; // if still -1
         rotationSensorListener.disable();
-        mMediaRecorder.setOrientationHint(finalDegree);
+        mMediaRecorder.setOrientationHint(finalDegree-90);
 
         //mMediaRecorder.setPreviewDisplay(mHolder.getSurface());
 

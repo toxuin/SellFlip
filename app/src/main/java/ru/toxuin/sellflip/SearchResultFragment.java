@@ -1,6 +1,7 @@
 package ru.toxuin.sellflip;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -16,7 +17,8 @@ import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
-import com.etsy.android.grid.StaggeredGridViewSellFlip;
+import android.widget.Toast;
+import com.bulletnoid.android.widget.StaggeredGridView.StaggeredGridView;
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
@@ -28,14 +30,19 @@ import ru.toxuin.sellflip.library.GridSearchAdapter;
 import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.CategoryRequest;
+import ru.toxuin.sellflip.restapi.spicerequests.ListAdsRequest;
+import ru.toxuin.sellflip.restapi.spicerequests.SingleAdRequest;
 
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class SearchResultFragment extends SpiceFragment {
     private static final String TAG = "SEARCH_RESULT_UI";
     GridSearchAdapter searchAdapter;
-    private StaggeredGridViewSellFlip gridView;
+    private StaggeredGridView gridView;
     private View rootView;
 
     List<Category> categories;
@@ -45,10 +52,13 @@ public class SearchResultFragment extends SpiceFragment {
 
     protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
     private PendingRequestListener<Category.List> rightMenuSpiceListener;
+    private int page = 0;
     private boolean favsMode = false;
     private boolean trending = false;
     private LinearLayout emptyPanel;
     private TextView emptyText;
+    private ProgressDialog loading;
+    private String category;
 
     public SearchResultFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
@@ -57,14 +67,13 @@ public class SearchResultFragment extends SpiceFragment {
         rootView = inflater.inflate(R.layout.fragment_results, container, false);
         String title = getString(R.string.search_results);
         getActivity().setTitle(title);
-        gridView = (StaggeredGridViewSellFlip) rootView.findViewById(R.id.itemList);
+        gridView = (StaggeredGridView) rootView.findViewById(R.id.itemList);
         emptyPanel = (LinearLayout) rootView.findViewById(R.id.nothing_panel);
         emptyText = (TextView) rootView.findViewById(R.id.nothing_to_show);
 
         searchAdapter = new GridSearchAdapter(getActivity(), spiceManager);
         if (favsMode) {
             BaseActivity.setContentTitle("My favorites");
-            searchAdapter.favsMode();
         }
 
         String savedSearchQuery = null;
@@ -75,27 +84,24 @@ public class SearchResultFragment extends SpiceFragment {
             savedSearchQuery = savedInstanceState.getString("searchQuery", null);
             savedTrending = savedInstanceState.getBoolean("trending", false);
         }
-        if (searchQuery != null) {
-            searchAdapter.setSearchQuery(searchQuery);
-        } else if (savedSearchQuery != null) {
-            searchAdapter.setSearchQuery(savedSearchQuery);
+        if (savedSearchQuery != null) {
+            searchQuery = savedSearchQuery;
         }
 
         if (savedCategory != null) {
-            searchAdapter.setCategory(savedCategory);
+            category = savedCategory;
         }
         if (savedTrending || trending) {
             BaseActivity.setContentTitle("Trending");
-            searchAdapter.setTrending(true);
         }
 
         gridView.setAdapter(searchAdapter);
 
-        if (!favsMode) gridView.setOnScrollListener(searchAdapter.searchResultsEndlessScrollListener);
+        gridView.setOnLoadmoreListener(loadMoreListener);
 
         SharedPreferences prefs = getActivity().getSharedPreferences(getActivity().getString(R.string.app_preference_key), Context.MODE_PRIVATE);
         if (!prefs.getString("pref_key_search_result_columns", "0").equals("0")) {
-            gridView.setColumnCount(Integer.parseInt(prefs.getString("pref_key_search_result_columns", "0")), false);
+            gridView.setColumnCount(Integer.parseInt(prefs.getString("pref_key_search_result_columns", "0")));
         }
 
         // DATA IS FETCHED IN onStart
@@ -131,8 +137,8 @@ public class SearchResultFragment extends SpiceFragment {
                 rightMenuAdapter.setRoot(root);
             }
             searchAdapter.clear();
-            searchAdapter.setCategory(root.getId());
-            searchAdapter.requestData(0);
+            category = root.getId();
+            requestData(0);
         }
         else {
             rightMenuAdapter = new CategoryListAdapter(getActivity());
@@ -160,7 +166,7 @@ public class SearchResultFragment extends SpiceFragment {
         super.onStart();
         getActivity().registerReceiver(totalItemsBroadcastReceiver, new IntentFilter(getActivity().getString(R.string.broadcast_intent_total_items)));
         getActivity().registerReceiver(emptyReceiver, new IntentFilter(getActivity().getString(R.string.broadcast_intent_empty_result)));
-        searchAdapter.requestData(0);
+        requestData(0);
     }
 
     @Override
@@ -178,13 +184,158 @@ public class SearchResultFragment extends SpiceFragment {
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
         if (searchAdapter == null) return;
-        if (searchAdapter.getCategory() != null && !searchAdapter.getCategory().isEmpty()) {
-            outState.putString("category", searchAdapter.getCategory());
+        if (category != null && !category.isEmpty()) {
+            outState.putString("category", category);
         }
         if (searchQuery != null && !searchQuery.isEmpty()) {
             outState.putString("searchQuery", searchQuery);
         }
     }
+
+    public SearchResultFragment setSearchQuery(String searchQuery) {
+        this.searchQuery = searchQuery;
+        return this;
+    }
+
+    @Override
+    public void onAttach(Activity activity) {
+        super.onAttach(activity);
+        if (spiceManager == null) return;
+        spiceManager.addListenerIfPending(Category.List.class, CategoryRequest.getCacheKey(), rightMenuSpiceListener);
+        spiceManager.addListenerIfPending(SingleAd.List.class, listCacheKey, listRequestListener);
+        for (Object favCacheKey : favAdsRequests.keySet()) {
+            spiceManager.addListenerIfPending(SingleAd.class, favCacheKey, favAdsRequests.get(favCacheKey));
+        }
+    }
+
+    @Override
+    public void onDetach() {
+        super.onDetach();
+        if (loading != null) loading.dismiss();
+    }
+
+    public SearchResultFragment favsMode() {
+        this.favsMode = true;
+        return this;
+    }
+
+    public SearchResultFragment trending() {
+        this.trending = true;
+        return this;
+    }
+
+
+
+
+    // #### LOADING DATA STUFF ##### //
+
+    public void requestData(final int page) {
+        if (favsMode) {
+            SharedPreferences spref = getActivity().getSharedPreferences(getActivity().getString(R.string.app_preference_key), Context.MODE_PRIVATE);
+            Set<String> favs = spref.getStringSet("favoriteAds", new HashSet<String>());
+            if (favs.isEmpty()) {
+                Intent intent = new Intent(getActivity().getString(R.string.broadcast_intent_empty_result));
+                intent.putExtra("message", "No favorites found!");
+                getActivity().sendBroadcast(intent);
+            } else {
+                final boolean[] firstAd = {true};
+                for (String id : favs) {
+                    SingleAdRequest favAdRequest = new SingleAdRequest(id);
+                    Object favCacheKey = favAdRequest.getCacheKey();
+                    PendingRequestListener<SingleAd> favRequestListener = new PendingRequestListener<SingleAd>() {
+                        @Override
+                        public void onRequestSuccess(SingleAd ad) {
+                            if (firstAd[0]) {
+                                searchAdapter.clear();
+                                firstAd[0] = false;
+                            }
+                            searchAdapter.add(ad);
+                            Log.d(TAG, "FAV: ADDED " + ad.getTitle());
+                        }
+
+                        @Override
+                        public void onRequestNotFound() {
+                        }
+
+                        @Override
+                        public void onRequestFailure(SpiceException spiceException) {
+                            spiceException.printStackTrace();
+                        }
+                    };
+                    spiceManager.execute(favAdRequest, favCacheKey, DurationInMillis.ONE_HOUR, favRequestListener);
+                    favAdsRequests.put(favCacheKey, favRequestListener);
+                }
+            }
+
+        } else {
+            // NOT FAV MODE
+
+            if (loading != null) loading.dismiss();
+            loading = new ProgressDialog(getActivity());
+            loading.setTitle("Loading");
+            loading.setIndeterminate(true);
+            loading.setCancelable(false);
+            loading.setMessage("Wait while loading...");
+            loading.show();
+            Boolean trend = null;
+            if (trending) trend = Boolean.TRUE;
+            ListAdsRequest listAdsRequest = new ListAdsRequest(category, searchQuery, trend, page);
+            listCacheKey = listAdsRequest.getCacheKey();
+            listRequestListener = new PendingRequestListener<SingleAd.List>() {
+                @Override
+                public void onRequestNotFound() {
+                    try {
+                        loading.dismiss();
+                    } catch (Exception e) {
+                        // INGORE
+                    }
+                }
+
+                @Override
+                public void onRequestSuccess(SingleAd.List allAds) {
+                    try {
+                        loading.dismiss();
+                    } catch (Exception e) {
+                        // INGORE
+                    }
+                    if (allAds == null || allAds.isEmpty()) {
+                        Intent intent = new Intent(getActivity().getString(R.string.broadcast_intent_empty_result));
+                        intent.putExtra("message", "No results!");
+                        getActivity().sendBroadcast(intent);
+                        searchAdapter.clear();
+                        searchAdapter.notifyDataSetChanged();
+                        return;
+                    }
+                    if (page == 0) searchAdapter.clear();
+                    searchAdapter.addAll(allAds);
+                    Log.d(TAG, "GOT " + allAds.size() + " ITEMS!");
+                }
+
+                @Override
+                public void onRequestFailure(SpiceException spiceException) {
+                    try {
+                        loading.dismiss();
+                        Intent intent = new Intent(getActivity().getString(R.string.broadcast_intent_empty_result));
+                        intent.putExtra("message", "Error: " + spiceException.getMessage());
+                        getActivity().sendBroadcast(intent);
+                        searchAdapter.clear();
+                        searchAdapter.notifyDataSetChanged();
+                    } catch (Exception e) {
+                        // INGORE
+                    }
+                    Toast.makeText(getActivity(), "ERROR: " + spiceException.getMessage(), Toast.LENGTH_SHORT).show();
+                    spiceException.printStackTrace();
+                }
+            };
+            spiceManager.execute(listAdsRequest, listAdsRequest.getCacheKey(), DurationInMillis.ONE_MINUTE, listRequestListener);
+        }
+    }
+
+
+    private PendingRequestListener<SingleAd.List> listRequestListener;
+    private Object listCacheKey;
+                // CACHE KEY - LISTENER
+    private Map<Object, PendingRequestListener<SingleAd>> favAdsRequests = new HashMap<>();
 
     @Override
     public SpiceManager getSpiceManager() {
@@ -207,44 +358,21 @@ public class SearchResultFragment extends SpiceFragment {
     private BroadcastReceiver emptyReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            page = 0;
             String message = intent.getStringExtra("message");
             emptyPanel.setVisibility(View.VISIBLE);
             emptyText.setText(message);
         }
     };
 
-    public SearchResultFragment setSearchQuery(String searchQuery) {
-        this.searchQuery = searchQuery;
-        return this;
-    }
 
-    @Override
-    public void onAttach(Activity activity) {
-        super.onAttach(activity);
-        if (spiceManager == null) return;
-        spiceManager.addListenerIfPending(Category.List.class, CategoryRequest.getCacheKey(), rightMenuSpiceListener);
-        if (searchAdapter == null) return;
-        spiceManager.addListenerIfPending(SingleAd.List.class, searchAdapter.getCacheKey(), searchAdapter.getSpiceListener());
-        Map<Object, PendingRequestListener<SingleAd>> favListeners = searchAdapter.getFavListeners();
-        for (Object favCacheKey : favListeners.keySet()) {
-            spiceManager.addListenerIfPending(SingleAd.class, favCacheKey, favListeners.get(favCacheKey));
+    private StaggeredGridView.OnLoadmoreListener loadMoreListener = new StaggeredGridView.OnLoadmoreListener() {
+        @Override
+        public void onLoadmore() {
+            if (totalServerItems > 0 && searchAdapter.getCount() > 0 && searchAdapter.getCount() < totalServerItems) {
+                page++;
+                requestData(page);
+            }
         }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        if (searchAdapter == null) return;
-        searchAdapter.hideLoading();
-    }
-
-    public SearchResultFragment favsMode() {
-        this.favsMode = true;
-        return this;
-    }
-
-    public SearchResultFragment trending() {
-        this.trending = true;
-        return this;
-    }
+    };
 }
