@@ -9,7 +9,7 @@ import retrofit.converter.GsonConverter;
 import ru.toxuin.sellflip.entities.Category;
 
 public class SellFlipSpiceService extends RetrofitGsonSpiceService {
-    public static final String API_ENDPOINT_URL = "http://sellflip.me";
+    public static final String API_ENDPOINT_URL = "https://sellflip.me";
     private static boolean wipeCache = true;
 
     public static String getEndpointUrl() {

@@ -24,6 +24,7 @@ import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
+import android.widget.RelativeLayout;
 import com.beardedhen.androidbootstrap.FontAwesomeText;
 import com.facebook.Session;
 import com.github.johnpersano.supertoasts.SuperToast;
@@ -458,7 +459,12 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                         rightPanel.setVisibility(View.VISIBLE);
                         isRightPanelVisible = true;
                     }
-                    @Override public void onAnimationEnd(Animation animation) {}
+                    @Override public void onAnimationEnd(Animation animation) {
+                        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) rightPanel.getLayoutParams();
+                        params.setMargins(0, 0, 0, 0);
+                        rightPanel.setLayoutParams(params);
+                        rightPanel.requestLayout();
+                    }
                     @Override public void onAnimationRepeat(Animation animation) {}
                 });
             } else if (isRightPanelVisible) {
@@ -471,6 +477,10 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                     @Override public void onAnimationStart(Animation animation) {}
                     @Override public void onAnimationEnd(Animation animation) {
                         rightPanel.setVisibility(View.INVISIBLE);
+                        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) rightPanel.getLayoutParams();
+                        params.setMargins(0, -sidePanelHeight, 0, 0);
+                        rightPanel.setLayoutParams(params);
+                        rightPanel.requestLayout();
                     }
                     @Override public void onAnimationRepeat(Animation animation) {}
                 });
@@ -489,7 +499,6 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
             Animation anim = null;
             if (angle == 270 && isLeftPanelVisible) {
                 anim = new TranslateAnimation(0, 0, 0, sidePanelHeight);
-                //anim = new TranslateAnimation(0, 0, sidePanelHeight, 0);
                 anim.setInterpolator(new LinearInterpolator());
                 anim.setDuration(300);
                 anim.setFillEnabled(true);
@@ -499,11 +508,15 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                         leftPanel.setVisibility(View.INVISIBLE);
                         isLeftPanelVisible = false;
                     }
-                    @Override public void onAnimationEnd(Animation animation) {}
+                    @Override public void onAnimationEnd(Animation animation) {
+                        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) leftPanel.getLayoutParams();
+                        params.setMargins(0, 0, 0, -sidePanelHeight);
+                        leftPanel.setLayoutParams(params);
+                        leftPanel.requestLayout();
+                    }
                     @Override public void onAnimationRepeat(Animation animation) {}
                 });
             } else if (!isLeftPanelVisible) {
-                //anim = new TranslateAnimation(0, 0, 0, sidePanelHeight);
                 anim = new TranslateAnimation(0, 0, sidePanelHeight, 0);
                 anim.setInterpolator(new LinearInterpolator());
                 anim.setDuration(300);
@@ -517,11 +530,12 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
 
                     @Override
                     public void onAnimationEnd(Animation animation) {
+                        RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) leftPanel.getLayoutParams();
+                        params.setMargins(0, 0, 0, 0);
+                        leftPanel.setLayoutParams(params);
+                        leftPanel.requestLayout();
                     }
-
-                    @Override
-                    public void onAnimationRepeat(Animation animation) {
-                    }
+                    @Override public void onAnimationRepeat(Animation animation) {}
                 });
                 isLeftPanelVisible = true;
             }
