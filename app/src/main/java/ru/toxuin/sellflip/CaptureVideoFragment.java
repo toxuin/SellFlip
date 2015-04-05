@@ -20,7 +20,6 @@ import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
 import android.view.animation.TranslateAnimation;
-import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 
@@ -39,6 +38,7 @@ import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.library.MagneticOrientationChangeListener;
 import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.library.Utils;
+import ru.toxuin.sellflip.library.views.CameraImageButton;
 import ru.toxuin.sellflip.restapi.ApiHeaders;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.AuthRequest;
@@ -59,7 +59,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
     private ProgressBar progressBarSecond;
 
     private View rootView;
-    private Button capture;
+    private CameraImageButton capture;
     private MagneticOrientationChangeListener rotationSensorListener;
     private SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
 
@@ -79,7 +79,8 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
         final FontAwesomeText closeXBtnSecond = (FontAwesomeText) rootView.findViewById(R.id.closeXBtn_second);
         //final FontAwesomeText recordIndicator = (FontAwesomeText) rootView.findViewById(R.id.recordIndicator);
 
-        capture = (Button) rootView.findViewById(R.id.button_capture);
+        capture = (CameraImageButton) rootView.findViewById(R.id.button_capture);
+        capture.beep();
 
         capture.setEnabled(false);
         nextArrowBtn.setEnabled(false);
@@ -128,7 +129,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                     if (mMediaRecorder == null) return;
                     mMediaRecorder.stop();
                     releaseMediaRecorder();
-                    capture.setText("Capture");
+                    capture.beep(false);
                     isRecording = false;
                     progressHandler.removeCallbacks(this);
 
@@ -140,6 +141,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                     BaseActivity.setContent(createAdFragment);
                     // go to the next activity
                 }
+                capture.beep();
                 progressHandler.postDelayed(this, 500);
             }
         };
@@ -156,7 +158,6 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                             // inform the user that recording has stopped
                             isRecording = false;
                             progressHandler.removeCallbacks(progressRunnable);
-                            capture.setText("Capture");
                         } else {
                             mCamera.stopPreview();
                             prepareVideoRecorder();
@@ -165,7 +166,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                             isRecording = true;
                             closeXBtn.setEnabled(false);
                             progressHandler.postDelayed(progressRunnable, 0);
-                            capture.setText("Stop");
+                            capture.beep(false);
                         }
                     }
                 }
