@@ -24,6 +24,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
                 app:numColumns="@integer/search_result_columns"
+                app:itemMargin="@dimen/search_results_cards_margin"
                 android:smoothScrollbar="true"/>
 
 </LinearLayout>
