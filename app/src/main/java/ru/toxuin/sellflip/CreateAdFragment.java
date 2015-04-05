@@ -21,10 +21,14 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.LinearInterpolator;
+import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -40,6 +44,7 @@ import java.util.Locale;
 import java.util.Set;
 
 import com.octo.android.robospice.SpiceManager;
+import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.entities.Coordinates;
@@ -281,6 +286,8 @@ public class CreateAdFragment extends SpiceFragment {
                 String phone = phoneEdit.getText().toString();
                 String email = emailEdit.getText().toString();
 
+                nextArrowBtn.setEnabled(false);
+
                 SingleAd singleAd = new SingleAd(null, title, price, email, phone, category, description, coord, null);
                 CreateAdRequest request = new CreateAdRequest(singleAd);
                 spiceManager.execute(request, new RequestListener<SingleAd>() {
@@ -293,12 +300,21 @@ public class CreateAdFragment extends SpiceFragment {
                         superToast.setText(getString(R.string.starting_video_upload));
                         superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
                         superToast.show();
+                        nextArrowBtn.setIcon("fa-circle-o-notch");
+
+                        RotateAnimation anim = new RotateAnimation(0, 359, 0.5f, 0.5f);
+                        anim.setDuration(DurationInMillis.ONE_SECOND);
+                        anim.setInterpolator(new LinearInterpolator());
+                        anim.setRepeatMode(Animation.INFINITE);
+                        nextArrowBtn.startAnimation(anim);
 
                         VideoUploadRequest videoRequest = new VideoUploadRequest(newAd.getId(), filename);
                         spiceManager.execute(videoRequest, new RequestListener<Void>() {
                             @Override
                             public void onRequestSuccess(Void aVoid) {
                                 Log.d(TAG, "UPLOADED VIDEO!");
+                                nextArrowBtn.stopAnimation();
+                                nextArrowBtn.setIcon("fa-arrow-right");
                                 BaseActivity.setContent(new SingleAdFragment().setAdId(newAd.getId()));
                             }
 
@@ -311,15 +327,19 @@ public class CreateAdFragment extends SpiceFragment {
                                 superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
                                 superToast.show();
                                 spiceException.printStackTrace();
+                                nextArrowBtn.stopAnimation();
+                                nextArrowBtn.setIcon("fa-arrow-right");
+                                nextArrowBtn.setEnabled(true);
                             }
                         });
-
-
                     }
 
                     @Override
                     public void onRequestFailure(SpiceException spiceException) {
                         Log.d(TAG, "COULD NOT CREATE AD: " + spiceException.getMessage());
+                        nextArrowBtn.stopAnimation();
+                        nextArrowBtn.setIcon("fa-arrow-right");
+                        nextArrowBtn.setEnabled(true);
                         spiceException.printStackTrace();
                     }
                 });
@@ -342,7 +362,7 @@ public class CreateAdFragment extends SpiceFragment {
             for (String key : savedLocations) {
                 Coordinates coord = Utils.getCoordinatesFromPreferences(getActivity(), key);
                 String name = sPref.getString("LOCATION_NAME_" + key, "No name");
-                locationAdapter.add(new Pair<>(name, coord));
+                if (!locationAdapter.containsValue(coord)) locationAdapter.add(new Pair<>(name, coord));
             }
         }
 

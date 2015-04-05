@@ -12,6 +12,7 @@ import android.widget.CheckedTextView;
 import android.widget.SpinnerAdapter;
 import android.widget.TextView;
 import ru.toxuin.sellflip.R;
+import ru.toxuin.sellflip.entities.Coordinates;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -76,5 +77,12 @@ public class TaggingAdapter<T> extends BaseAdapter implements SpinnerAdapter {
         return view;
         */
         return getView(position, convertView, parent);
+    }
+
+    public boolean containsValue(T value) {
+        for (Pair<String, T> pair : content) {
+            if (pair.second.equals(value)) return true;
+        }
+        return false;
     }
 }
