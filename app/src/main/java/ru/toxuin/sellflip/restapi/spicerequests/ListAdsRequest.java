@@ -44,7 +44,7 @@ public class ListAdsRequest extends RetrofitSpiceRequest<SingleAd.List, ApiServi
     }
 
     public String getCacheKey() {
-        return "getTopAds." + category + "." + page + "." + order;
+        return "getTopAds." + category + "." + page + "." + order + "." + (listMy?"onlymine":"everything");
     }
 
     public void setOnlyMine(boolean onlyMine) {

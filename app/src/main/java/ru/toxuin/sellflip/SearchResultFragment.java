@@ -356,6 +356,7 @@ public class SearchResultFragment extends SpiceFragment {
             if (orderByLikes) order = "likes";
             ListAdsRequest listAdsRequest = new ListAdsRequest(category, searchQuery, order, page);
             if (mode == Mode.MY_ADS) {
+                searchAdapter.clear();
                 searchAdapter.myAdsMode();
                 listAdsRequest.setOnlyMine(true);
             }
