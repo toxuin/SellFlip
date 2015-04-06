@@ -9,6 +9,7 @@ import android.database.MatrixCursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.MenuItemCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.SearchView;
@@ -24,6 +25,7 @@ import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import android.widget.Toast;
 import com.facebook.AppEventsLogger;
 import com.facebook.Request;
 import com.facebook.Response;
@@ -50,6 +52,7 @@ import ru.toxuin.sellflip.fragments.PrefsFragment;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
 import ru.toxuin.sellflip.library.OnBackPressedListener;
 import ru.toxuin.sellflip.library.SuggestionAdapter;
+import ru.toxuin.sellflip.library.Utils;
 import ru.toxuin.sellflip.restapi.ApiHeaders;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.AuthRequest;
@@ -91,7 +94,7 @@ public class BaseActivity extends ActionBarActivity {
      *
      * @param fragment Fragment to set as content.
      */
-    public static void setContent(Fragment fragment) {
+    public static void setContent(Fragment fragment, boolean addToBackStack) {
         String fragName = fragment.getClass().getName();
         if (self == null) return;
         if (self.leftMenu.isMenuShowing()) self.leftMenu.toggle();
@@ -107,13 +110,34 @@ public class BaseActivity extends ActionBarActivity {
         if (fragment instanceof SearchResultFragment) {
             self.enableRightMenu();
         } else if (fragment instanceof CaptureVideoFragment) {
+            if (!Utils.checkCameraHardware(self)) {
+                Toast.makeText(self, "Your device does not have a camera!", Toast.LENGTH_SHORT).show();
+                return;
+            }
             self.setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         }
-        fragmentManager.beginTransaction()
-                .replace(R.id.content, fragment, ACTIVE_FRAGMENT_TAG)
-                .addToBackStack(fragName).commit(); // add frags with a tag will allow to pop them by tag
+        if (!(fragment instanceof CaptureVideoFragment) && !(fragment instanceof CategorySelectFragment) && !(fragment instanceof CreateAdFragment)) {
+            Utils.removeTempFiles();
+        }
+
+        FragmentTransaction transaction = fragmentManager.beginTransaction();
+        transaction.replace(R.id.content, fragment, ACTIVE_FRAGMENT_TAG);
+        if (addToBackStack) {
+            if (fragment instanceof CaptureVideoFragment || fragment instanceof CategorySelectFragment || fragment instanceof CreateAdFragment) {
+                fragName = "CREATION";
+            }
+            transaction.addToBackStack(fragName);
+        }
+        transaction.commit();
+        if (fragment instanceof SearchResultFragment && !addToBackStack) {
+            fragmentManager.popBackStack("CREATION", FragmentManager.POP_BACK_STACK_INCLUSIVE);
+        }
         self.activeFragment = fragment;
         self.backPressedListener = null;
+    }
+
+    public static void setContent(Fragment fragment) {
+        setContent(fragment, true);
     }
 
     /**

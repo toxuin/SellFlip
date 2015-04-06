@@ -40,7 +40,6 @@ import java.util.Locale;
 import java.util.Random;
 import java.util.Set;
 
-import ru.toxuin.sellflip.CaptureVideoFragment;
 import ru.toxuin.sellflip.R;
 import ru.toxuin.sellflip.entities.Coordinates;
 
@@ -56,8 +55,9 @@ public class Utils {
 
     public static void removeTempFiles() {
         for (String file : fileNames) {
-            new File(file).delete();
-            Log.d(TAG, "removed " + file);
+            if (new File(file).delete()) {
+                Log.d(TAG, "removed " + file);
+            }
         }
     }
 

@@ -12,6 +12,7 @@ import android.location.Geocoder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.util.Pair;
 import android.text.Editable;
 import android.text.TextWatcher;
@@ -32,6 +33,7 @@ import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
+import android.widget.Toast;
 import com.beardedhen.androidbootstrap.FontAwesomeText;
 import com.ecloud.pulltozoomview.PullToZoomScrollViewEx;
 import com.github.johnpersano.supertoasts.SuperToast;
@@ -49,6 +51,8 @@ import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
 import ru.toxuin.sellflip.entities.Coordinates;
 import ru.toxuin.sellflip.entities.SingleAd;
+import ru.toxuin.sellflip.library.BitmapCache;
+import ru.toxuin.sellflip.library.OnBackPressedListener;
 import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.library.TaggingAdapter;
 import ru.toxuin.sellflip.library.Utils;
@@ -338,13 +342,25 @@ public class CreateAdFragment extends SpiceFragment {
                         nextArrowBtn.setAnimation(anim);
                         nextArrowBtn.animate();
 
-                        VideoUploadRequest videoRequest = new VideoUploadRequest(newAd.getId(), filename);
+                        final VideoUploadRequest videoRequest = new VideoUploadRequest(newAd.getId(), filename);
+
+                        BaseActivity.registerBackPressedListener(new OnBackPressedListener() {
+                            @Override
+                            public boolean onBackPressed() {
+                                spiceManager.dontNotifyRequestListenersForRequest(videoRequest);
+                                Utils.removeTempFiles();
+                                BaseActivity.setContent(new SearchResultFragment(), false);
+                                return true;
+                            }
+                        });
+
                         spiceManager.execute(videoRequest, new RequestListener<Void>() {
                             @Override
                             public void onRequestSuccess(Void aVoid) {
                                 Log.d(TAG, "UPLOADED VIDEO!");
                                 nextArrowBtn.stopAnimation();
                                 nextArrowBtn.setIcon("fa-arrow-right");
+                                Utils.removeTempFiles();
                                 BaseActivity.setContent(new SingleAdFragment().setAdId(newAd.getId()));
                             }
 

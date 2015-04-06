@@ -90,6 +90,14 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
         capture.setEnabled(false);
         nextArrowBtn.setEnabled(false);
         nextArrowBtnSecond.setEnabled(false);
+        nextArrowBtn.post(new Runnable() {
+            @Override public void run() {
+                if (progressBar.getProgress() > 0) {
+                    nextArrowBtn.setEnabled(true);
+                    nextArrowBtnSecond.setEnabled(true);
+                }
+            }
+        });
         progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
         progressBarSecond = (ProgressBar) rootView.findViewById(R.id.progressBar_second);
         mPreview = (SurfaceView) rootView.findViewById(R.id.surface_preview);
@@ -444,7 +452,6 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
 
     @Override public void onDestroy() {
         super.onDestroy();
-        Utils.removeTempFiles();
         Utils.setFullScreen(getActivity(), false);
         getActivity().setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED);
     }
