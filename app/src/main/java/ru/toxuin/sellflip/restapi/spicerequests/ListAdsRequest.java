@@ -38,11 +38,8 @@ public class ListAdsRequest extends RetrofitSpiceRequest<SingleAd.List, ApiServi
         int skip = itemsPerPage * page;
         int limit = itemsPerPage;
         Log.d(TAG, "REQUESTING TOP ADS FROM " + skip + " TO " + (skip + limit) + "(" + limit + " ITEMS)");
-        if (listMy) {
-            return getService().getMyAds(category, searchTerm, order, skip, limit);
-        } else {
-            return getService().listTopAds(category, searchTerm, order, skip, limit);
-        }
+        if (listMy) return getService().getMyAds(category, searchTerm, order, skip, limit);
+        else return getService().listTopAds(category, searchTerm, order, skip, limit);
 
     }
 
@@ -50,8 +47,7 @@ public class ListAdsRequest extends RetrofitSpiceRequest<SingleAd.List, ApiServi
         return "getTopAds." + category + "." + page + "." + order;
     }
 
-    public ListAdsRequest setOnlyMine(boolean onlyMine) {
+    public void setOnlyMine(boolean onlyMine) {
         listMy = onlyMine;
-        return this;
     }
 }

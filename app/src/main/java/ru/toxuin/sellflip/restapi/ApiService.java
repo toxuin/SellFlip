@@ -16,7 +16,7 @@ import ru.toxuin.sellflip.restapi.spicerequests.AuthRequest;
 public interface ApiService {
     String LIST_ADS = "/api/v1/adsItems";
     String SINGLE_AD = "/api/v1/adsItems/{id}";
-    String MY_ADS = "/api/v1/adsItems/myAds";
+    String MY_ADS = "/api/v1/adsItems/myAds/";
     String VIDEO_UPLOAD = "/api/v1/adsItems/{id}/upload";
     String CATEGORIES = "/api/v1/categories";
     String AUTH = "/auth/facebook_token";

@@ -45,6 +45,7 @@ public class GridSearchAdapter extends BaseAdapter {
     private final LayoutInflater mLayoutInflater;
 
     protected SpiceManager spiceManager;
+    private boolean onlyMine = false;
 
     public GridSearchAdapter(Context context, SpiceManager manager) {
         this.spiceManager = manager;
@@ -118,6 +119,10 @@ public class GridSearchAdapter extends BaseAdapter {
         for (SingleAd ad : ads) {
             add(ad);
         }
+    }
+
+    public void myAdsMode() {
+        onlyMine = true;
     }
 
     public static class SearchResultViewHolder implements View.OnClickListener, View.OnLongClickListener {

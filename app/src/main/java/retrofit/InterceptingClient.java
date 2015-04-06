@@ -4,6 +4,9 @@ import android.content.Context;
 import android.content.Intent;
 
 import java.io.IOException;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
+import java.security.cert.CertificateException;
 import java.util.concurrent.TimeUnit;
 
 import com.squareup.okhttp.OkHttpClient;
@@ -12,7 +15,15 @@ import retrofit.client.Header;
 import retrofit.client.OkClient;
 import retrofit.client.Request;
 import retrofit.client.Response;
+import ru.toxuin.sellflip.BuildConfig;
 import ru.toxuin.sellflip.R;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSession;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
+import javax.net.ssl.X509TrustManager;
 
 public class InterceptingClient implements Client {
     private static final String TAG = "InterceptingClient";
@@ -22,6 +33,38 @@ public class InterceptingClient implements Client {
     public InterceptingClient(Context ctx) {
         this.context = ctx.getApplicationContext();
         OkHttpClient okClient = new OkHttpClient();
+
+        if (BuildConfig.DEBUG) {
+            okClient.setHostnameVerifier(new HostnameVerifier() {
+                @Override
+                public boolean verify(String hostname, SSLSession session) {
+                    return true;
+                }
+            });
+
+
+            final TrustManager[] trustAllCerts = new TrustManager[] {
+                    new X509TrustManager() {
+                        @Override public void checkClientTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {}
+                        @Override public void checkServerTrusted(java.security.cert.X509Certificate[] chain, String authType) throws CertificateException {}
+                        @Override public java.security.cert.X509Certificate[] getAcceptedIssuers() {return null;}
+                    }
+            };
+
+            SSLContext sslContext = null;
+            try {
+                sslContext = SSLContext.getInstance("SSL");
+                sslContext.init(null, trustAllCerts, new java.security.SecureRandom());
+            } catch (NoSuchAlgorithmException | KeyManagementException e) {
+                e.printStackTrace();
+            }
+            final SSLSocketFactory sslSocketFactory;
+            if (sslContext != null) {
+                sslSocketFactory = sslContext.getSocketFactory();
+                okClient.setSslSocketFactory(sslSocketFactory);
+            }
+        }
+
         okClient.setReadTimeout(60, TimeUnit.SECONDS);
         this.fallbackClient = new OkClient(okClient);
     }

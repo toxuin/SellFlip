@@ -42,72 +42,34 @@ import ru.toxuin.sellflip.restapi.spicerequests.SingleAdRequest;
 
 public class SearchResultFragment extends SpiceFragment {
     private static final String TAG = "SEARCH_RESULT_UI";
-    private static int totalServerItems = 0;
-    private BroadcastReceiver totalItemsBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            totalServerItems = intent.getIntExtra("X-Total-Items", 0);
-            Log.d("TOTAL-BROADCAST", "GOT TOTAL ITEMS ON SERVER: " + totalServerItems);
-            emptyPanel.setVisibility(View.GONE);
-        }
-    };
-    protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
-    GridSearchAdapter searchAdapter;
-    List<Category> categories;
-    private OnItemClickListener categoryClickListener = new OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Category selectedCat = rightMenuAdapter.getItem(position);
-            if (selectedCat.equals(rightMenuAdapter.getRoot())) {
-                Category papa = rightMenuAdapter.findParent(categories, selectedCat);
-                drawRightMenu(papa);
-                return;
-            }
-            drawRightMenu(selectedCat);
-        }
-    };
-    CategoryListAdapter rightMenuAdapter;
+
     private StaggeredGridView gridView;
     private View rootView;
-    private String searchQuery;
-    private PendingRequestListener<Category.List> rightMenuSpiceListener;
-    private int page = 0;
-    private BroadcastReceiver emptyReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            page = 0;
-            String message = intent.getStringExtra("message");
-            emptyPanel.setVisibility(View.VISIBLE);
-            emptyText.setText(message);
-        }
-    };
-    private StaggeredGridView.OnLoadmoreListener loadMoreListener = new StaggeredGridView.OnLoadmoreListener() {
-        @Override
-        public void onLoadmore() {
-            if (totalServerItems > 0 && searchAdapter.getCount() > 0 && searchAdapter.getCount() < totalServerItems) {
-                page++;
-                requestData(page);
-            }
-        }
-    };
-    private boolean favsMode = false;
-    private boolean trending = false;
-    private boolean myAdsMode = false;
+
+    CategoryListAdapter rightMenuAdapter;
+    GridSearchAdapter searchAdapter;
+
     private LinearLayout emptyPanel;
     private TextView emptyText;
     private ProgressDialog loading;
+    List<Category> categories;
     private String category;
+
+    private Mode mode = Mode.NORMAL;
+    private String searchQuery;
+    private boolean orderByLikes = false;
+
+    // LOADING ITEMS
+    private int page = 0;
+    private static int totalServerItems = 0;
+    protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
+    private PendingRequestListener<Category.List> rightMenuSpiceListener;
     private PendingRequestListener<SingleAd.List> listRequestListener;
     private Object listCacheKey;
-    // CACHE KEY - LISTENER
+              // CACHE KEY - LISTENER
     private Map<Object, PendingRequestListener<SingleAd>> favAdsRequests = new HashMap<>();
 
-    public SearchResultFragment() {
-    } // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
-
-    public static int getTotalServerItems() {
-        return totalServerItems;
-    }
+    public SearchResultFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -119,9 +81,9 @@ public class SearchResultFragment extends SpiceFragment {
         emptyText = (TextView) rootView.findViewById(R.id.nothing_to_show);
 
         searchAdapter = new GridSearchAdapter(getActivity(), spiceManager);
-        if (favsMode) {
+        if (mode == Mode.FAVS) {
             BaseActivity.setContentTitle("My favorites");
-        } else if (myAdsMode) {
+        } else if (mode == Mode.MY_ADS) {
             BaseActivity.setContentTitle("My Ads");
         }
 
@@ -141,7 +103,7 @@ public class SearchResultFragment extends SpiceFragment {
         if (savedCategory != null) {
             category = savedCategory;
         }
-        if (savedTrending || trending) {
+        if (savedTrending || orderByLikes) {
             BaseActivity.setContentTitle("Trending");
         }
 
@@ -198,6 +160,17 @@ public class SearchResultFragment extends SpiceFragment {
         BaseActivity.setRightMenuListAdapter(rightMenuAdapter);
     }
 
+
+
+
+
+
+
+
+
+    // ##### LIFECYCLE ###### //
+
+
     @Override
     public void onStart() {
         super.onStart();
@@ -217,9 +190,6 @@ public class SearchResultFragment extends SpiceFragment {
         }
     }
 
-
-    // #### LOADING DATA STUFF ##### //
-
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
@@ -230,11 +200,6 @@ public class SearchResultFragment extends SpiceFragment {
         if (searchQuery != null && !searchQuery.isEmpty()) {
             outState.putString("searchQuery", searchQuery);
         }
-    }
-
-    public SearchResultFragment setSearchQuery(String searchQuery) {
-        this.searchQuery = searchQuery;
-        return this;
     }
 
     @Override
@@ -254,23 +219,92 @@ public class SearchResultFragment extends SpiceFragment {
         if (loading != null) loading.dismiss();
     }
 
+
+
+
+
+
+    // ###### MODES ###### //
+
     public SearchResultFragment favsMode() {
-        this.favsMode = true;
+        this.mode = Mode.FAVS;
         return this;
     }
 
     public SearchResultFragment trending() {
-        this.trending = true;
+        this.orderByLikes = true;
         return this;
     }
 
     public SearchResultFragment myAdsMode() {
-        this.myAdsMode = true;
+        this.mode = Mode.MY_ADS;
         return this;
     }
 
+    public SearchResultFragment setSearchQuery(String searchQuery) {
+        this.searchQuery = searchQuery;
+        return this;
+    }
+
+
+
+
+
+
+    // ###### LISTENERS ###### //
+
+    private OnItemClickListener categoryClickListener = new OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Category selectedCat = rightMenuAdapter.getItem(position);
+            if (selectedCat.equals(rightMenuAdapter.getRoot())) {
+                Category papa = rightMenuAdapter.findParent(categories, selectedCat);
+                drawRightMenu(papa);
+                return;
+            }
+            drawRightMenu(selectedCat);
+        }
+    };
+
+    private StaggeredGridView.OnLoadmoreListener loadMoreListener = new StaggeredGridView.OnLoadmoreListener() {
+        @Override
+        public void onLoadmore() {
+            if (totalServerItems > 0 && searchAdapter.getCount() > 0 && searchAdapter.getCount() < totalServerItems) {
+                page++;
+                requestData(page);
+            }
+        }
+    };
+
+    private BroadcastReceiver emptyReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            page = 0;
+            String message = intent.getStringExtra("message");
+            emptyPanel.setVisibility(View.VISIBLE);
+            emptyText.setText(message);
+        }
+    };
+
+    private BroadcastReceiver totalItemsBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            totalServerItems = intent.getIntExtra("X-Total-Items", 0);
+            Log.d("TOTAL-BROADCAST", "GOT TOTAL ITEMS ON SERVER: " + totalServerItems);
+            emptyPanel.setVisibility(View.GONE);
+        }
+    };
+
+
+
+
+
+
+
+    // #### LOADING DATA STUFF ##### //
+
     public void requestData(final int page) {
-        if (favsMode) {
+        if (mode == Mode.FAVS) {
             SharedPreferences spref = getActivity().getSharedPreferences(getActivity().getString(R.string.app_preference_key), Context.MODE_PRIVATE);
             Set<String> favs = spref.getStringSet("favoriteAds", new HashSet<String>());
             if (favs.isEmpty()) {
@@ -319,9 +353,12 @@ public class SearchResultFragment extends SpiceFragment {
                 loading.show();
             }
             String order = null;
-            if (trending) order = "likes";
+            if (orderByLikes) order = "likes";
             ListAdsRequest listAdsRequest = new ListAdsRequest(category, searchQuery, order, page);
-            if (myAdsMode) listAdsRequest.setOnlyMine(true);
+            if (mode == Mode.MY_ADS) {
+                searchAdapter.myAdsMode();
+                listAdsRequest.setOnlyMine(true);
+            }
             listCacheKey = listAdsRequest.getCacheKey();
             listRequestListener = new PendingRequestListener<SingleAd.List>() {
                 @Override
@@ -376,5 +413,13 @@ public class SearchResultFragment extends SpiceFragment {
     @Override
     public SpiceManager getSpiceManager() {
         return spiceManager;
+    }
+
+    public static int getTotalServerItems() {
+        return totalServerItems;
+    }
+
+    private enum Mode {
+        FAVS, MY_ADS, NORMAL
     }
 }
