@@ -80,6 +80,6 @@
     <string name="subject_line">Subject Line</string>
     <string name="subject">Subject</string>
     <string name="email_hint">Email we can reach you at</string>
-    <string name="add_to_favs">Add this to favorites!</string>
-    <string name="remove_from_favs">Remove from favorites</string>
+    <string name="add_to_favs">Add to favs</string>
+    <string name="remove_from_favs">Remove from favs</string>
 </resources>
