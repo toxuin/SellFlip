@@ -12,10 +12,15 @@ import java.util.Date;
 
 public class SellFlipSpiceService extends RetrofitGsonSpiceService {
     public static final String API_ENDPOINT_URL = "https://sellflip.me";
+    public static final String MEDIA_ENDPOINT_URL = "http://sellflip.me";
     private static boolean wipeCache = true;
 
     public static String getEndpointUrl() {
         return API_ENDPOINT_URL;
+    }
+
+    public static String getMediaServerUrl() {
+        return MEDIA_ENDPOINT_URL;
     }
 
     public static void clearCache() {

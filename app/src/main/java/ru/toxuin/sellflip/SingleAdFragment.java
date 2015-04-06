@@ -143,7 +143,7 @@ public class SingleAdFragment extends SpiceFragment implements
 
         try {
             player.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            videoUrl = SellFlipSpiceService.getEndpointUrl() + "/api/v1/adsItems/" + adId + "/video";
+            videoUrl = SellFlipSpiceService.getMediaServerUrl() + "/api/v1/adsItems/" + adId + "/video";
             player.setDataSource(getActivity(), Uri.parse(videoUrl));
             player.setOnPreparedListener(this);
         } catch (Exception e) {

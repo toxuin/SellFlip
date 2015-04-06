@@ -333,7 +333,8 @@ public class CreateAdFragment extends SpiceFragment {
                         RotateAnimation anim = new RotateAnimation(0, 359, Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
                         anim.setDuration(DurationInMillis.ONE_SECOND);
                         anim.setInterpolator(new LinearInterpolator());
-                        anim.setRepeatMode(Animation.INFINITE);
+                        anim.setRepeatCount(Animation.INFINITE);
+                        anim.setRepeatMode(Animation.RESTART);
                         nextArrowBtn.setAnimation(anim);
                         nextArrowBtn.animate();
 
