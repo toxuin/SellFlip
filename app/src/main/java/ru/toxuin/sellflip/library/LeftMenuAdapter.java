@@ -44,6 +44,14 @@ public class LeftMenuAdapter extends ArrayAdapter<SideMenuItem> {
         return convertView;
     }
 
+    public boolean contains(SideMenuItem item){
+        for (int i = 0; i < getCount(); i++) {
+           if (item == getItem(i)) {
+               return true;
+           }
+        }
+        return false;
+    }
     static class LeftMenuViewHolder {
         FontAwesomeText slide_menu_icon;
         TextView slide_menu_title;

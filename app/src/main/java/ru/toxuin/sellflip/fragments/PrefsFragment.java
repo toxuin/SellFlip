@@ -9,9 +9,15 @@ import android.preference.Preference;
 import android.support.v4.preference.PreferenceFragment;
 import android.view.Window;
 
+import com.facebook.Session;
+import com.github.johnpersano.supertoasts.SuperToast;
+import com.github.johnpersano.supertoasts.util.Style;
+import com.google.android.gms.common.api.Api;
+
 import ru.toxuin.sellflip.BaseActivity;
 import ru.toxuin.sellflip.R;
 import ru.toxuin.sellflip.library.BitmapCache;
+import ru.toxuin.sellflip.restapi.ApiHeaders;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 
 public class PrefsFragment extends PreferenceFragment {
@@ -57,7 +63,18 @@ public class PrefsFragment extends PreferenceFragment {
         logout.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                BaseActivity.showLogInDialog();
+                if(Session.getActiveSession().isOpened() && ApiHeaders.getAccessToken()!= null){
+                    Session.getActiveSession().closeAndClearTokenInformation();
+                    ApiHeaders.clearToken();
+                    SuperToast superToast = new SuperToast(getActivity(), Style.getStyle(Style.BLUE, SuperToast.Animations.POPUP));
+                    superToast.setDuration(SuperToast.Duration.SHORT);
+                    superToast.setText("Successfully logged out");
+                    superToast.setIcon(SuperToast.Icon.Dark.INFO, SuperToast.IconPosition.LEFT);
+                    superToast.show();
+                } else {
+                  BaseActivity.showLogInDialog();
+                }
+
                 return true;
             }
         });

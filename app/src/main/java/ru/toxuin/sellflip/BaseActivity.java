@@ -77,6 +77,9 @@ public class BaseActivity extends ActionBarActivity {
     private Menu menu;
     private SearchView searchView;
 
+    private SideMenuItem loginMenuItem;
+    private SideMenuItem myAdsMenuItem;
+
     private Session.StatusCallback statusCallback = new Session.StatusCallback() {
         @Override public void call(Session session, SessionState sessionState, Exception e) {
             onSessionStateChange(session, sessionState, e);
@@ -251,6 +254,18 @@ public class BaseActivity extends ActionBarActivity {
             }
         }
 
+        loginMenuItem = new SideMenuItem("Login", "fa-sign-in", new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                sendBroadcast(new Intent(getString(R.string.broadcast_intent_auth)));
+            }
+        });
+
+        myAdsMenuItem = new SideMenuItem("My Ads", "fa-adn", new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                BaseActivity.setContent(new SearchResultFragment().myAdsMode());
+            }
+        });
+
         // ADD ITEMS TO LEFT MENU
         ListView leftMenuList = (ListView) leftMenu.getMenu().findViewById(R.id.left_menu_list);
 
@@ -270,20 +285,6 @@ public class BaseActivity extends ActionBarActivity {
             }
         }));
 
-        // if user is not logged in show
-        leftMenuAdapter.add(new SideMenuItem("Login", "fa-sign-in", new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                sendBroadcast(new Intent(getString(R.string.broadcast_intent_auth)));
-            }
-        }));
-
-        // if user logged in show his ads
-        leftMenuAdapter.add(new SideMenuItem("My Ads", "fa-adn", new View.OnClickListener() {
-            @Override public void onClick(View v) {
-                BaseActivity.setContent(new SearchResultFragment().myAdsMode());
-            }
-        }));
-
         leftMenuAdapter.add(new SideMenuItem("Create ad", "fa-plus", new View.OnClickListener() {
             @Override public void onClick(View v) {
                 if (ApiHeaders.getAccessToken() != null
@@ -294,7 +295,6 @@ public class BaseActivity extends ActionBarActivity {
                 BaseActivity.setContent(new CaptureVideoFragment());
             }
         }));
-
         leftMenuAdapter.add(new SideMenuItem("My Favorites", "fa-star", new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -307,6 +307,10 @@ public class BaseActivity extends ActionBarActivity {
                 BaseActivity.setContent(new PrefsFragment());
             }
         }));
+
+        if(!leftMenuAdapter.contains(loginMenuItem)){
+            leftMenuAdapter.insert(loginMenuItem, 3);
+        }
 
         leftMenuList.setAdapter(leftMenuAdapter);
 
@@ -350,6 +354,13 @@ public class BaseActivity extends ActionBarActivity {
             facebook_profile_pic.setProfileId(null);
             facebook_username.setText("");
             ApiHeaders.clearToken();
+
+            /* Hide my Ads, show login */
+                leftMenuAdapter.remove(myAdsMenuItem);
+            if(!leftMenuAdapter.contains(loginMenuItem)){
+                leftMenuAdapter.insert(loginMenuItem, 3);
+            }
+
         } else {
             // perform AuthRequest to the back end
             AuthRequest request = new AuthRequest(session.getAccessToken());
@@ -360,12 +371,19 @@ public class BaseActivity extends ActionBarActivity {
                     if (!accessToken.token.isEmpty() && Session.getActiveSession().isOpened() && facebook_container.getVisibility() == View.GONE) {
                         makeMeRequest(Session.getActiveSession());
                     }
+                    /* Show my Ads, hide login */
+                    if(!leftMenuAdapter.contains(myAdsMenuItem)){
+                        leftMenuAdapter.insert(myAdsMenuItem, 4);
+                    }
+                        leftMenuAdapter.remove(loginMenuItem);
+                    hideLogInDialog();
                 }
 
                 @Override
                 public void onRequestFailure(SpiceException spiceException) {
                     spiceException.printStackTrace();
                 }
+
             });
         }
     }
