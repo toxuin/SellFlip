@@ -8,8 +8,8 @@ android {
         applicationId "ru.toxuin.sellflip"
         minSdkVersion 14
         targetSdkVersion 21
-        versionCode 3
-        versionName "Your Personal Version"
+        versionCode 4
+        versionName "Iron Bugs"
     }
     buildTypes {
         release {
