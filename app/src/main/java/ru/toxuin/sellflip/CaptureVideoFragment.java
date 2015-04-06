@@ -87,6 +87,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
 
         capture.setEnabled(false);
         nextArrowBtn.setEnabled(false);
+        nextArrowBtnSecond.setEnabled(false);
         progressBar = (ProgressBar) rootView.findViewById(R.id.progressBar);
         progressBarSecond = (ProgressBar) rootView.findViewById(R.id.progressBar_second);
         mPreview = (SurfaceView) rootView.findViewById(R.id.surface_preview);
@@ -200,6 +201,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
             }
         };
         nextArrowBtn.setOnClickListener(nextListener);
+        nextArrowBtnSecond.setOnClickListener(nextListener);
 
         View.OnClickListener closeListener = new View.OnClickListener() {
             @Override public void onClick(View v) {
@@ -270,11 +272,17 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
         mMediaRecorder.setOutputFile(tempFile.getAbsolutePath());
         // Step 5: Set the preview output
 
-
         if (finalDegree == -1) finalDegree = lookingDegrees;
-
         if (finalDegree == -1) finalDegree = 90; // if still -1
         if (finalDegree == 360) finalDegree = 0;
+
+        if (naturalOrientation == Surface.ROTATION_0) {
+            if (finalDegree == 90) finalDegree = 270;
+            else if (finalDegree == 270) finalDegree = 90;
+        } else if (naturalOrientation == Surface.ROTATION_90) {
+            if (finalDegree == 180) finalDegree = 0;
+            else if (finalDegree == 0) finalDegree = 180;
+        }
 
         Log.d(TAG, "### CAPTIONING IN " + finalDegree + " DEGREES");
         mMediaRecorder.setOrientationHint(finalDegree);

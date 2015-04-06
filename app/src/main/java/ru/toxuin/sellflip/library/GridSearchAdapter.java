@@ -160,12 +160,15 @@ public class GridSearchAdapter extends BaseAdapter {
             Date past = ad.getDate();
             Date now = new Date();
             long secondsAgo = TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
-            long minutesAgo = TimeUnit.MILLISECONDS.toSeconds(now.getTime() - past.getTime());
+            long minutesAgo = TimeUnit.MILLISECONDS.toMinutes(now.getTime() - past.getTime());
             long hoursAgo = TimeUnit.MILLISECONDS.toHours(now.getTime() - past.getTime());
             if (secondsAgo < 60) dateAgo = secondsAgo + " " + context.getString(R.string.seconds_ago);
             else if (minutesAgo < 60)
                 dateAgo = minutesAgo + " " + context.getString(R.string.minutes_ago);
-            else if (hoursAgo < 24) dateAgo = hoursAgo + " " + context.getString(R.string.hours_ago);
+            else if (hoursAgo < 24) {
+                if (hoursAgo == 1) dateAgo = "1 hour ago";
+                else dateAgo = hoursAgo + " " + context.getString(R.string.hours_ago);
+            }
             else dateAgo = DateFormat.getDateFormat(context.getApplicationContext()).format(past);
             date.setText(dateAgo);
 

@@ -14,15 +14,6 @@
         android:layout_height="wrap_content"
         android:orientation="vertical">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:layout_marginBottom="10dp"
-            android:padding="16dp"
-            android:text="@string/create_post_ad"
-            android:textAppearance="?android:attr/textAppearanceLarge"/>
-
         <RelativeLayout
             android:id="@+id/relativeLayout"
             android:layout_width="fill_parent"
@@ -110,63 +101,73 @@
                     android:maxLength="50"/>
             </TableRow>
 
-            <TableRow
-                android:layout_width="fill_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="10dp"
-                android:baselineAligned="true"
-                android:gravity="center_vertical">
+            <org.apmem.tools.layouts.FlowLayout android:layout_width="match_parent"
+                                                android:layout_height="wrap_content"
+                    android:layout_marginTop="10dp">
 
-                <TextView
-                    android:id="@+id/textView"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="@string/create_price"
-                    android:textAppearance="?android:attr/textAppearanceMedium"/>
-
-                <EditText
-                    android:id="@+id/priceEdit"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:ems="7"
-                    android:gravity="center"
-                    android:inputType="numberDecimal"
-                    android:maxLength="7"/>
-
-                <TextView
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:text="$"
-                    android:textAppearance="?android:attr/textAppearanceMedium"
-                    />
-
-                <RadioGroup
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_gravity="start"
-                    android:baselineAligned="true"
-                    android:gravity="center_vertical"
-                    android:orientation="horizontal">
-
-                    <RadioButton
-                        android:id="@+id/radioButtonFree"
+                <TableRow
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginStart="10dp"
-                        android:text="@string/create_free"/>
+                        android:baselineAligned="true"
+                        android:gravity="center_vertical">
 
-                    <RadioButton
-                        android:id="@+id/radioButtonContact"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginLeft="10dp"
-                        android:layout_marginStart="10dp"
-                        android:text="@string/create_contact"/>
+                    <TextView
+                            android:id="@+id/textView"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="@string/create_price"
+                            android:textAppearance="?android:attr/textAppearanceMedium"/>
 
-                </RadioGroup>
+                    <EditText
+                            android:id="@+id/priceEdit"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:ems="7"
+                            android:gravity="center"
+                            android:inputType="numberDecimal"
+                            android:maxLength="7"/>
 
-            </TableRow>
+                    <TextView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:text="$"
+                            android:textAppearance="?android:attr/textAppearanceMedium"
+                            />
+                </TableRow>
+
+
+                <TableRow android:layout_width="wrap_content"
+                          android:layout_height="wrap_content"
+                          android:gravity="center_vertical">
+                    <RadioGroup
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_gravity="start"
+                            android:baselineAligned="true"
+                            android:gravity="center_vertical"
+                            android:orientation="horizontal">
+
+                        <RadioButton
+                                android:id="@+id/radioButtonFree"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="10dp"
+                                android:layout_marginStart="10dp"
+                                android:text="@string/create_free"/>
+
+                        <RadioButton
+                                android:id="@+id/radioButtonContact"
+                                android:layout_width="wrap_content"
+                                android:layout_height="wrap_content"
+                                android:layout_marginLeft="10dp"
+                                android:layout_marginStart="10dp"
+                                android:text="@string/create_contact"/>
+
+                    </RadioGroup>
+                </TableRow>
+
+
+            </org.apmem.tools.layouts.FlowLayout>
 
             <TextView
                 android:layout_width="fill_parent"

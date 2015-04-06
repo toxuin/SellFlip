@@ -8,6 +8,8 @@ import retrofit.RestAdapter;
 import retrofit.converter.GsonConverter;
 import ru.toxuin.sellflip.entities.Category;
 
+import java.util.Date;
+
 public class SellFlipSpiceService extends RetrofitGsonSpiceService {
     public static final String API_ENDPOINT_URL = "https://sellflip.me";
     private static boolean wipeCache = true;
@@ -39,7 +41,7 @@ public class SellFlipSpiceService extends RetrofitGsonSpiceService {
     @Override
     protected RestAdapter.Builder createRestAdapterBuilder() {
         Gson gson = new GsonBuilder()
-                .setDateFormat("yyyy-MM-dd") // Will complain about default JS format without it
+                .registerTypeAdapter(Date.class, new DateDeserializer())
                 .registerTypeAdapter(Category.List.class, new CategoryDeserializer())
                 .create();
 
