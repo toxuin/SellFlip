@@ -33,7 +33,7 @@ public class SingleAdThumbRequest extends SpiceRequest<Bitmap> {
     @Override
     public Bitmap loadDataFromNetwork() throws Exception {
         String url = SellFlipSpiceService.getEndpointUrl() + "/api/v1/adsItems/"+ adId + "/thumb";
-        if (width > 0) url += "/w"+width;
+        if (width > 0) url += "/" + width;
         if (cache.getBitmapFromMemCache(url) == null) {
 
             File parentDir = new File(context.getCacheDir() + File.pathSeparator + "tmp_item_bitmaps");

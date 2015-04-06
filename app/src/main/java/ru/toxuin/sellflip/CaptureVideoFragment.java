@@ -2,6 +2,7 @@ package ru.toxuin.sellflip;
 
 
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
 import android.hardware.Camera;
@@ -12,10 +13,12 @@ import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.LinearInterpolator;
 import android.view.animation.RotateAnimation;
@@ -39,7 +42,6 @@ import ru.toxuin.sellflip.library.MagneticOrientationChangeListener;
 import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.library.Utils;
 import ru.toxuin.sellflip.library.views.CameraImageButton;
-import ru.toxuin.sellflip.restapi.ApiHeaders;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.AuthRequest;
 
@@ -47,7 +49,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
     public static final String TAG = "CaptureVideoFrag";
     public static int VIDEO_MINIMUM_LENGTH = 1; // easier debugging
     public static int VIDEO_MAXIMUM_LENGTH = 15;
-    private static int lookingDegrees = 90;
+    private static int lookingDegrees = 0;
 
     private Camera mCamera;
     private static int finalDegree = -1;
@@ -65,6 +67,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
 
     LinearLayout rightPanel;
     LinearLayout leftPanel;
+    private int naturalOrientation = -1;
 
     public CaptureVideoFragment() {
     }
@@ -139,6 +142,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                     args.putString("filename", filename);
                     createAdFragment.setArguments(args);
                     BaseActivity.setContent(createAdFragment);
+                    return;
                     // go to the next activity
                 }
                 capture.beep();
@@ -266,10 +270,14 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
         mMediaRecorder.setOutputFile(tempFile.getAbsolutePath());
         // Step 5: Set the preview output
 
+
         if (finalDegree == -1) finalDegree = lookingDegrees;
+
         if (finalDegree == -1) finalDegree = 90; // if still -1
-        rotationSensorListener.disable();
-        mMediaRecorder.setOrientationHint(finalDegree-90);
+        if (finalDegree == 360) finalDegree = 0;
+
+        Log.d(TAG, "### CAPTIONING IN " + finalDegree + " DEGREES");
+        mMediaRecorder.setOrientationHint(finalDegree);
 
         //mMediaRecorder.setPreviewDisplay(mHolder.getSurface());
 
@@ -305,6 +313,26 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
             //result = 270;
             result = 90;
         } else result = 0;
+
+        if (naturalOrientation < 0) {
+            naturalOrientation = ((WindowManager) getActivity().getSystemService(Context.WINDOW_SERVICE)).getDefaultDisplay().getRotation();
+        }
+
+        if (naturalOrientation == Surface.ROTATION_0) {
+            Log.d(TAG, "NORMAL DEVICE DETECTED!");
+        } else if (naturalOrientation == Surface.ROTATION_90) {
+            result += 90;
+            Log.d(TAG, "90 DEG SKEWED DEVICE DETECTED!");
+        } else if (naturalOrientation == Surface.ROTATION_180) {
+            result += 180;
+            Log.d(TAG, "180 DEG SKEWED DEVICE DETECTED!");
+        } else if (naturalOrientation == Surface.ROTATION_270) {
+            result += 270;
+            Log.d(TAG, "270 DEG SKEWED DEVICE DETECTED!");
+        }
+
+
+
         if (lookingDegrees != result) changeLayout(result);
 
         lookingDegrees = result;
@@ -325,6 +353,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
         super.onResume();
         Utils.setFullScreen(getActivity(), true);
         BaseActivity.hideActionBar();
+        finalDegree = -1;
         if (rotationSensorListener != null) rotationSensorListener.enable();
     }
 
@@ -406,31 +435,42 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
     int sidePanelHeight = 0;
     boolean isRightPanelVisible = false;
     boolean isLeftPanelVisible = true;
-    private void changeLayout(final int angle) {
+
+    private void changeLayout(int orientation) {
     /*           270 (-90)
                |------------|
            180 |            | 0
          (-180)|____________|
                   90 (-270)            */
 
-        //Log.d(TAG, "WAS ANGLE: " + wasAngle + ", NOW ANGLE: " + angle);
+        if (orientation == 0) orientation = 360;
+
+        Log.d(TAG, "WAS ANGLE: " + wasAngle + ", NOW ANGLE: " + orientation);
+        final int angle = orientation;
 
         if (capture != null) {
             boolean clockWise = true;
             if (wasAngle < angle) clockWise = false;
-            if (wasAngle == 270 && angle == 0) clockWise = false;
-            if (wasAngle == 0 && angle == 270) clockWise = true;
+            if (wasAngle == 360 && angle == 90) clockWise = false;
+            if (wasAngle == 90 && angle == 360) clockWise = true;
 
-            int toAngle = angle - 90;
-            int fromAngle = wasAngle -90;
+            int toAngle = angle;
+            int fromAngle = wasAngle;
 
-            if (fromAngle == toAngle && fromAngle == -90) fromAngle = 0; // INITIAL CONDITION, ROTATED CW
-            if (fromAngle == -90 && toAngle == 90) fromAngle = 0;  // INITIAL CONDITION, ROTATED CCW
-            if (clockWise && fromAngle == -90 && toAngle == 180) {
-                fromAngle = 270;
-            } else if (!clockWise && fromAngle == 180 && toAngle == -90) {
-                toAngle = 270;
+            if (fromAngle == 0 && toAngle == 90) fromAngle = 360; // INITIAL CONDITION, ROTATED CW
+            else if (fromAngle == 0 && toAngle == 270) fromAngle = 360;  // INITIAL CONDITION, ROTATED CCW
+
+            fromAngle += 180;
+            toAngle += 180;
+            if (fromAngle > 360) fromAngle -= 360;
+            if (toAngle > 360) toAngle -= 360;
+
+            if (clockWise && fromAngle == 90 && toAngle == 360) {
+                toAngle = 0;
+            } else if (!clockWise && fromAngle == 360 && toAngle == 90) {
+                fromAngle = 0;
             }
+
             RotateAnimation anim = new RotateAnimation(fromAngle, toAngle,
                     Animation.RELATIVE_TO_SELF, 0.5f, Animation.RELATIVE_TO_SELF, 0.5f);
             anim.setInterpolator(new LinearInterpolator());
@@ -443,13 +483,12 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
 
 
 
-
-
+        int targetAngle = naturalOrientation == Surface.ROTATION_0 ? 180 : 360;
 
         if (rightPanel != null) {
             sidePanelHeight = rightPanel.getHeight();
             Animation anim = null;
-            if (angle == 270 && !isRightPanelVisible) {
+            if (angle == targetAngle && !isRightPanelVisible) {
                 anim = new TranslateAnimation(0, 0, -sidePanelHeight, 0);
                 anim.setInterpolator(new LinearInterpolator());
                 anim.setDuration(300);
@@ -475,7 +514,9 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                 anim.setFillEnabled(true);
                 anim.setFillAfter(true);
                 anim.setAnimationListener(new Animation.AnimationListener() {
-                    @Override public void onAnimationStart(Animation animation) {}
+                    @Override public void onAnimationStart(Animation animation) {
+                        isRightPanelVisible = false;
+                    }
                     @Override public void onAnimationEnd(Animation animation) {
                         rightPanel.setVisibility(View.INVISIBLE);
                         RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) rightPanel.getLayoutParams();
@@ -485,7 +526,6 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                     }
                     @Override public void onAnimationRepeat(Animation animation) {}
                 });
-                isRightPanelVisible = false;
             }
             if (anim != null) rightPanel.startAnimation(anim);
         }
@@ -498,7 +538,7 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
 
         if (leftPanel != null) {
             Animation anim = null;
-            if (angle == 270 && isLeftPanelVisible) {
+            if (angle == targetAngle && isLeftPanelVisible) {
                 anim = new TranslateAnimation(0, 0, 0, sidePanelHeight);
                 anim.setInterpolator(new LinearInterpolator());
                 anim.setDuration(300);
