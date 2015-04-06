@@ -44,11 +44,11 @@ public class GridSearchAdapter extends BaseAdapter {
 
     private final LayoutInflater mLayoutInflater;
 
-    protected SpiceManager spiceManager;
+    protected SpiceManager spiceMediaManager;
     private boolean onlyMine = false;
 
     public GridSearchAdapter(Context context, SpiceManager manager) {
-        this.spiceManager = manager;
+        this.spiceMediaManager = manager;
         mLayoutInflater = LayoutInflater.from(context);
         this.context = context;
         this.itemsList = new LinkedList<>();
@@ -65,7 +65,7 @@ public class GridSearchAdapter extends BaseAdapter {
         if (convertView == null || (vh != null && !vh.id.equals(ad.getId()))) {
             convertView = mLayoutInflater.inflate(R.layout.search_result_item, parent, false);
             vh = new SearchResultViewHolder(context, convertView);
-            vh.setSpiceManager(spiceManager);
+            vh.setSpiceManager(spiceMediaManager);
             vh.bind(ad);
 
             // THUMBNAIL
@@ -133,7 +133,7 @@ public class GridSearchAdapter extends BaseAdapter {
         TextView date;
         PrescalableImageView thumbnail;
         String id;
-        SpiceManager spiceManager;
+        SpiceManager sMediaManager;
 
         public SearchResultViewHolder(Context cntx, View itemView) {
             this.context = cntx;
@@ -147,7 +147,7 @@ public class GridSearchAdapter extends BaseAdapter {
         }
 
         public void setSpiceManager(SpiceManager manager) {
-            this.spiceManager = manager;
+            this.sMediaManager= manager;
         }
 
         public void bind(SingleAd ad) {
@@ -198,9 +198,14 @@ public class GridSearchAdapter extends BaseAdapter {
             Point size = new Point();
             display.getSize(size);
 
-            int thumbWidth = size.x / context.getResources().getInteger(R.integer.search_result_columns);
+            SharedPreferences prefs = context.getSharedPreferences(context.getString(R.string.app_preference_key), Context.MODE_PRIVATE);
+            int columns = Integer.parseInt(prefs.getString("pref_key_search_result_columns", "0"));
+
+            if (columns == 0) context.getResources().getInteger(R.integer.search_result_columns);
+            if (columns == 0) columns = 1;
+            int thumbWidth = size.x / columns;
             final SingleAdThumbRequest thumbRequest = new SingleAdThumbRequest(context, ad.getId(), thumbWidth);
-            spiceManager.execute(thumbRequest, new RequestListener<Bitmap>() {
+            sMediaManager.execute(thumbRequest, new RequestListener<Bitmap>() {
                 @Override
                 public void onRequestSuccess(Bitmap bitmap) {
                     if (bitmap != null) thumbnail.setImageBitmap(bitmap);

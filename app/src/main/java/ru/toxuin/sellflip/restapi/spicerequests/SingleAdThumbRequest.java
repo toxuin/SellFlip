@@ -4,12 +4,18 @@ import android.content.Context;
 import android.graphics.Bitmap;
 import com.octo.android.robospice.request.SpiceRequest;
 import com.octo.android.robospice.request.simple.BitmapRequest;
+import com.squareup.okhttp.Headers;
+import com.squareup.okhttp.OkHttpClient;
+import com.squareup.okhttp.Request;
+import com.squareup.okhttp.Response;
 import ru.toxuin.sellflip.library.BitmapCache;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 
 import java.io.EOFException;
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.UUID;
 
 public class SingleAdThumbRequest extends SpiceRequest<Bitmap> {
@@ -32,7 +38,7 @@ public class SingleAdThumbRequest extends SpiceRequest<Bitmap> {
 
     @Override
     public Bitmap loadDataFromNetwork() throws Exception {
-        String url = SellFlipSpiceService.getEndpointUrl() + "/api/v1/adsItems/"+ adId + "/thumb";
+        String url = SellFlipSpiceService.getMediaEndpointUrl() + "/api/v1/publicAdsItems/"+ adId + "/thumb";
         if (width > 0) url += "/" + width;
         if (cache.getBitmapFromMemCache(url) == null) {
 
