@@ -9,6 +9,8 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
+import android.media.MediaPlayer;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -50,6 +52,7 @@ import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.library.TaggingAdapter;
 import ru.toxuin.sellflip.library.Utils;
+import ru.toxuin.sellflip.library.views.PrescalableImageView;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.CreateAdRequest;
 import ru.toxuin.sellflip.restapi.spicerequests.VideoUploadRequest;
@@ -80,7 +83,7 @@ public class CreateAdFragment extends SpiceFragment {
 
         final TextView adTitle = (TextView) rootView.findViewById(R.id.adTitle);
         final EditText titleEdit = (EditText) rootView.findViewById(R.id.titleEdit);
-        final ImageView adPic = (ImageView) rootView.findViewById(R.id.adPic);
+        final PrescalableImageView adPic = (PrescalableImageView) rootView.findViewById(R.id.adPic);
         final ImageButton takeVideoBtn = (ImageButton) rootView.findViewById(R.id.takeVideoBtn);
         final RadioButton freeRadioBtn = (RadioButton) rootView.findViewById(R.id.radioButtonFree);
         final RadioButton contactRadioBtn = (RadioButton) rootView.findViewById(R.id.radioButtonContact);
@@ -96,6 +99,9 @@ public class CreateAdFragment extends SpiceFragment {
         Bundle args = getArguments();
         category = args.getString("category");
         filename = args.getString("filename");
+        int videoHeight = args.getInt("video_height", -1);
+        int videoWidth = args.getInt("video_width", -1);
+        if (videoHeight > 0 && videoWidth > 0) adPic.setRatio((videoWidth / videoHeight) * 0.7f);
         if (filename == null) {
             SuperToast superToast = new SuperToast(getActivity(), Style.getStyle(Style.RED, SuperToast.Animations.POPUP));
             superToast.setDuration(SuperToast.Duration.MEDIUM);
@@ -155,6 +161,9 @@ public class CreateAdFragment extends SpiceFragment {
                 }
             }
         });
+
+        frameSeekBar.setProgress(1);
+        if (frameGrabberThread != null) frameGrabberThread.start();
 
         titleEdit.addTextChangedListener(new TextWatcher() {
             @Override
@@ -356,15 +365,6 @@ public class CreateAdFragment extends SpiceFragment {
         SharedPreferences sPref = getActivity().getSharedPreferences(getString(R.string.location_preference_key), Context.MODE_PRIVATE);
         Set<String> savedLocations = sPref.getStringSet("SAVED_LOCATIONS_KEYS", null);
 
-        // IF HAS SAVED LOCATIONS
-        if (sPref.contains("SAVED_LOCATIONS_KEYS") && savedLocations != null && savedLocations.size() > 0) {
-            for (String key : savedLocations) {
-                Coordinates coord = Utils.getCoordinatesFromPreferences(getActivity(), key);
-                String name = sPref.getString("LOCATION_NAME_" + key, "No name");
-                if (!locationAdapter.containsValue(coord)) locationAdapter.add(new Pair<>(name, coord));
-            }
-        }
-
         // IF HAS coord
         if (coord != null) {
             Geocoder geocoder = new Geocoder(getActivity(), Locale.getDefault());
@@ -377,7 +377,16 @@ public class CreateAdFragment extends SpiceFragment {
                 e.printStackTrace();
             } finally {
                 Pair <String, Coordinates> coordPair = new Pair<>(address, coord);
-                locationAdapter.add(coordPair);
+                if (!locationAdapter.containsValue(coord)) locationAdapter.add(coordPair);
+            }
+        }
+
+        // IF HAS SAVED LOCATIONS
+        if (sPref.contains("SAVED_LOCATIONS_KEYS") && savedLocations != null && savedLocations.size() > 0) {
+            for (String key : savedLocations) {
+                Coordinates coord = Utils.getCoordinatesFromPreferences(getActivity(), key);
+                String name = sPref.getString("LOCATION_NAME_" + key, "No name");
+                if (!locationAdapter.containsValue(coord)) locationAdapter.add(new Pair<>(name, coord));
             }
         }
 

@@ -5,8 +5,10 @@ import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.ActivityInfo;
+import android.graphics.Bitmap;
 import android.hardware.Camera;
 import android.media.CamcorderProfile;
+import android.media.MediaMetadataRetriever;
 import android.media.MediaRecorder;
 import android.os.Bundle;
 import android.os.Handler;
@@ -138,9 +140,24 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
                     progressHandler.removeCallbacks(this);
 
                     String filename = Utils.mergeVideos(getActivity());
+
+                    MediaMetadataRetriever retriever = new  MediaMetadataRetriever();
+                    Bitmap bmp;
+                    int videoHeight = -1, videoWidth = -1;
+                    try {
+                        retriever.setDataSource("...location of your video file");
+                        bmp = retriever.getFrameAtTime();
+                        videoHeight = bmp.getHeight();
+                        videoWidth = bmp.getWidth();
+                    } catch (Exception e) {
+                        // IGNORED
+                    }
+
                     CreateAdFragment createAdFragment = new CreateAdFragment();
                     Bundle args = new Bundle();
                     args.putString("filename", filename);
+                    if (videoHeight > 0) args.putInt("video_height", videoHeight);
+                    if (videoWidth > 0) args.putInt("video_width", videoWidth);
                     createAdFragment.setArguments(args);
                     BaseActivity.setContent(createAdFragment);
                     return;

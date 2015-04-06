@@ -20,13 +20,14 @@
             android:layout_height="wrap_content"
             android:background="@color/single_ad_brighter">
 
-            <ImageView
+            <ru.toxuin.sellflip.library.views.PrescalableImageView
                 android:id="@+id/adPic"
                 android:layout_width="fill_parent"
-                android:layout_height="@dimen/ad_pic_preview_height"
+                android:layout_height="wrap_content"
                 android:adjustViewBounds="true"
                 android:contentDescription="@string/create_ad_image"
-                android:scaleType="centerCrop"/>
+                android:scaleType="centerCrop"
+                android:minHeight="@dimen/ad_pic_preview_height"/>
 
             <TextView
                 android:id="@+id/adTitle"
