@@ -37,13 +37,14 @@ import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
 
+import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.UpdateManager;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import net.hockeyapp.android.CrashManager;
-import net.hockeyapp.android.UpdateManager;
 import ru.toxuin.sellflip.entities.SideMenuItem;
 import ru.toxuin.sellflip.fragments.PrefsFragment;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
@@ -150,6 +151,14 @@ public class BaseActivity extends ActionBarActivity {
         } catch (Exception ignored) {
         }
         authDialog = null;
+    }
+
+    public static void hideActionBar() {
+        self.getSupportActionBar().hide();
+    }
+
+    public static void showActionBar() {
+        self.getSupportActionBar().show();
     }
 
     @Override
@@ -261,9 +270,17 @@ public class BaseActivity extends ActionBarActivity {
             }
         }));
 
+        // if user is not logged in show
         leftMenuAdapter.add(new SideMenuItem("Login", "fa-sign-in", new View.OnClickListener() {
             @Override public void onClick(View v) {
                 sendBroadcast(new Intent(getString(R.string.broadcast_intent_auth)));
+            }
+        }));
+
+        // if user logged in show his ads
+        leftMenuAdapter.add(new SideMenuItem("My Ads", "fa-adn", new View.OnClickListener() {
+            @Override public void onClick(View v) {
+                BaseActivity.setContent(new SearchResultFragment().myAdsMode());
             }
         }));
 
@@ -420,7 +437,6 @@ public class BaseActivity extends ActionBarActivity {
             super.onBackPressed();
     }
 
-
     // SEARCH STUFF
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -496,13 +512,5 @@ public class BaseActivity extends ActionBarActivity {
         });
 
         return super.onCreateOptionsMenu(menu);
-    }
-
-    public static void hideActionBar() {
-        self.getSupportActionBar().hide();
-    }
-
-    public static void showActionBar() {
-        self.getSupportActionBar().show();
     }
 }

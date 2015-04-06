@@ -12,17 +12,24 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-
 import android.widget.AdapterView;
 import android.widget.AdapterView.OnItemClickListener;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.bulletnoid.android.widget.StaggeredGridView.StaggeredGridView;
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.PendingRequestListener;
+
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 import ru.toxuin.sellflip.entities.Category;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.CategoryListAdapter;
@@ -33,34 +40,74 @@ import ru.toxuin.sellflip.restapi.spicerequests.CategoryRequest;
 import ru.toxuin.sellflip.restapi.spicerequests.ListAdsRequest;
 import ru.toxuin.sellflip.restapi.spicerequests.SingleAdRequest;
 
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-
 public class SearchResultFragment extends SpiceFragment {
     private static final String TAG = "SEARCH_RESULT_UI";
+    private static int totalServerItems = 0;
+    private BroadcastReceiver totalItemsBroadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            totalServerItems = intent.getIntExtra("X-Total-Items", 0);
+            Log.d("TOTAL-BROADCAST", "GOT TOTAL ITEMS ON SERVER: " + totalServerItems);
+            emptyPanel.setVisibility(View.GONE);
+        }
+    };
+    protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
     GridSearchAdapter searchAdapter;
+    List<Category> categories;
+    private OnItemClickListener categoryClickListener = new OnItemClickListener() {
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            Category selectedCat = rightMenuAdapter.getItem(position);
+            if (selectedCat.equals(rightMenuAdapter.getRoot())) {
+                Category papa = rightMenuAdapter.findParent(categories, selectedCat);
+                drawRightMenu(papa);
+                return;
+            }
+            drawRightMenu(selectedCat);
+        }
+    };
+    CategoryListAdapter rightMenuAdapter;
     private StaggeredGridView gridView;
     private View rootView;
-
-    List<Category> categories;
-    CategoryListAdapter rightMenuAdapter;
-    private static int totalServerItems = 0;
     private String searchQuery;
-
-    protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
     private PendingRequestListener<Category.List> rightMenuSpiceListener;
     private int page = 0;
+    private BroadcastReceiver emptyReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            page = 0;
+            String message = intent.getStringExtra("message");
+            emptyPanel.setVisibility(View.VISIBLE);
+            emptyText.setText(message);
+        }
+    };
+    private StaggeredGridView.OnLoadmoreListener loadMoreListener = new StaggeredGridView.OnLoadmoreListener() {
+        @Override
+        public void onLoadmore() {
+            if (totalServerItems > 0 && searchAdapter.getCount() > 0 && searchAdapter.getCount() < totalServerItems) {
+                page++;
+                requestData(page);
+            }
+        }
+    };
     private boolean favsMode = false;
     private boolean trending = false;
+    private boolean myAdsMode = false;
     private LinearLayout emptyPanel;
     private TextView emptyText;
     private ProgressDialog loading;
     private String category;
+    private PendingRequestListener<SingleAd.List> listRequestListener;
+    private Object listCacheKey;
+    // CACHE KEY - LISTENER
+    private Map<Object, PendingRequestListener<SingleAd>> favAdsRequests = new HashMap<>();
 
-    public SearchResultFragment() {} // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
+    public SearchResultFragment() {
+    } // SUBCLASSES OF FRAGMENT NEED EMPTY CONSTRUCTOR
+
+    public static int getTotalServerItems() {
+        return totalServerItems;
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -74,7 +121,10 @@ public class SearchResultFragment extends SpiceFragment {
         searchAdapter = new GridSearchAdapter(getActivity(), spiceManager);
         if (favsMode) {
             BaseActivity.setContentTitle("My favorites");
+        } else if (myAdsMode) {
+            BaseActivity.setContentTitle("My Ads");
         }
+
 
         String savedSearchQuery = null;
         String savedCategory = null;
@@ -110,7 +160,8 @@ public class SearchResultFragment extends SpiceFragment {
 
         rightMenuSpiceListener = new PendingRequestListener<Category.List>() {
             @Override
-            public void onRequestNotFound() {}
+            public void onRequestNotFound() {
+            }
 
             @Override
             public void onRequestSuccess(Category.List cats) {
@@ -139,27 +190,13 @@ public class SearchResultFragment extends SpiceFragment {
             searchAdapter.clear();
             category = root.getId();
             requestData(0);
-        }
-        else {
+        } else {
             rightMenuAdapter = new CategoryListAdapter(getActivity());
             rightMenuAdapter.addAll(categories);
         }
         BaseActivity.setRightMenuItemClickListener(categoryClickListener);
         BaseActivity.setRightMenuListAdapter(rightMenuAdapter);
     }
-
-    private OnItemClickListener categoryClickListener = new OnItemClickListener() {
-        @Override
-        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-            Category selectedCat = rightMenuAdapter.getItem(position);
-            if (selectedCat.equals(rightMenuAdapter.getRoot())) {
-                Category papa = rightMenuAdapter.findParent(categories, selectedCat);
-                drawRightMenu(papa);
-                return;
-            }
-            drawRightMenu(selectedCat);
-        }
-    };
 
     @Override
     public void onStart() {
@@ -179,6 +216,9 @@ public class SearchResultFragment extends SpiceFragment {
             // ignore, just not registered.
         }
     }
+
+
+    // #### LOADING DATA STUFF ##### //
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
@@ -224,10 +264,10 @@ public class SearchResultFragment extends SpiceFragment {
         return this;
     }
 
-
-
-
-    // #### LOADING DATA STUFF ##### //
+    public SearchResultFragment myAdsMode() {
+        this.myAdsMode = true;
+        return this;
+    }
 
     public void requestData(final int page) {
         if (favsMode) {
@@ -268,8 +308,6 @@ public class SearchResultFragment extends SpiceFragment {
             }
 
         } else {
-            // NOT FAV MODE
-
             if (loading != null) loading.dismiss();
             if (page == 0) {
                 loading = new ProgressDialog(getActivity());
@@ -283,6 +321,7 @@ public class SearchResultFragment extends SpiceFragment {
             String order = null;
             if (trending) order = "likes";
             ListAdsRequest listAdsRequest = new ListAdsRequest(category, searchQuery, order, page);
+            if (myAdsMode) listAdsRequest.setOnlyMine(true);
             listCacheKey = listAdsRequest.getCacheKey();
             listRequestListener = new PendingRequestListener<SingleAd.List>() {
                 @Override
@@ -334,48 +373,8 @@ public class SearchResultFragment extends SpiceFragment {
         }
     }
 
-
-    private PendingRequestListener<SingleAd.List> listRequestListener;
-    private Object listCacheKey;
-                // CACHE KEY - LISTENER
-    private Map<Object, PendingRequestListener<SingleAd>> favAdsRequests = new HashMap<>();
-
     @Override
     public SpiceManager getSpiceManager() {
         return spiceManager;
     }
-
-    public static int getTotalServerItems() {
-        return totalServerItems;
-    }
-
-    private BroadcastReceiver totalItemsBroadcastReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            totalServerItems = intent.getIntExtra("X-Total-Items", 0);
-            Log.d("TOTAL-BROADCAST", "GOT TOTAL ITEMS ON SERVER: " + totalServerItems);
-            emptyPanel.setVisibility(View.GONE);
-        }
-    };
-
-    private BroadcastReceiver emptyReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            page = 0;
-            String message = intent.getStringExtra("message");
-            emptyPanel.setVisibility(View.VISIBLE);
-            emptyText.setText(message);
-        }
-    };
-
-
-    private StaggeredGridView.OnLoadmoreListener loadMoreListener = new StaggeredGridView.OnLoadmoreListener() {
-        @Override
-        public void onLoadmore() {
-            if (totalServerItems > 0 && searchAdapter.getCount() > 0 && searchAdapter.getCount() < totalServerItems) {
-                page++;
-                requestData(page);
-            }
-        }
-    };
 }

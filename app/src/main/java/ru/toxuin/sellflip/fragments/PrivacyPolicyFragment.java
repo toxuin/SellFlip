@@ -54,7 +54,7 @@ public class PrivacyPolicyFragment extends Fragment {
             }
         });
 
-        webView.loadUrl(SellFlipSpiceService.API_ENDPOINT_URL + "/policy");
+        webView.loadUrl(SellFlipSpiceService.API_ENDPOINT_URL + "/policy_mobile");
         return rootView;
     }
 
