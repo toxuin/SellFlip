@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:fontawesometext="http://schemas.android.com/apk/res-auto"
+              android:orientation="vertical"
+              android:background="@color/single_ad_background"
+              android:layout_width="match_parent"
+              android:layout_height="match_parent">
+
+    <RelativeLayout
+            android:id="@+id/relativeLayout"
+            android:layout_width="fill_parent"
+            android:layout_height="wrap_content"
+            android:background="@color/single_ad_brighter" android:gravity="center_vertical">
+
+        <TextView
+                android:id="@+id/adTitle"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center"
+                android:text="@string/create_ad_title"
+                android:textColor="#FFFFFF"
+                android:textSize="24sp" android:layout_centerVertical="true"/>
+
+
+        <ImageButton
+                android:id="@+id/takeVideoBtn"
+                style="@style/AppTheme"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_margin="6dp"
+                android:background="@drawable/circle_button"
+                android:contentDescription="@string/create_take_video"
+                android:src="@drawable/ic_image_photo_camera"/>
+    </RelativeLayout>
+
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            android:padding="16dp">
+
+        <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:paddingTop="10dp">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/create_select_cover_frame"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    />
+
+            <SeekBar
+                    android:id="@+id/frameSeekBar"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"/>
+        </TableRow>
+
+        <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:gravity="center_vertical">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/create_title"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    />
+
+            <EditText
+                    android:id="@+id/titleEdit"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textAutoCorrect"
+                    android:maxLength="50"/>
+        </TableRow>
+
+        <org.apmem.tools.layouts.FlowLayout android:layout_width="match_parent"
+                                            android:layout_height="wrap_content"
+                                            android:layout_marginTop="10dp">
+
+            <TableRow
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:baselineAligned="true"
+                    android:gravity="center_vertical">
+
+                <TextView
+                        android:id="@+id/textView"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/create_price"
+                        android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+                <EditText
+                        android:id="@+id/priceEdit"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:ems="7"
+                        android:gravity="center"
+                        android:inputType="numberDecimal"
+                        android:maxLength="7"/>
+
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="$"
+                        android:textAppearance="?android:attr/textAppearanceMedium"
+                        />
+            </TableRow>
+
+
+            <TableRow android:layout_width="wrap_content"
+                      android:layout_height="wrap_content"
+                      android:gravity="center_vertical">
+                <RadioGroup
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:layout_gravity="start"
+                        android:baselineAligned="true"
+                        android:gravity="center_vertical"
+                        android:orientation="horizontal">
+
+                    <RadioButton
+                            android:id="@+id/radioButtonFree"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginStart="10dp"
+                            android:text="@string/create_free"/>
+
+                    <RadioButton
+                            android:id="@+id/radioButtonContact"
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:layout_marginLeft="10dp"
+                            android:layout_marginStart="10dp"
+                            android:text="@string/create_contact"/>
+
+                </RadioGroup>
+            </TableRow>
+
+
+        </org.apmem.tools.layouts.FlowLayout>
+
+        <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:text="@string/create_description"
+                android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+        <EditText
+                android:id="@+id/create_description"
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:inputType="textImeMultiLine|textMultiLine"
+                android:maxHeight="100dp"
+                android:maxLines="10"/>
+
+        <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="#33000000"
+                android:gravity="center"
+                android:text="@string/create_location_info"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"/>
+
+
+        <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:baselineAligned="true"
+                android:gravity="center_vertical">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/create_location"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    />
+
+
+            <Button
+                    android:id="@+id/create_location_btn"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="5dp"
+                    android:layout_weight="1"
+                    android:background="@android:drawable/btn_dropdown"
+                    android:gravity="start|center_vertical"
+                    android:text="..."/>
+
+        </TableRow>
+
+        <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:background="#33000000"
+                android:gravity="center"
+                android:text="@string/create_contact_info"
+                android:textColor="#FFFFFF"
+                android:textSize="20sp"/>
+
+
+        <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:baselineAligned="true"
+                android:gravity="center_vertical">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/create_phone"
+                    android:textAppearance="?android:attr/textAppearanceMedium"/>
+
+            <EditText
+                    android:id="@+id/create_phone"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="phone"
+                    android:maxLength="12"/>
+
+        </TableRow>
+
+        <TableRow
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="10dp"
+                android:baselineAligned="true"
+                android:gravity="center_vertical">
+
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="@string/create_email"
+                    android:textAppearance="?android:attr/textAppearanceMedium"
+                    />
+
+            <EditText
+                    android:id="@+id/create_email"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:ems="10"
+                    android:inputType="textEmailAddress"
+                    android:maxLength="30"/>
+
+        </TableRow>
+
+        <RelativeLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:layout_margin="10dp"
+                >
+
+            <com.beardedhen.androidbootstrap.FontAwesomeText
+                    android:id="@+id/backArrowBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentLeft="true"
+                    android:layout_alignParentStart="true"
+                    android:layout_margin="5dp"
+                    android:textColor="@color/single_ad_secondary"
+                    android:textSize="28sp"
+                    fontawesometext:fa_icon="fa-arrow-left"
+                    />
+
+            <com.beardedhen.androidbootstrap.FontAwesomeText
+                    android:id="@+id/nextArrowBtn"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignParentRight="true"
+                    android:layout_margin="5dp"
+                    android:gravity="end"
+                    android:textColor="@color/single_ad_secondary"
+                    android:textSize="28sp"
+                    fontawesometext:fa_icon="fa-arrow-right"
+                    />
+        </RelativeLayout>
+
+    </LinearLayout>
+
+</LinearLayout>

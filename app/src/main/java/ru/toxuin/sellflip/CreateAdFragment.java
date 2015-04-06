@@ -9,14 +9,13 @@ import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.location.Address;
 import android.location.Geocoder;
-import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.util.Pair;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -28,12 +27,13 @@ import android.view.animation.RotateAnimation;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
-import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RadioButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
 import com.beardedhen.androidbootstrap.FontAwesomeText;
+import com.ecloud.pulltozoomview.PullToZoomScrollViewEx;
 import com.github.johnpersano.supertoasts.SuperToast;
 import com.github.johnpersano.supertoasts.util.Style;
 
@@ -74,6 +74,8 @@ public class CreateAdFragment extends SpiceFragment {
     private String category;
     protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
 
+    private PullToZoomScrollViewEx scrollView;
+
     public CreateAdFragment() {
     }
 
@@ -81,20 +83,39 @@ public class CreateAdFragment extends SpiceFragment {
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         rootView = inflater.inflate(R.layout.fragment_createad, container, false);
 
-        final TextView adTitle = (TextView) rootView.findViewById(R.id.adTitle);
-        final EditText titleEdit = (EditText) rootView.findViewById(R.id.titleEdit);
-        final PrescalableImageView adPic = (PrescalableImageView) rootView.findViewById(R.id.adPic);
-        final ImageButton takeVideoBtn = (ImageButton) rootView.findViewById(R.id.takeVideoBtn);
-        final RadioButton freeRadioBtn = (RadioButton) rootView.findViewById(R.id.radioButtonFree);
-        final RadioButton contactRadioBtn = (RadioButton) rootView.findViewById(R.id.radioButtonContact);
-        final EditText descriptionEdit = (EditText) rootView.findViewById(R.id.create_description);
-        final EditText phoneEdit = (EditText) rootView.findViewById(R.id.create_phone);
-        final EditText emailEdit = (EditText) rootView.findViewById(R.id.create_email);
-        locationSelectBtn = (Button) rootView.findViewById(R.id.create_location_btn);
-        final SeekBar frameSeekBar = (SeekBar) rootView.findViewById(R.id.frameSeekBar);
-        final EditText priceEdit = (EditText) rootView.findViewById(R.id.priceEdit);
-        final FontAwesomeText backArrowBtn = (FontAwesomeText) rootView.findViewById(R.id.backArrowBtn);
-        final FontAwesomeText nextArrowBtn = (FontAwesomeText) rootView.findViewById(R.id.nextArrowBtn);
+        scrollView = (PullToZoomScrollViewEx) rootView.findViewById(R.id.scroll_view);
+
+        View headView = inflater.inflate(R.layout.createad_head, null, false);
+        View zoomView = inflater.inflate(R.layout.createad_zoom, null, false);
+        View contentView = inflater.inflate(R.layout.createad_content, null, false);
+        scrollView.setHeaderView(headView);
+        scrollView.setZoomView(zoomView);
+        scrollView.setScrollContentView(contentView);
+
+        final PrescalableImageView adPic = (PrescalableImageView) zoomView.findViewById(R.id.adPic);
+        final ImageButton takeVideoBtn = (ImageButton) contentView.findViewById(R.id.takeVideoBtn);
+        final TextView adTitle = (TextView) contentView.findViewById(R.id.adTitle);
+        final EditText titleEdit = (EditText) contentView.findViewById(R.id.titleEdit);
+        final RadioButton freeRadioBtn = (RadioButton) contentView.findViewById(R.id.radioButtonFree);
+        final RadioButton contactRadioBtn = (RadioButton) contentView.findViewById(R.id.radioButtonContact);
+        final EditText descriptionEdit = (EditText) contentView.findViewById(R.id.create_description);
+        final EditText phoneEdit = (EditText) contentView.findViewById(R.id.create_phone);
+        final EditText emailEdit = (EditText) contentView.findViewById(R.id.create_email);
+        locationSelectBtn = (Button) contentView.findViewById(R.id.create_location_btn);
+        final SeekBar frameSeekBar = (SeekBar) contentView.findViewById(R.id.frameSeekBar);
+        final EditText priceEdit = (EditText) contentView.findViewById(R.id.priceEdit);
+        final FontAwesomeText backArrowBtn = (FontAwesomeText) contentView.findViewById(R.id.backArrowBtn);
+        final FontAwesomeText nextArrowBtn = (FontAwesomeText) contentView.findViewById(R.id.nextArrowBtn);
+
+
+
+        DisplayMetrics localDisplayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(localDisplayMetrics);
+        final int mScreenWidth = localDisplayMetrics.widthPixels;
+        final int mScreenHeight = localDisplayMetrics.heightPixels;
+        LinearLayout.LayoutParams localObject = new LinearLayout.LayoutParams(mScreenWidth, (int) (9.0F * (mScreenWidth / 24.0F)));
+        scrollView.setHeaderLayoutParams(localObject);
+        scrollView.setParallax(true);
 
         Bundle args = getArguments();
         category = args.getString("category");

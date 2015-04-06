@@ -168,31 +168,29 @@ public class CaptureVideoFragment extends SpiceFragment implements SurfaceHolder
             }
         };
 
-        capture.setOnClickListener(
-                new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        if (isRecording) {
-                            mMediaRecorder.stop();  // stop the recording
-                            mMediaRecorder.reset();   // clear recorder configuration
+        capture.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (isRecording && mMediaRecorder != null) {
+                    mMediaRecorder.stop();  // stop the recording
+                    mMediaRecorder.reset();   // clear recorder configuration
 //                            mCamera.lock();         // take camera access back from MediaRecorder
-                            closeXBtn.setEnabled(true);
-                            // inform the user that recording has stopped
-                            isRecording = false;
-                            progressHandler.removeCallbacks(progressRunnable);
-                        } else {
-                            mCamera.stopPreview();
-                            prepareVideoRecorder();
-                            mMediaRecorder.start();
-                            // inform the user that recording has started
-                            isRecording = true;
-                            closeXBtn.setEnabled(false);
-                            progressHandler.postDelayed(progressRunnable, 0);
-                            capture.beep(false);
-                        }
-                    }
+                    closeXBtn.setEnabled(true);
+                    // inform the user that recording has stopped
+                    isRecording = false;
+                    progressHandler.removeCallbacks(progressRunnable);
+                } else {
+                    mCamera.stopPreview();
+                    prepareVideoRecorder();
+                    mMediaRecorder.start();
+                    // inform the user that recording has started
+                    isRecording = true;
+                    closeXBtn.setEnabled(false);
+                    progressHandler.postDelayed(progressRunnable, 0);
+                    capture.beep(false);
                 }
-        );
+            }
+        });
 
         View.OnClickListener nextListener = new View.OnClickListener() {
             @Override public void onClick(View v) {

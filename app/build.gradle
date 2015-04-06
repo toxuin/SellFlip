@@ -40,5 +40,6 @@ dependencies {
     compile 'com.squareup.okhttp:okhttp-urlconnection:2.0.0'
     compile group:'com.octo.android.robospice', name:'robospice-retrofit', version:'1.4.9'
     compile 'org.apmem.tools:layouts:1.8@aar'
+    compile 'com.ecloud:pulltozoomview:1.0@aar'
     compile project(':android-support-v4-preferencefragment')
 }
