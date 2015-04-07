@@ -37,6 +37,10 @@
             android:summary="Application usage agreement"
             android:title="Privacy policy"/>
         <Preference
+                android:key="pref_key_version"
+                android:summary="App Codename: "
+                android:title="App Version: "/>
+        <Preference
             android:key="pref_key_contact"
             android:summary="Found a bug or have some suggestions?"
             android:title="Contact us"/>

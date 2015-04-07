@@ -15,6 +15,7 @@ import com.github.johnpersano.supertoasts.util.Style;
 import com.google.android.gms.common.api.Api;
 
 import ru.toxuin.sellflip.BaseActivity;
+import ru.toxuin.sellflip.BuildConfig;
 import ru.toxuin.sellflip.R;
 import ru.toxuin.sellflip.library.BitmapCache;
 import ru.toxuin.sellflip.restapi.ApiHeaders;
@@ -33,6 +34,7 @@ public class PrefsFragment extends PreferenceFragment {
         Preference privacy = findPreference("pref_key_privacy_policy");
         Preference contact = findPreference("pref_key_contact");
         Preference saveSearch = findPreference("pref_key_save_search");
+        Preference version = findPreference("pref_key_version");
 
         cacheReset.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
@@ -122,6 +124,8 @@ public class PrefsFragment extends PreferenceFragment {
             }
         });
 
+        version.setTitle("App Version #: " + BuildConfig.VERSION_CODE);
+        version.setSummary("App Codename: " + BuildConfig.VERSION_NAME);
 
 
 //
