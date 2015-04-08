@@ -114,6 +114,8 @@
                             bootstrap:bb_type="success"
                             bootstrap:bb_size="small"/>
 
+
+
                 </org.apmem.tools.layouts.FlowLayout>
 
                 <LinearLayout
@@ -196,6 +198,17 @@
                             bootstrap:bb_type="info"/>
 
                 </org.apmem.tools.layouts.FlowLayout>
+
+                <com.beardedhen.androidbootstrap.BootstrapButton
+                    android:id="@+id/rmvBtn"
+                    android:visibility="gone"
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_margin="16dp"
+                    android:text="Delete this add"
+                    bootstrap:bb_icon_left="fa-trash-o"
+                    bootstrap:bb_roundedCorners="true"
+                    bootstrap:bb_type="danger"/>
 
             </LinearLayout>
         </ScrollView>

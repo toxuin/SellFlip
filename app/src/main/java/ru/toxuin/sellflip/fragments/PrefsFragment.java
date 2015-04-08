@@ -65,7 +65,7 @@ public class PrefsFragment extends PreferenceFragment {
         logout.setOnPreferenceClickListener(new Preference.OnPreferenceClickListener() {
             @Override
             public boolean onPreferenceClick(Preference preference) {
-                if(Session.getActiveSession().isOpened() && ApiHeaders.getAccessToken()!= null){
+                if(Session.getActiveSession().isOpened() && !ApiHeaders.isTokenEmpty()){
                     Session.getActiveSession().closeAndClearTokenInformation();
                     ApiHeaders.clearToken();
                     SuperToast superToast = new SuperToast(getActivity(), Style.getStyle(Style.BLUE, SuperToast.Animations.POPUP));

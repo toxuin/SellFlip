@@ -4,15 +4,24 @@ import retrofit.RequestInterceptor;
 
 public class ApiHeaders implements RequestInterceptor {
     private static String backEndAccessToken;
+    private static ApiHeaders instance = new ApiHeaders();
 
-    private ApiHeaders(){}
+    private ApiHeaders() {}
 
-    public static ApiHeaders getInstance(){
-        return new ApiHeaders();
+    public static ApiHeaders getInstance() {
+        return instance;
+    }
+
+    public static boolean isTokenEmpty() {
+        return backEndAccessToken != null && backEndAccessToken.isEmpty();
     }
 
     public static void clearToken() {
         backEndAccessToken = null;
+    }
+
+    public static String getAccessToken() {
+        return backEndAccessToken;
     }
 
     public static void setAccessToken(String token) {
@@ -23,9 +32,5 @@ public class ApiHeaders implements RequestInterceptor {
         if (backEndAccessToken != null) {
             request.addHeader("Authorization", "Bearer " + backEndAccessToken);
         }
-    }
-
-    public static String getAccessToken() {
-        return backEndAccessToken;
     }
 }

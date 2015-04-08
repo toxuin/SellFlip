@@ -14,6 +14,7 @@ public class SingleAd {
     private float price; // -1 = Please contact, 0 = free
     private String email;
     private String phone;
+    private String owner; // id of owner
     private String category;
     private String description;
     @SerializedName("coordinates")
@@ -143,6 +144,10 @@ public class SingleAd {
     public int getVideoHeight() {
         if (videoDimens.length < 2) return 0;
         return videoDimens[1];
+    }
+
+    public String getOwner() {
+        return owner;
     }
 
     public static class List extends ArrayList<SingleAd> {}

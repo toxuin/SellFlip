@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Set;
 
 import ru.toxuin.sellflip.entities.SideMenuItem;
+import ru.toxuin.sellflip.entities.User;
 import ru.toxuin.sellflip.fragments.PrefsFragment;
 import ru.toxuin.sellflip.library.LeftMenuAdapter;
 import ru.toxuin.sellflip.library.OnBackPressedListener;
@@ -56,6 +57,7 @@ import ru.toxuin.sellflip.library.Utils;
 import ru.toxuin.sellflip.restapi.ApiHeaders;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.AuthRequest;
+import ru.toxuin.sellflip.restapi.spicerequests.CurrentUserRequest;
 
 
 public class BaseActivity extends ActionBarActivity {
@@ -66,6 +68,7 @@ public class BaseActivity extends ActionBarActivity {
     private static BaseActivity self;
     private static FragmentManager fragmentManager;
     private static AuthDialog authDialog;
+    public static User currentUser;
     protected SpiceManager spiceManager = new SpiceManager(SellFlipSpiceService.class);
     private SlidingMenu leftMenu;
     private SlidingMenu rightMenu;
@@ -311,8 +314,7 @@ public class BaseActivity extends ActionBarActivity {
 
         leftMenuAdapter.add(new SideMenuItem("Create ad", "fa-plus", new View.OnClickListener() {
             @Override public void onClick(View v) {
-                if (ApiHeaders.getAccessToken() != null
-                        && ApiHeaders.getAccessToken().isEmpty()) {
+                if (ApiHeaders.isTokenEmpty()) {
                     showLogInDialog();
                     return;
                 }
@@ -387,11 +389,24 @@ public class BaseActivity extends ActionBarActivity {
 
         } else {
             // perform AuthRequest to the back end
+
             AuthRequest request = new AuthRequest(session.getAccessToken());
             spiceManager.execute(request, new RequestListener<AuthRequest.AccessToken>() {
+
                 @Override
                 public void onRequestSuccess(AuthRequest.AccessToken accessToken) {
                     ApiHeaders.setAccessToken(accessToken.token);
+                    /* Execute get current user request */
+                    spiceManager.execute(new CurrentUserRequest(), new RequestListener<User>() {
+                        @Override public void onRequestFailure(SpiceException spiceException) {
+
+                        }
+
+                        @Override public void onRequestSuccess(User user) {
+                            currentUser = user;
+                        }
+                    });
+
                     if (!accessToken.token.isEmpty() && Session.getActiveSession().isOpened() && facebook_container.getVisibility() == View.GONE) {
                         makeMeRequest(Session.getActiveSession());
                     }

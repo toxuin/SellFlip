@@ -35,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import com.facebook.Session;
 import com.octo.android.robospice.SpiceManager;
 import com.octo.android.robospice.persistence.DurationInMillis;
 import com.octo.android.robospice.persistence.exception.SpiceException;
@@ -44,8 +45,10 @@ import ru.toxuin.sellflip.entities.Like;
 import ru.toxuin.sellflip.entities.SingleAd;
 import ru.toxuin.sellflip.library.SpiceFragment;
 import ru.toxuin.sellflip.library.views.VideoControllerView;
+import ru.toxuin.sellflip.restapi.ApiHeaders;
 import ru.toxuin.sellflip.restapi.SellFlipSpiceService;
 import ru.toxuin.sellflip.restapi.spicerequests.LikeRequest;
+import ru.toxuin.sellflip.restapi.spicerequests.RemoveAdRequest;
 import ru.toxuin.sellflip.restapi.spicerequests.SingleAdRequest;
 
 public class SingleAdFragment extends SpiceFragment implements
@@ -79,6 +82,7 @@ public class SingleAdFragment extends SpiceFragment implements
     private BootstrapButton likeBtn;
     private BootstrapButton shareBtn;
     private BootstrapButton favBtn;
+    private BootstrapButton rmvBtn;
 
     private SurfaceView videoSurface;
     private float ratio = 1;
@@ -119,8 +123,10 @@ public class SingleAdFragment extends SpiceFragment implements
         likeBtn = (BootstrapButton) rootView.findViewById(R.id.singlead_action_like);
         shareBtn = (BootstrapButton) rootView.findViewById(R.id.singlead_action_share);
         favBtn = (BootstrapButton) rootView.findViewById(R.id.singlead_action_favorite);
-
+        rmvBtn = (BootstrapButton) rootView.findViewById(R.id.rmvBtn);
         videoSurface = (SurfaceView) rootView.findViewById(R.id.videoSurface);
+
+
 
         return rootView;
     }
@@ -260,6 +266,39 @@ public class SingleAdFragment extends SpiceFragment implements
                         }
                         editor.putStringSet("favoriteAds", favs);
                         editor.apply();
+                    }
+                });
+
+
+                //
+                if(!ApiHeaders.isTokenEmpty() && Session.getActiveSession().isOpened()) { // user loggedIn
+
+                    if(BaseActivity.currentUser != null) {
+
+                        //TODO: test with a new back end
+                        Log.d(TAG, "USER id " + BaseActivity.currentUser.getId());
+                        Log.d(TAG, "owner id " + ad.getOwner());
+                        if(BaseActivity.currentUser.getId().equals(ad.getOwner())) { // compare ad.owner with user.id
+                            rmvBtn.setVisibility(View.VISIBLE);
+                        }
+
+                    }
+
+                }
+
+                rmvBtn.setOnClickListener(new OnClickListener() {
+                    @Override public void onClick(View v) {
+                        // perform remove request
+                        spiceManager.execute(new RemoveAdRequest(ad.getId()), new RequestListener<Void>() {
+                            @Override public void onRequestFailure(SpiceException spiceException) {
+                                // display failed to remove
+                            }
+
+                            @Override public void onRequestSuccess(Void aVoid) {
+                                // close ad
+                                // display ad was removed
+                            }
+                        });
                     }
                 });
 
