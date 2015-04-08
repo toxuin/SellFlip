@@ -40,6 +40,7 @@ import com.octo.android.robospice.persistence.exception.SpiceException;
 import com.octo.android.robospice.request.listener.RequestListener;
 
 import net.hockeyapp.android.CrashManager;
+import net.hockeyapp.android.Tracking;
 import net.hockeyapp.android.UpdateManager;
 
 import java.util.ArrayList;
@@ -227,6 +228,7 @@ public class BaseActivity extends ActionBarActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Tracking.startUsage(this);
         self = this;
         setContentView(R.layout.activity_base);
 
@@ -492,6 +494,12 @@ public class BaseActivity extends ActionBarActivity {
     public void onBackPressed() {
         if (backPressedListener == null || !backPressedListener.onBackPressed())
             super.onBackPressed();
+    }
+
+    @Override
+    protected void onDestroy() {
+        Tracking.stopUsage(this);
+        super.onDestroy();
     }
 
     // SEARCH STUFF
